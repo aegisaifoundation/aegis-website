@@ -1,26 +1,116 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #020408;
+  --foreground: #ffffff;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background-dark: #020408;
+  --color-card-dark: rgba(8, 17, 31, 0.55);
+  --color-electric-blue: #4D7CFE;
+  --color-cyan-glow: #7DD3FC;
+  --font-heading: var(--font-sora);
+  --font-body: var(--font-inter);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), sans-serif;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Styles */
+.glass-card {
+  background: rgba(8, 17, 31, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.5), 
+    inset 0 0 20px rgba(255, 255, 255, 0.02);
+}
+
+.glass-card-hover {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-hover:hover {
+  background: rgba(12, 24, 44, 0.7);
+  border-color: rgba(77, 124, 254, 0.3);
+  box-shadow: 
+    0 15px 40px rgba(77, 124, 254, 0.08), 
+    inset 0 0 20px rgba(77, 124, 254, 0.03);
+  transform: translateY(-4px);
+}
+
+/* Text glow filters */
+.text-glow-blue {
+  text-shadow: 0 0 12px rgba(77, 124, 254, 0.6), 0 0 30px rgba(77, 124, 254, 0.3);
+}
+
+.text-glow-white-soft {
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.25), 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 12px rgba(125, 211, 252, 0.6), 0 0 30px rgba(125, 211, 252, 0.3);
+}
+
+/* Smooth scroll styling for Lenis */
+html.lenis {
+  height: auto;
+}
+
+.lenis-smooth {
+  scroll-behavior: auto;
+}
+
+.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020408;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4D7CFE;
+}
+
+/* ThreeJS Canvas styling */
+.three-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.interactive-canvas {
+  pointer-events: auto !important;
+}
+
+/* Custom keyframes for CSS-based animations */
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+.animate-float {
+  animation: floatSlow 8s ease-in-out infinite;
 }
