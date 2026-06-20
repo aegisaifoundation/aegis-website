@@ -1,30 +1,15 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown } from "lucide-react";
 
-// Dynamic import of 3D WebGL Canvas to prevent SSR hydration errors
-const EarthNetwork = dynamic(() => import("../3d/EarthNetwork"), { ssr: false });
-
 export default function Hero() {
   return (
     <section
-      className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#020408] pt-20"
+      className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-transparent pt-20"
       id="hero"
     >
-      {/* 3D WebGL Earth Backdrop */}
-      <div className="absolute inset-0 w-full h-full z-0 opacity-20">
-        <EarthNetwork />
-      </div>
-
-      {/* Grid overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.006)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.006)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] z-1 pointer-events-none" />
-
-      {/* Radial Gradient Glow behind center */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-radial from-[#4D7CFE]/5 via-[#4D7CFE]/0 to-transparent z-1 blur-[120px] pointer-events-none" />
-
       {/* Main Content Area */}
       <motion.div
         className="relative z-10 max-w-[1440px] mx-auto w-full px-6 md:px-12 flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-center py-12"
@@ -82,7 +67,7 @@ export default function Hero() {
           >
             <Link
               href="#vision"
-              className="group flex items-center justify-center gap-3 font-heading font-semibold text-xs tracking-widest text-[#020408] bg-white px-8 py-4 rounded-full transition-all duration-350 hover:bg-gray-100 hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:-translate-y-0.5"
+              className="group flex items-center justify-center gap-3 font-heading font-semibold text-xs tracking-widest text-black bg-white px-8 py-4 rounded-full transition-all duration-350 hover:bg-gray-100 hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:-translate-y-0.5"
             >
               EXPLORE THE VISION
               <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -90,7 +75,7 @@ export default function Hero() {
             
             <Link
               href="#join"
-              className="group flex items-center justify-center gap-3 font-heading font-semibold text-xs tracking-widest text-white border border-white/10 bg-[#08111f]/45 hover:bg-[#0c182c]/80 hover:border-white/20 px-8 py-4 rounded-full transition-all duration-350 hover:shadow-[0_0_20px_rgba(77,124,254,0.15)] hover:-translate-y-0.5"
+              className="btn-glass group flex items-center justify-center gap-3 font-heading font-semibold text-xs tracking-widest text-white px-8 py-4"
             >
               JOIN THE NETWORK
             </Link>

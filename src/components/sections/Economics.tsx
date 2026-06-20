@@ -26,7 +26,7 @@ export default function Economics() {
 
   return (
     <section 
-      className="relative min-h-screen py-24 flex flex-col items-center justify-center bg-[#020408] border-b border-white/5"
+      className="relative min-h-screen py-40 flex flex-col items-center justify-center bg-transparent border-b border-white/5"
       id="economics"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_70%,rgba(77,124,254,0.02)_0%,transparent_50%)] pointer-events-none" />
@@ -57,7 +57,7 @@ export default function Economics() {
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="absolute z-20 w-36 h-36 rounded-full bg-[#020408] border border-[#4D7CFE]/30 flex flex-col items-center justify-center text-center shadow-[0_0_50px_rgba(77,124,254,0.1)] p-4"
+            className="absolute z-20 w-36 h-36 rounded-full bg-[#000000] border border-[#4D7CFE]/30 flex flex-col items-center justify-center text-center shadow-[0_0_50px_rgba(77,124,254,0.1)] p-4"
           >
             <span className="font-heading text-[10px] font-bold tracking-widest text-[#7DD3FC] mb-1">
               THE CORE
@@ -147,7 +147,7 @@ export default function Economics() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.5, delay: idx * 0.06 }}
-                className="glass-card p-6 md:p-8 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] hover:border-[#4D7CFE]/20 transition-all duration-300 hover:shadow-[0_12px_24px_rgba(77,124,254,0.03)] text-left flex flex-col group"
+                className="glass-card glass-card-hover p-6 md:p-8 text-left flex flex-col group"
               >
                 <div className="w-10 h-10 rounded-lg border border-[#4D7CFE]/20 bg-[#4D7CFE]/5 text-[#7DD3FC] flex items-center justify-center mb-6 shrink-0 group-hover:scale-105 transition-transform">
                   <Icon className="w-5.5 h-5.5" />

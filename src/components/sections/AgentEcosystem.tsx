@@ -20,10 +20,10 @@ export default function AgentEcosystem() {
 
   return (
     <section 
-      className="relative min-h-screen py-24 flex flex-col items-center justify-center bg-[#020408] border-b border-white/5"
+      className="relative min-h-screen py-40 flex flex-col items-center justify-center bg-transparent border-b border-white/5"
       id="agent-ecosystem"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_80%,rgba(77,124,254,0.02)_0%,transparent_50%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_80%,rgba(77,124,254,0.015)_0%,transparent_50%)] pointer-events-none" />
 
       <div className="max-w-[1440px] mx-auto w-full px-6 md:px-12 flex flex-col items-center relative z-10">
         
@@ -68,7 +68,7 @@ export default function AgentEcosystem() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.5, delay: idx * 0.05 }}
-                className={`glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-all duration-350 hover:shadow-[0_15px_30px_rgba(77,124,254,0.03)] hover:scale-[1.03] flex flex-col items-center text-center group`}
+                className="glass-card glass-card-hover p-6 flex flex-col items-center text-center group"
               >
                 <div className={`w-12 h-12 rounded-xl border flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 ${agent.color} bg-white/5`}>
                   <Icon className="w-5.5 h-5.5" />

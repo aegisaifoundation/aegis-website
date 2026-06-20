@@ -32,13 +32,13 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+      className={`fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1200px] z-50 rounded-full border border-white/8 bg-white/[0.03] transition-all duration-300 ${
         isScrolled
-          ? "h-16 bg-[#020408]/65 border-b border-white/5 backdrop-blur-md shadow-2xl shadow-black/40"
-          : "h-24 bg-transparent border-b border-transparent"
+          ? "h-16 backdrop-blur-[30px]"
+          : "h-20 backdrop-blur-[20px]"
       }`}
     >
-      <div className="max-w-[1440px] mx-auto h-full px-6 md:px-12 flex items-center justify-between">
+      <div className="w-full h-full px-6 md:px-10 flex items-center justify-between">
         {/* Logo */}
         <Link href="#" className="flex items-center gap-3 group">
           <img
@@ -68,7 +68,7 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center">
           <Link
             href="#join"
-            className="flex items-center gap-2 text-xs font-heading font-semibold tracking-widest text-white border border-white/10 hover:border-white/20 bg-transparent hover:bg-white/5 px-6 py-3 rounded-full transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.08)] hover:-translate-y-0.5 active:translate-y-0"
+            className="btn-glass flex items-center gap-2 text-xs font-heading font-semibold tracking-widest text-white px-6 py-3"
           >
             JOIN NETWORK
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
@@ -87,7 +87,7 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       <div
-        className={`fixed top-0 left-0 w-full h-screen bg-[#020408]/98 backdrop-blur-2xl z-40 transition-all duration-500 ease-in-out lg:hidden flex flex-col justify-center items-center gap-8 ${
+        className={`fixed top-0 left-0 w-full h-screen bg-[#000000]/98 backdrop-blur-2xl z-40 transition-all duration-500 ease-in-out lg:hidden flex flex-col justify-center items-center gap-8 ${
           isMobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
@@ -115,7 +115,7 @@ export default function Navbar() {
         <Link
           href="#join"
           onClick={() => setIsMobileOpen(false)}
-          className="flex items-center gap-2 text-sm font-heading font-semibold tracking-widest text-white border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 px-8 py-4 rounded-full transition-all duration-350"
+          className="btn-glass flex items-center gap-2 text-sm font-heading font-semibold tracking-widest text-white px-8 py-4"
         >
           JOIN NETWORK
           <ArrowRight className="w-4 h-4" />

@@ -19,7 +19,7 @@ export default function TechStack() {
 
   return (
     <section 
-      className="relative min-h-screen py-24 flex flex-col items-center justify-center bg-[#020408] border-b border-white/5"
+      className="relative min-h-screen py-48 flex flex-col items-center justify-center bg-transparent border-b border-white/5"
       id="technology"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_40%,rgba(77,124,254,0.02)_0%,transparent_50%)] pointer-events-none" />
@@ -67,7 +67,7 @@ export default function TechStack() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.5, delay: idx * 0.08 }}
-                className="glass-card p-6 md:p-8 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] hover:border-[#4D7CFE]/20 transition-all duration-300 hover:shadow-[0_12px_24px_rgba(77,124,254,0.03)] text-left flex flex-col justify-between group"
+                className="glass-card glass-card-hover p-6 md:p-8 text-left flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-center gap-4 mb-6">

@@ -13,36 +13,46 @@ import TechStack from "@/components/sections/TechStack";
 import Economics from "@/components/sections/Economics";
 import Roadmap from "@/components/sections/Roadmap";
 import Research from "@/components/sections/Research";
-import Manifesto from "@/components/sections/Manifesto";
 import JoinNetwork from "@/components/sections/JoinNetwork";
-import Footer from "@/components/Footer";
+import Manifesto from "@/components/sections/Manifesto";
+import FinalEnding from "@/components/ending/FinalEnding";
+
+import Universe from "@/components/background/Universe";
+import Atmosphere from "@/components/background/Atmosphere";
+import TransitionManager from "@/components/transitions/TransitionManager";
 
 export default function Home() {
   return (
     <LenisProvider>
+      {/* Background Universe */}
+      <Universe />
+
+      {/* Atmosphere Audio Controls */}
+      <Atmosphere />
+
       {/* Navigation */}
       <Navbar />
 
-      {/* Main content layouts */}
-      <main className="flex-1">
-        <Hero />
-        <AgeOfIntelligence />
-        <Problem />
-        <Vision />
-        <WhatIsAegis />
-        <CoreArchitecture />
-        <AgentEcosystem />
-        <Sectors />
-        <TechStack />
-        <Economics />
-        <Roadmap />
-        <Research />
-        <Manifesto />
-        <JoinNetwork />
+      {/* Main content layouts wrapped in TransitionManager */}
+      <main className="flex-1 relative z-10">
+        <TransitionManager>
+          <Hero />
+          <AgeOfIntelligence />
+          <Problem />
+          <Vision />
+          <WhatIsAegis />
+          <CoreArchitecture />
+          <AgentEcosystem />
+          <Sectors />
+          <TechStack />
+          <Economics />
+          <Roadmap />
+          <Research />
+          <JoinNetwork />
+          <Manifesto />
+          <FinalEnding />
+        </TransitionManager>
       </main>
-
-      {/* Footer */}
-      <Footer />
     </LenisProvider>
   );
 }

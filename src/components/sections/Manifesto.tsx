@@ -13,7 +13,7 @@ export default function Manifesto() {
 
   return (
     <section 
-      className="relative min-h-screen py-32 flex flex-col items-center justify-center bg-[#020408] border-b border-white/5 overflow-hidden"
+      className="relative min-h-screen py-72 flex flex-col items-center justify-center bg-transparent border-b border-white/5 overflow-hidden"
       id="manifesto"
     >
       {/* Background ambient lighting */}
@@ -32,7 +32,7 @@ export default function Manifesto() {
         </motion.span>
 
         {/* Cinematic Typographic Reveal lines */}
-        <div className="flex flex-col gap-8 max-w-4xl w-full">
+        <div className="flex flex-col gap-10 max-w-5xl w-full">
           {statements.map((stmt, idx) => {
             const isSpecial = idx === 0 || idx === 1 || idx === 4;
             return (
@@ -42,7 +42,7 @@ export default function Manifesto() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 1.0, delay: idx * 0.15, ease: "easeOut" }}
-                className={`font-heading font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight tracking-tight ${
+                className={`font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight tracking-tight ${
                   isSpecial 
                     ? "text-white" 
                     : "text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-600"

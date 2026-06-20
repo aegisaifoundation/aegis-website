@@ -29,7 +29,7 @@ export default function Sectors() {
 
   return (
     <section 
-      className="relative min-h-screen py-24 flex flex-col items-center justify-center bg-[#020408] border-b border-white/5"
+      className="relative min-h-screen py-40 flex flex-col items-center justify-center bg-transparent border-b border-white/5"
       id="sectors"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(77,124,254,0.02)_0%,transparent_50%)] pointer-events-none" />
@@ -80,7 +80,7 @@ export default function Sectors() {
               >
                 <Link
                   href={`/sectors/${sec.title.toLowerCase().replace(" ", "-")}`}
-                  className="group block h-full glass-card p-5 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] hover:border-[#4D7CFE]/30 transition-all duration-300 hover:shadow-[0_12px_24px_rgba(77,124,254,0.03)] hover:-translate-y-1"
+                  className="group block h-full glass-card glass-card-hover p-5"
                 >
                   {/* Icon */}
                   <div className="flex items-center gap-3 mb-4">

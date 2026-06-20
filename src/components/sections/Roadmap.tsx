@@ -16,7 +16,7 @@ export default function Roadmap() {
 
   return (
     <section 
-      className="relative min-h-screen py-24 flex flex-col items-center justify-center bg-[#020408] border-b border-white/5"
+      className="relative min-h-screen py-40 flex flex-col items-center justify-center bg-transparent border-b border-white/5"
       id="roadmap"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(77,124,254,0.02)_0%,transparent_50%)] pointer-events-none" />
@@ -63,15 +63,15 @@ export default function Roadmap() {
               const Icon = step.icon;
               return (
                 <motion.div
-                  key={step.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.6, delay: idx * 0.1 }}
-                  className="flex flex-col items-center lg:items-start text-center lg:text-left group"
+                   key={step.title}
+                   initial={{ opacity: 0, y: 30 }}
+                   whileInView={{ opacity: 1, y: 0 }}
+                   viewport={{ once: true, margin: "-100px" }}
+                   transition={{ duration: 0.6, delay: idx * 0.1 }}
+                   className="flex flex-col items-center lg:items-start text-center lg:text-left group"
                 >
                   {/* Timeline circle node */}
-                  <div className={`w-18 h-18 rounded-full border bg-[#020408] flex items-center justify-center mb-6 shadow-xl ${step.color} relative z-10 group-hover:scale-105 transition-transform duration-300`}>
+                  <div className={`w-18 h-18 rounded-full glass-card flex items-center justify-center mb-6 shadow-xl ${step.color} relative z-10 group-hover:scale-105 transition-transform duration-300`}>
                     <Icon className="w-5.5 h-5.5" />
                     {/* Tiny index count badge */}
                     <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full border border-white/10 bg-white/5 font-heading text-[9px] font-bold flex items-center justify-center text-white">
@@ -80,7 +80,7 @@ export default function Roadmap() {
                   </div>
 
                   {/* Card Info */}
-                  <div className="glass-card p-5 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] transition-colors duration-300 w-full flex-1">
+                  <div className="p-5 w-full flex-1 text-center lg:text-left">
                     <span className="font-heading text-[10px] font-extrabold tracking-widest text-[#7DD3FC] block mb-1">
                       {step.year}
                     </span>

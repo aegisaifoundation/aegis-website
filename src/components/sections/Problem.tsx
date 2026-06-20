@@ -19,10 +19,10 @@ export default function Problem() {
 
   return (
     <section 
-      className="relative min-h-screen py-24 flex items-center justify-center bg-[#020408] border-b border-white/5"
-      id="architecture"
+      className="relative min-h-screen py-48 flex items-center justify-center bg-transparent border-b border-white/5"
+      id="problem"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_40%,rgba(77,124,254,0.02)_0%,transparent_50%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_40%,rgba(77,124,254,0.015)_0%,transparent_50%)] pointer-events-none" />
 
       <div className="max-w-[1440px] mx-auto w-full px-6 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center relative z-10">
         
@@ -72,7 +72,7 @@ export default function Problem() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="flex items-start gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] hover:border-white/10 transition-all duration-300"
+                  className="flex items-start gap-4 p-4 glass-card glass-card-hover"
                 >
                   <div className="p-2.5 rounded-lg border border-[#4D7CFE]/20 bg-[#4D7CFE]/5 text-[#7DD3FC]">
                     <Icon className="w-5 h-5" />
@@ -122,7 +122,7 @@ export default function Problem() {
         </div>
 
         {/* Right column 3D model */}
-        <div className="lg:col-span-6 relative w-full h-[400px] md:h-[500px] flex items-center justify-center rounded-2xl overflow-hidden border border-white/5 bg-gradient-to-br from-white/[0.01] to-transparent">
+        <div className="lg:col-span-6 relative w-full h-[400px] md:h-[500px] flex items-center justify-center rounded-2xl overflow-hidden border border-white/5 bg-transparent">
           {/* Subtle glow border backing */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 bg-[#4D7CFE]/5 blur-3xl rounded-full z-0" />
           
@@ -130,7 +130,7 @@ export default function Problem() {
             <DataCenter3D />
           </div>
 
-          <div className="absolute bottom-5 left-5 right-5 glass-card px-4 py-3 rounded-lg border border-white/10 z-20 flex justify-between items-center">
+          <div className="absolute bottom-5 left-5 right-5 glass-card px-4 py-3 rounded-lg border border-white/10 z-20 flex justify-between items-center bg-[#0a0f19]/50">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
               <span className="font-heading text-[10px] tracking-wider font-semibold text-gray-400 uppercase">

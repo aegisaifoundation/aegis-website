@@ -6,19 +6,18 @@ import { ArrowRight, User, Bot, Building2, ServerCrash, Cpu } from "lucide-react
 
 export default function CoreArchitecture() {
   const steps = [
-    { title: "Users", desc: "Initiate private requests, query local indices, and run tasks locally.", icon: User, color: "text-blue-400 border-blue-500/20 bg-blue-500/5" },
     { title: "Agents", desc: "Orchestrate local reasoning flows, tool usage, and custom sub-agents.", icon: Bot, color: "text-cyan-400 border-cyan-500/20 bg-cyan-500/5" },
-    { title: "Institution Nodes", desc: "Compute locally using proprietary, secure data sources and local GPUs.", icon: Building2, color: "text-purple-400 border-purple-500/20 bg-purple-500/5" },
+    { title: "Nodes", desc: "Compute locally using proprietary, secure data sources and local GPUs.", icon: Building2, color: "text-purple-400 border-purple-500/20 bg-purple-500/5" },
     { title: "Aggregators", desc: "Compile zero-knowledge mathematical updates and models dynamically.", icon: ServerCrash, color: "text-[#4D7CFE] border-[#4D7CFE]/20 bg-[#4D7CFE]/5" },
     { title: "AEGIS Core", desc: "The global coordination consensus that updates network layers.", icon: Cpu, color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/5" },
   ];
 
   return (
     <section 
-      className="relative min-h-screen py-24 flex flex-col items-center justify-center bg-[#020408] border-b border-white/5"
+      className="relative min-h-screen py-40 flex flex-col items-center justify-center bg-transparent border-b border-white/5"
       id="architecture"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(77,124,254,0.02)_0%,transparent_50%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(77,124,254,0.015)_0%,transparent_50%)] pointer-events-none" />
 
       <div className="max-w-[1440px] mx-auto w-full px-6 md:px-12 flex flex-col items-center relative z-10">
         
@@ -57,7 +56,7 @@ export default function CoreArchitecture() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="glass-card px-8 py-6 rounded-2xl border border-[#4D7CFE]/20 bg-[#4D7CFE]/5 mb-16 text-center max-w-2xl w-full"
+          className="glass-card glass-card-hover px-8 py-6 rounded-2xl mb-16 text-center max-w-2xl w-full"
         >
           <h3 className="font-heading font-extrabold text-xl sm:text-2xl tracking-wide text-white leading-relaxed">
             No raw data moves.<br />
@@ -84,12 +83,12 @@ export default function CoreArchitecture() {
                 className="relative z-10 w-full flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-12 last:mb-0"
               >
                 {/* Icon wrapper */}
-                <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center shrink-0 shadow-lg ${step.color} transition-transform duration-300 hover:scale-105`}>
+                <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center shrink-0 shadow-lg ${step.color} transition-transform duration-300`}>
                   <Icon className="w-7 h-7" />
                 </div>
 
                 {/* Text details */}
-                <div className="glass-card p-5 md:p-6 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] transition-colors duration-300 text-center sm:text-left flex-1">
+                <div className="glass-card glass-card-hover p-5 md:p-6 rounded-xl flex-1 text-center sm:text-left">
                   <span className="text-[10px] font-heading font-extrabold text-gray-500 tracking-widest block mb-1 uppercase">
                     STAGE 0{idx + 1}
                   </span>

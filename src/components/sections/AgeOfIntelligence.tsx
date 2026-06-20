@@ -6,18 +6,18 @@ import Link from "next/link";
 
 export default function AgeOfIntelligence() {
   const eras = [
-    { title: "Agriculture", desc: "Mechanical cultivation of the physical world. Land & Labor.", color: "border-emerald-500/30 text-emerald-400" },
-    { title: "Industry", desc: "Mass production and energy harnessing. Machines & Capital.", color: "border-amber-500/30 text-amber-400" },
-    { title: "Information", desc: "Digitalization, compute systems, global internet. Code & Silicon.", color: "border-[#4D7CFE]/30 text-[#4D7CFE]" },
-    { title: "Intelligence", desc: "Collaborative knowledge networks and federated AI systems. The AEGIS Core.", color: "border-purple-500/40 text-purple-400 glow-purple" },
+    { title: "Agriculture", desc: "Mechanical cultivation of the physical world. Land & Labor.", color: "text-emerald-400" },
+    { title: "Industry", desc: "Mass production and energy harnessing. Machines & Capital.", color: "text-amber-400" },
+    { title: "Information", desc: "Digitalization, compute systems, global internet. Code & Silicon.", color: "text-[#4D7CFE]" },
+    { title: "Intelligence", desc: "Collaborative knowledge networks and federated AI systems. The AEGIS Core.", color: "text-purple-400" },
   ];
 
   return (
     <section 
-      className="relative min-h-screen py-24 flex flex-col items-center justify-center bg-[#020408] border-b border-white/5"
+      className="relative min-h-screen py-40 flex flex-col items-center justify-center bg-transparent border-b border-white/5"
       id="age-of-intelligence"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(77,124,254,0.02)_0%,transparent_50%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(77,124,254,0.015)_0%,transparent_50%)] pointer-events-none" />
 
       <div className="max-w-[1440px] mx-auto w-full px-6 md:px-12 flex flex-col items-center text-center relative z-10">
         
@@ -52,10 +52,10 @@ export default function AgeOfIntelligence() {
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.6, delay: idx * 0.15 }}
-                  className={`w-full glass-card p-6 md:p-8 rounded-2xl flex flex-col md:flex-row items-center gap-5 border ${era.color} transition-all duration-350 hover:shadow-[0_0_30px_rgba(77,124,254,0.05)]`}
+                  className="w-full glass-card glass-card-hover p-6 md:p-8 flex flex-col md:flex-row items-center gap-5"
                 >
                   {/* Left Circle Number */}
-                  <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center font-heading font-bold text-sm bg-white/5 text-white shadow-inner shrink-0">
+                  <div className={`w-12 h-12 rounded-full border border-white/10 flex items-center justify-center font-heading font-bold text-sm bg-white/5 shrink-0 ${era.color}`}>
                     0{idx + 1}
                   </div>
                   

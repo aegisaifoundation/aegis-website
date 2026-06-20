@@ -31,7 +31,7 @@ export default function JoinNetwork() {
 
   return (
     <section 
-      className="relative min-h-screen py-24 flex flex-col items-center justify-center bg-[#020408] border-b border-white/5 overflow-hidden"
+      className="relative min-h-screen py-40 flex flex-col items-center justify-center bg-transparent border-b border-white/5 overflow-hidden"
       id="join"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(77,124,254,0.02)_0%,transparent_50%)] pointer-events-none" />
@@ -79,7 +79,7 @@ export default function JoinNetwork() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative z-10 glass-card p-8 md:p-10 rounded-3xl border border-white/5 bg-white/[0.01]"
+            className="relative z-10 glass-card p-8 md:p-10 rounded-[40px] border border-white/5 bg-[rgba(10,15,25,0.55)]"
           >
             {!submitted ? (
               <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -94,7 +94,7 @@ export default function JoinNetwork() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3.5 bg-white/[0.02] border border-white/10 rounded-xl font-body text-sm text-white focus:outline-none focus:border-[#4D7CFE] focus:bg-white/[0.04] transition-all duration-300 placeholder:text-gray-600"
+                    className="w-full px-4 py-3.5 input-glass border border-white/10 rounded-xl font-body text-sm text-white focus:outline-none focus:border-[#4D7CFE] transition-all duration-300 placeholder:text-gray-600"
                     placeholder="Enter your name"
                   />
                 </div>
@@ -110,7 +110,7 @@ export default function JoinNetwork() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3.5 bg-white/[0.02] border border-white/10 rounded-xl font-body text-sm text-white focus:outline-none focus:border-[#4D7CFE] focus:bg-white/[0.04] transition-all duration-300 placeholder:text-gray-600"
+                    className="w-full px-4 py-3.5 input-glass border border-white/10 rounded-xl font-body text-sm text-white focus:outline-none focus:border-[#4D7CFE] transition-all duration-300 placeholder:text-gray-600"
                     placeholder="you@institution.org"
                   />
                 </div>
@@ -126,7 +126,7 @@ export default function JoinNetwork() {
                       id="country"
                       value={formData.country}
                       onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                      className="w-full px-4 py-3.5 bg-white/[0.02] border border-white/10 rounded-xl font-body text-sm text-white focus:outline-none focus:border-[#4D7CFE] focus:bg-white/[0.04] transition-all duration-300 placeholder:text-gray-600"
+                      className="w-full px-4 py-3.5 input-glass border border-white/10 rounded-xl font-body text-sm text-white focus:outline-none focus:border-[#4D7CFE] transition-all duration-300 placeholder:text-gray-600"
                       placeholder="e.g. United States"
                     />
                   </div>
@@ -140,7 +140,7 @@ export default function JoinNetwork() {
                       id="institution"
                       value={formData.institution}
                       onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
-                      className="w-full px-4 py-3.5 bg-white/[0.02] border border-white/10 rounded-xl font-body text-sm text-white focus:outline-none focus:border-[#4D7CFE] focus:bg-white/[0.04] transition-all duration-300 placeholder:text-gray-600"
+                      className="w-full px-4 py-3.5 input-glass border border-white/10 rounded-xl font-body text-sm text-white focus:outline-none focus:border-[#4D7CFE] transition-all duration-300 placeholder:text-gray-600"
                       placeholder="e.g. Stanford University"
                     />
                   </div>
@@ -155,7 +155,7 @@ export default function JoinNetwork() {
                     id="role"
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full px-4 py-3.5 bg-[#08111f] border border-white/10 rounded-xl font-body text-sm text-white focus:outline-none focus:border-[#4D7CFE] focus:bg-[#0c182c] transition-all duration-300 cursor-pointer"
+                    className="w-full px-4 py-3.5 input-glass border border-white/10 rounded-xl font-body text-sm text-white focus:outline-none focus:border-[#4D7CFE] transition-all duration-300 cursor-pointer"
                   >
                     {roles.map((r) => (
                       <option key={r} value={r}>
