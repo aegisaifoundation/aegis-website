@@ -21,7 +21,7 @@ export default function AgentEcosystem() {
   return (
     <section 
       className="relative min-h-screen py-40 flex flex-col items-center justify-center bg-transparent border-b border-white/5"
-      id="agent-ecosystem"
+      id="agents"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_80%,rgba(77,124,254,0.015)_0%,transparent_50%)] pointer-events-none" />
 

@@ -70,16 +70,12 @@ export default function JoinNetwork() {
 
         {/* Form Container */}
         <div className="w-full max-w-lg relative">
-          {/* Decorative glowing backdrops */}
-          <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#4D7CFE]/5 blur-3xl rounded-full z-0" />
-          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#7DD3FC]/5 blur-3xl rounded-full z-0" />
-
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative z-10 glass-card p-8 md:p-10 rounded-[40px] border border-white/5 bg-[rgba(10,15,25,0.55)]"
+            className="relative z-10 glass-card p-8 md:p-10 rounded-[32px] border border-white/6 bg-[rgba(255,255,255,0.015)]"
           >
             {!submitted ? (
               <form onSubmit={handleSubmit} className="flex flex-col gap-6">

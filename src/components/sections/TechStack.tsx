@@ -102,6 +102,7 @@ export default function TechStack() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
+          className="mb-12"
         >
           <Link
             href="/technology-stack"
@@ -111,6 +112,24 @@ export default function TechStack() {
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </motion.div>
+
+        {/* Related Topics Exploration Footer */}
+        <div className="mt-12 pt-8 border-t border-white/5 w-full max-w-4xl text-center">
+          <span className="font-heading text-[10px] font-extrabold tracking-widest text-gray-500 uppercase block mb-4">
+            Related Topics
+          </span>
+          <div className="flex flex-wrap justify-center gap-6">
+            <Link href="#research" className="font-heading text-xs font-bold text-[#7DD3FC] hover:text-white transition-colors uppercase tracking-wider">
+              Research Papers
+            </Link>
+            <Link href="#sectors" className="font-heading text-xs font-bold text-[#7DD3FC] hover:text-white transition-colors uppercase tracking-wider">
+              Industrial Sectors
+            </Link>
+            <Link href="#economics" className="font-heading text-xs font-bold text-[#7DD3FC] hover:text-white transition-colors uppercase tracking-wider">
+              Economics & Monetization
+            </Link>
+          </div>
+        </div>
 
       </div>
     </section>

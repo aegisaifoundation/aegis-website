@@ -165,11 +165,26 @@ export default function Economics() {
 
         <Link
           href="/revenue-model"
-          className="group inline-flex items-center gap-2 text-xs font-heading font-bold tracking-widest text-[#7DD3FC] hover:text-white transition-all duration-350"
+          className="group inline-flex items-center gap-2 text-xs font-heading font-bold tracking-widest text-[#7DD3FC] hover:text-white transition-all duration-350 mb-12"
         >
           LEARN MORE ABOUT VALUE DISTRIBUTION
           <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
         </Link>
+
+        {/* Related Topics Exploration Footer */}
+        <div className="mt-12 pt-8 border-t border-white/5 w-full max-w-4xl text-center">
+          <span className="font-heading text-[10px] font-extrabold tracking-widest text-gray-500 uppercase block mb-4">
+            Related Topics
+          </span>
+          <div className="flex flex-wrap justify-center gap-6">
+            <Link href="#research" className="font-heading text-xs font-bold text-[#7DD3FC] hover:text-white transition-colors uppercase tracking-wider">
+              Research Papers
+            </Link>
+            <Link href="#manifesto" className="font-heading text-xs font-bold text-[#7DD3FC] hover:text-white transition-colors uppercase tracking-wider">
+              Digital Manifesto
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -2,24 +2,24 @@ import Navbar from "@/components/Navbar";
 import LenisProvider from "@/components/LenisProvider";
 
 import Hero from "@/components/sections/Hero";
-import AgeOfIntelligence from "@/components/sections/AgeOfIntelligence";
-import Problem from "@/components/sections/Problem";
+import HeroTransition from "@/components/transitions/HeroTransition";
 import Vision from "@/components/sections/Vision";
-import WhatIsAegis from "@/components/sections/WhatIsAegis";
+import Problem from "@/components/sections/Problem";
 import CoreArchitecture from "@/components/sections/CoreArchitecture";
 import AgentEcosystem from "@/components/sections/AgentEcosystem";
-import Sectors from "@/components/sections/Sectors";
 import TechStack from "@/components/sections/TechStack";
+import Sectors from "@/components/sections/Sectors";
 import Economics from "@/components/sections/Economics";
-import Roadmap from "@/components/sections/Roadmap";
 import Research from "@/components/sections/Research";
+import Roadmap from "@/components/sections/Roadmap";
 import JoinNetwork from "@/components/sections/JoinNetwork";
 import Manifesto from "@/components/sections/Manifesto";
-import FinalEnding from "@/components/ending/FinalEnding";
+import MinimalEnding from "@/components/ending/MinimalEnding";
 
 import Universe from "@/components/background/Universe";
-import Atmosphere from "@/components/background/Atmosphere";
-import TransitionManager from "@/components/transitions/TransitionManager";
+import SearchModal from "@/components/SearchModal";
+import SidebarUX from "@/components/SidebarUX";
+import MobileExplore from "@/components/MobileExplore";
 
 export default function Home() {
   return (
@@ -27,31 +27,34 @@ export default function Home() {
       {/* Background Universe */}
       <Universe />
 
-      {/* Atmosphere Audio Controls */}
-      <Atmosphere />
+      {/* Spotlight/Raycast Search Console */}
+      <SearchModal />
 
-      {/* Navigation */}
+      {/* Desktop Navigation Helper */}
+      <SidebarUX />
+
+      {/* Mobile Navigation Sheet */}
+      <MobileExplore />
+
+      {/* Navigation Header Capsule */}
       <Navbar />
 
-      {/* Main content layouts wrapped in TransitionManager */}
+      {/* Main Content Layout (Standard Natural Scroll Flow) */}
       <main className="flex-1 relative z-10">
-        <TransitionManager>
-          <Hero />
-          <AgeOfIntelligence />
-          <Problem />
-          <Vision />
-          <WhatIsAegis />
-          <CoreArchitecture />
-          <AgentEcosystem />
-          <Sectors />
-          <TechStack />
-          <Economics />
-          <Roadmap />
-          <Research />
-          <JoinNetwork />
-          <Manifesto />
-          <FinalEnding />
-        </TransitionManager>
+        <Hero />
+        <HeroTransition />
+        <Vision />
+        <Problem />
+        <CoreArchitecture />
+        <AgentEcosystem />
+        <TechStack />
+        <Sectors />
+        <Economics />
+        <Research />
+        <Roadmap />
+        <JoinNetwork />
+        <Manifesto />
+        <MinimalEnding />
       </main>
     </LenisProvider>
   );

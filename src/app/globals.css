@@ -21,53 +21,54 @@ body {
   overflow-x: hidden;
 }
 
-/* Glassmorphism Styles */
+/* Solid Dark Card Styles */
 .glass-card {
-  background: rgba(10, 15, 25, 0.45);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 80px rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 32px;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
 }
 
 .glass-card-hover {
-  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .glass-card-hover:hover {
-  transform: translateY(-8px);
-  border-color: rgba(255, 255, 255, 0.16);
-  filter: brightness(1.08);
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.15);
+  filter: none !important;
 }
 
-/* Button & Input Glass Styles */
+/* Solid Button & Input Styles (removed blur/glow/glass) */
 .btn-glass {
   background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
 }
 
 .btn-glass:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .input-glass {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.3s ease;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .input-glass:focus {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Text glow filters */
