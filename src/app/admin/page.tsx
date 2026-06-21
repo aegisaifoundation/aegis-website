@@ -1,11 +1,92 @@
 "use client";
 
-import React, { useState } from "react";
-import { Users, Globe2, Sparkles, Inbox, Activity, Search, ShieldCheck, PieChart, Layers, ArrowLeft } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Users, Globe2, Sparkles, Inbox, Activity, Search, ShieldCheck, PieChart, Layers, ArrowLeft, Lock, Key } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"overview" | "requests" | "analytics">("overview");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+
+  const [activeTab, setActiveTab] = useState<"overview" | "requests" | "analytics" | "security">("overview");
+
+  // Password change states
+  const [currentPasswordInput, setCurrentPasswordInput] = useState("");
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
+  const [securitySuccess, setSecuritySuccess] = useState("");
+  const [securityError, setSecurityError] = useState("");
+
+  // Initialize default password and restore session on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("aegis_admin_password");
+      if (!stored) {
+        localStorage.setItem("aegis_admin_password", "admin");
+      }
+      
+      const session = sessionStorage.getItem("aegis_admin_session");
+      if (session === "active") {
+        setIsLoggedIn(true);
+      }
+    }
+  }, []);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (typeof window !== "undefined") {
+      const storedPassword = localStorage.getItem("aegis_admin_password") || "admin";
+      if (loginUsername === "admin" && loginPassword === storedPassword) {
+        setIsLoggedIn(true);
+        setLoginError("");
+        sessionStorage.setItem("aegis_admin_session", "active");
+      } else {
+        setLoginError("Invalid username or password.");
+      }
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setLoginUsername("");
+    setLoginPassword("");
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("aegis_admin_session");
+    }
+  };
+
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecurityError("");
+    setSecuritySuccess("");
+
+    if (typeof window !== "undefined") {
+      const storedPassword = localStorage.getItem("aegis_admin_password") || "admin";
+
+      if (currentPasswordInput !== storedPassword) {
+        setSecurityError("Current password is incorrect.");
+        return;
+      }
+
+      if (!newPasswordInput) {
+        setSecurityError("New password cannot be empty.");
+        return;
+      }
+
+      if (newPasswordInput !== confirmPasswordInput) {
+        setSecurityError("New passwords do not match.");
+        return;
+      }
+
+      localStorage.setItem("aegis_admin_password", newPasswordInput);
+      setSecuritySuccess("Password updated successfully.");
+      setCurrentPasswordInput("");
+      setNewPasswordInput("");
+      setConfirmPasswordInput("");
+    }
+  };
 
   // Mock analytics data
   interface MetricItem {
@@ -45,6 +126,80 @@ export default function AdminDashboard() {
     { sector: "Agriculture", interestIndex: "74.5%", nodePotential: "90 nodes" }
   ];
 
+  // Render Login Form if unauthorized
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-[#000000] text-white flex items-center justify-center p-6 font-body">
+        <div className="w-full max-w-md glass-card p-8 border border-white/5 flex flex-col gap-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-[#4D7CFE] to-[#7DD3FC]" />
+          
+          <div className="flex flex-col items-center text-center gap-2">
+            <div className="w-12 h-12 rounded-2xl border border-white/10 bg-white/5 text-[#7DD3FC] flex items-center justify-center mb-2">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h1 className="font-heading font-extrabold text-xl tracking-tight">Access Restricted</h1>
+            <p className="text-xs text-gray-500 max-w-xs font-light">
+              Enter credentials to authenticate into the AEGIS Operations Dashboard.
+            </p>
+          </div>
+
+          <form onSubmit={handleLogin} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="font-heading text-[9px] font-extrabold tracking-widest text-gray-500 uppercase">
+                Username
+              </label>
+              <input
+                type="text"
+                value={loginUsername}
+                onChange={(e) => setLoginUsername(e.target.value)}
+                placeholder="admin"
+                className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 focus:border-[#4D7CFE] focus:bg-white/[0.08] text-sm text-white placeholder-gray-600 transition-all outline-none"
+                required
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="font-heading text-[9px] font-extrabold tracking-widest text-gray-500 uppercase">
+                Password
+              </label>
+              <input
+                type="password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 focus:border-[#4D7CFE] focus:bg-white/[0.08] text-sm text-white placeholder-gray-600 transition-all outline-none"
+                required
+              />
+            </div>
+
+            {loginError && (
+              <p className="text-xs text-red-400 font-medium text-center mt-1">
+                {loginError}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="btn-glass w-full py-3 mt-2 text-xs font-heading font-bold tracking-widest text-white hover:bg-gradient-to-r hover:from-[#4D7CFE] hover:to-[#7DD3FC] hover:border-transparent hover:text-white transition-all cursor-pointer"
+            >
+              AUTHENTICATE
+            </button>
+          </form>
+
+          <div className="border-t border-white/5 pt-4 text-center">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Back to landing page
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#000000] text-white p-6 md:p-12 font-body selection:bg-[#4D7CFE]/30 selection:text-white">
       <div className="max-w-[80rem] mx-auto flex flex-col gap-10">
@@ -65,20 +220,29 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 border border-white/5 bg-white/[0.01] p-1 rounded-xl">
-            {(["overview", "requests", "analytics"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase transition-all cursor-pointer ${
-                  activeTab === tab 
-                    ? "bg-[#4D7CFE] text-white shadow-md shadow-[#4D7CFE]/20" 
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex items-center gap-2 border border-white/5 bg-white/[0.01] p-1 rounded-xl">
+              {(["overview", "requests", "analytics", "security"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 py-2 rounded-lg text-[10px] font-heading font-bold uppercase transition-all cursor-pointer ${
+                    activeTab === tab 
+                      ? "bg-[#4D7CFE] text-white shadow-md shadow-[#4D7CFE]/20" 
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="px-3.5 py-2 rounded-lg border border-white/10 hover:border-red-500/30 hover:bg-red-500/10 text-gray-400 hover:text-red-400 text-[10px] font-heading font-bold uppercase transition-all cursor-pointer"
+            >
+              LOGOUT
+            </button>
           </div>
         </header>
 
@@ -287,6 +451,86 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+          </div>
+        )}
+
+        {/* Tab 4: Security Settings (Change Password) */}
+        {activeTab === "security" && (
+          <div className="max-w-md mx-auto w-full flex flex-col gap-5 text-left">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl border border-white/10 bg-white/5 text-[#7DD3FC] flex items-center justify-center">
+                <Key className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="font-heading font-extrabold text-lg">Dashboard Security</h2>
+                <p className="text-xs text-gray-500 font-light mt-0.5">Update the admin account access password.</p>
+              </div>
+            </div>
+
+            <div className="glass-card p-6 border border-white/5 relative overflow-hidden mt-2">
+              <form onSubmit={handleChangePassword} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-heading text-[9px] font-extrabold tracking-widest text-gray-500 uppercase">
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    value={currentPasswordInput}
+                    onChange={(e) => setCurrentPasswordInput(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 focus:border-[#4D7CFE] focus:bg-white/[0.08] text-sm text-white placeholder-gray-600 transition-all outline-none"
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-heading text-[9px] font-extrabold tracking-widest text-gray-500 uppercase">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={newPasswordInput}
+                    onChange={(e) => setNewPasswordInput(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 focus:border-[#4D7CFE] focus:bg-white/[0.08] text-sm text-white placeholder-gray-600 transition-all outline-none"
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-heading text-[9px] font-extrabold tracking-widest text-gray-500 uppercase">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPasswordInput}
+                    onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 focus:border-[#4D7CFE] focus:bg-white/[0.08] text-sm text-white placeholder-gray-600 transition-all outline-none"
+                    required
+                  />
+                </div>
+
+                {securityError && (
+                  <p className="text-xs text-red-400 font-medium">
+                    {securityError}
+                  </p>
+                )}
+
+                {securitySuccess && (
+                  <p className="text-xs text-emerald-400 font-medium">
+                    {securitySuccess}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn-glass w-full py-3 mt-2 text-xs font-heading font-bold tracking-widest text-white hover:bg-gradient-to-r hover:from-[#4D7CFE] hover:to-[#7DD3FC] hover:border-transparent hover:text-white transition-all cursor-pointer"
+                >
+                  UPDATE PASSWORD
+                </button>
+              </form>
+            </div>
           </div>
         )}
 

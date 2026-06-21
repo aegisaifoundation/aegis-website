@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -25,6 +25,27 @@ function ServerArray() {
     }
     return temp;
   }, []);
+
+  // Generate EdgesGeometry for racks and servers to avoid diagonal wireframe lines
+  const { rackEdgesGeometry, serverEdgesGeometry } = useMemo(() => {
+    const rackBox = new THREE.BoxGeometry(0.8, 2.5, 0.8);
+    const rackEd = new THREE.EdgesGeometry(rackBox);
+    rackBox.dispose();
+
+    const serverBox = new THREE.BoxGeometry(0.74, 0.32, 0.74);
+    const serverEd = new THREE.EdgesGeometry(serverBox);
+    serverBox.dispose();
+
+    return { rackEdgesGeometry: rackEd, serverEdgesGeometry: serverEd };
+  }, []);
+
+  // Dispose geometries on unmount
+  useEffect(() => {
+    return () => {
+      rackEdgesGeometry.dispose();
+      serverEdgesGeometry.dispose();
+    };
+  }, [rackEdgesGeometry, serverEdgesGeometry]);
 
   // Generate coordinate points for server indicator lights inside each rack
   const serverLights = useMemo(() => {
@@ -98,16 +119,14 @@ function ServerArray() {
       {/* Server Racks Wireframes */}
       {racks.map((rack, idx) => (
         <group key={idx} position={[rack.x, 0, rack.z]}>
-          {/* Rack outer casing */}
-          <mesh>
-            <boxGeometry args={[0.8, 2.5, 0.8]} />
-            <meshBasicMaterial 
+          {/* Rack outer casing (horizontal and vertical lines only) */}
+          <lineSegments geometry={rackEdgesGeometry}>
+            <lineBasicMaterial 
               color="#4D7CFE" 
-              wireframe 
               transparent 
               opacity={0.12} 
             />
-          </mesh>
+          </lineSegments>
           
           {/* Solid server units stacking vertically inside */}
           {[0, 1, 2, 3, 4].map((u) => (
@@ -118,15 +137,14 @@ function ServerArray() {
                 roughness={0.8} 
                 metalness={0.4} 
               />
-              <mesh>
-                <boxGeometry args={[0.74, 0.32, 0.74]} />
-                <meshBasicMaterial 
+              {/* Inner outline casing (horizontal and vertical lines only) */}
+              <lineSegments geometry={serverEdgesGeometry}>
+                <lineBasicMaterial 
                   color="#4D7CFE" 
-                  wireframe 
                   transparent 
                   opacity={0.06} 
                 />
-              </mesh>
+              </lineSegments>
             </mesh>
           ))}
         </group>

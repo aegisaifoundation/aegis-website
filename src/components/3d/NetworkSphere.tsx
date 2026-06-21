@@ -1,103 +1,58 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Line } from "@react-three/drei";
 import * as THREE from "three";
 
-// Interactive Constellation Sphere Component
-function Constellation() {
+// Interactive Lat/Long Sphere Grid Component
+function LatLongSphere() {
   const groupRef = useRef<THREE.Group>(null);
   
-  // Generate random points distributed inside a sphere
-  const nodes = useMemo(() => {
-    const temp: THREE.Vector3[] = [];
-    const count = 50;
-    const radius = 2.0;
-    
-    for (let i = 0; i < count; i++) {
-      const u = Math.random();
-      const v = Math.random();
-      const theta = u * 2.0 * Math.PI;
-      const phi = Math.acos(2.0 * v - 1.0);
-      
-      // Keep nodes slightly randomized inside the sphere boundary
-      const r = radius * (0.8 + Math.random() * 0.2); 
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = r * Math.sin(phi) * Math.sin(theta);
-      const z = r * Math.cos(phi);
-      
-      temp.push(new THREE.Vector3(x, y, z));
-    }
-    return temp;
+  // Generate a clean latitude/longitude grid (no diagonals) for the sphere
+  const sphereEdgesGeometry = useMemo(() => {
+    // 24 segments around (longitude lines), 16 segments vertically (latitude lines)
+    const sphereGeo = new THREE.SphereGeometry(2.0, 24, 16);
+    // Use default threshold angle (1 degree) to keep lat/long lines while removing coplanar diagonals
+    const edges = new THREE.EdgesGeometry(sphereGeo, 1);
+    sphereGeo.dispose();
+    return edges;
   }, []);
 
-  // Dynamically calculate lines between nearby nodes
-  const connections = useMemo(() => {
-    const temp: [THREE.Vector3, THREE.Vector3][] = [];
-    const maxDist = 1.35;
-    
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const dist = nodes[i].distanceTo(nodes[j]);
-        if (dist < maxDist) {
-          temp.push([nodes[i], nodes[j]]);
-        }
-      }
-    }
-    return temp;
-  }, [nodes]);
+  // Dispose geometries on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      sphereEdgesGeometry.dispose();
+    };
+  }, [sphereEdgesGeometry]);
 
-  // Track mouse coordinates to tilt the sphere
+  // Slow rotation and mouse-tracking tilt
   useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    
     if (groupRef.current) {
-      const time = state.clock.getElapsedTime();
-      
       // Auto idle spin
-      groupRef.current.rotation.y = time * 0.08;
+      groupRef.current.rotation.y = time * 0.06;
       
       // Mouse tilt with interpolation
-      const targetX = -state.pointer.y * 0.6;
-      const targetY = state.pointer.x * 0.6;
+      const targetX = -state.pointer.y * 0.4;
+      const targetY = state.pointer.x * 0.4;
       
       groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetX, 0.05);
-      // Add standard rotation with mouse offset
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetY + time * 0.08, 0.05);
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetY + time * 0.06, 0.05);
     }
   });
 
   return (
     <group ref={groupRef}>
-      {/* Outer bounding mesh indicator (very thin glowing shell) */}
-      <mesh>
-        <sphereGeometry args={[2.02, 16, 16]} />
-        <meshBasicMaterial 
+      {/* Latitude / Longitude lines of the Earth */}
+      <lineSegments geometry={sphereEdgesGeometry}>
+        <lineBasicMaterial 
           color="#7DD3FC" 
-          wireframe 
           transparent 
-          opacity={0.03} 
+          opacity={0.25} 
+          linewidth={1} 
         />
-      </mesh>
-
-      {/* Dotted Nodes */}
-      {nodes.map((pos, idx) => (
-        <mesh key={idx} position={pos}>
-          <sphereGeometry args={[0.035, 6, 6]} />
-          <meshBasicMaterial color="#7DD3FC" />
-        </mesh>
-      ))}
-
-      {/* Network connection paths */}
-      {connections.map(([p1, p2], idx) => (
-        <Line
-          key={idx}
-          points={[p1, p2]}
-          color="#4D7CFE"
-          lineWidth={0.5}
-          transparent
-          opacity={0.3}
-        />
-      ))}
+      </lineSegments>
     </group>
   );
 }
@@ -109,11 +64,10 @@ export default function NetworkSphere() {
         camera={{ position: [0, 0, 3.8], fov: 60 }}
         gl={{ antialias: true, alpha: true }}
       >
-        <ambientLight intensity={0.6} />
-        <pointLight position={[10, 10, 10]} intensity={1.2} color="#4D7CFE" />
-        <pointLight position={[-10, -10, -10]} intensity={0.5} color="#7DD3FC" />
+        <ambientLight intensity={0.5} />
+        <pointLight position={[10, 10, 10]} intensity={1.0} color="#4D7CFE" />
         
-        <Constellation />
+        <LatLongSphere />
       </Canvas>
     </div>
   );
