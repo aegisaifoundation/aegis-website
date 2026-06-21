@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Menu, X, ArrowRight, Search } from "lucide-react";
 
@@ -8,17 +8,38 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
 
-  // Track page scrolls for nav styling
+  // Track page scrolls for nav styling & scroll direction reveal
   useEffect(() => {
+    // Initialize ref on mount
+    lastScrollYRef.current = window.scrollY;
+
     const handleScroll = () => {
-      if (window.scrollY > 30) {
-        setIsScrolled(true);
-      } else {
+      const currentScrollY = window.scrollY;
+
+      // Always show navbar at the very top
+      if (currentScrollY < 50) {
+        setIsVisible(true);
         setIsScrolled(false);
+        lastScrollYRef.current = currentScrollY;
+        return;
       }
+
+      setIsScrolled(currentScrollY > 30);
+
+      // Hide when scrolling down (website goes up), show when scrolling up (website comes down)
+      if (currentScrollY > lastScrollYRef.current) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+
+      lastScrollYRef.current = currentScrollY;
     };
-    window.addEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -56,7 +77,6 @@ export default function Navbar() {
   const navLinks = [
     { name: "Vision", href: "#vision", id: "vision" },
     { name: "Architecture", href: "#architecture", id: "architecture" },
-    { name: "Agents", href: "#agents", id: "agents" },
     { name: "Technology", href: "#technology", id: "technology" },
     { name: "Sectors", href: "#sectors", id: "sectors" },
     { name: "Economics", href: "#economics", id: "economics" },
@@ -65,7 +85,9 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1360px] z-50 rounded-full border border-white/5 bg-black/50 transition-all duration-300 backdrop-blur-[10px] ${
+      className={`fixed left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1360px] z-50 rounded-full border border-white/5 bg-black/50 transition-all duration-300 backdrop-blur-[10px] ${
+        isVisible ? "top-4 opacity-100" : "-top-24 opacity-0 pointer-events-none"
+      } ${
         isScrolled
           ? "h-16"
           : "h-20"
@@ -85,12 +107,12 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center lg:gap-3 xl:gap-6 shrink-0">
+        <nav className="hidden lg:flex items-center lg:gap-6 xl:gap-8 shrink-0">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className={`font-body font-medium tracking-wider transition-colors duration-350 relative py-1 after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-white hover:after:w-full after:transition-all after:duration-300 text-[14px] lg:text-[13px] xl:text-[15px] ${
+              className={`font-body font-medium tracking-wider transition-colors duration-350 relative py-1 after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-white hover:after:w-full after:transition-all after:duration-300 text-[13.5px] xl:text-[14.5px] ${
                 activeSection === link.id
                   ? "text-white after:w-full font-semibold"
                   : "text-gray-400 after:w-0 hover:text-white"

@@ -3,6 +3,7 @@ import LenisProvider from "@/components/LenisProvider";
 
 import Hero from "@/components/sections/Hero";
 import HeroTransition from "@/components/transitions/HeroTransition";
+import AgeOfIntelligence from "@/components/sections/AgeOfIntelligence";
 import Vision from "@/components/sections/Vision";
 import Problem from "@/components/sections/Problem";
 import CoreArchitecture from "@/components/sections/CoreArchitecture";
@@ -43,6 +44,7 @@ export default function Home() {
       <main className="flex-1 relative z-10">
         <Hero />
         <HeroTransition />
+        <AgeOfIntelligence />
         <Vision />
         <Problem />
         <CoreArchitecture />

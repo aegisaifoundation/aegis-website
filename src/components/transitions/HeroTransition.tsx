@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 export default function HeroTransition() {
   return (
     <section 
-      className="relative w-full h-[60vh] flex flex-col items-center justify-center overflow-hidden border-y border-white/10 bg-white/[0.02] backdrop-blur-[30px] z-10"
+      className="relative w-full h-[60vh] flex flex-col items-center justify-center overflow-hidden border-y border-white/10 bg-transparent z-10"
       id="hero-transition"
     >
       <div className="max-w-[80rem] mx-auto w-full px-6 md:px-12 text-center flex flex-col items-center">
@@ -27,7 +27,7 @@ export default function HeroTransition() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="font-heading font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight tracking-tight text-white max-w-4xl"
+          className="font-heading font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-[#4D7CFE] max-w-4xl"
         >
           "The Next Infrastructure Is Intelligence"
         </motion.h2>

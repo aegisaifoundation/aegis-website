@@ -18,42 +18,25 @@ export default function Hero() {
           
           {/* Subtitle tag / Brand Title */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="flex flex-col items-center mb-14"
+            transition={{ duration: 1.0, ease: "easeOut" }}
+            className="flex flex-col items-center mb-10"
           >
-            <h1 className="font-heading font-extrabold text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-[0.25em] text-white leading-none text-glow-white-soft select-none mb-6">
+            <h1 className="font-heading font-extrabold text-6xl sm:text-7xl md:text-8xl lg:text-9xl tracking-[0.25em] text-white leading-none text-glow-white-soft select-none mb-8">
               AEGIS
             </h1>
-            <p className="font-heading text-xs sm:text-sm font-semibold tracking-[0.35em] text-[#7DD3FC] uppercase">
+            <p className="font-heading text-xs sm:text-sm md:text-base font-semibold tracking-[0.45em] text-[#7DD3FC] uppercase mb-4">
               INTELLIGENCE INFRASTRUCTURE
             </p>
           </motion.div>
-
-          {/* Title Statement */}
-          <motion.h2
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.0, delay: 0.15, ease: "easeOut" }}
-            className="font-heading font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-[46px] tracking-tight leading-[1.25] text-white mb-14"
-          >
-            The Future Of Intelligence May Not Belong To <br className="hidden md:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-400">
-              Giant Data Centers.
-            </span> <br />
-            It May Belong To{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4D7CFE] to-[#7DD3FC] text-glow-blue">
-              Connected Communities.
-            </span>
-          </motion.h2>
 
           {/* Small text */}
           <motion.p
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-            className="font-body text-base md:text-lg text-gray-400 tracking-wide mb-16 max-w-xl font-light"
+            transition={{ duration: 0.8, delay: 0.25, ease: "easeOut" }}
+            className="font-body text-base md:text-lg text-gray-400 tracking-wide mb-14 max-w-xl font-light"
           >
             Building Intelligence Through Connection
           </motion.p>

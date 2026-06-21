@@ -102,7 +102,7 @@ export default function Sectors() {
         </div>
 
         {/* Filtered Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 w-full mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full mb-16">
           <AnimatePresence mode="popLayout">
             {filteredSectors.map((sec, idx) => {
               const Icon = sec.icon;
@@ -117,24 +117,24 @@ export default function Sectors() {
                 >
                   <button
                     onClick={() => setSelectedSector(sec)}
-                    className="group block w-full h-full text-left glass-card glass-card-hover p-5 cursor-pointer"
+                    className="group block w-full h-full text-left glass-card glass-card-hover p-6 cursor-pointer"
                   >
                     {/* Icon */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-lg border border-white/10 bg-white/5 text-[#7DD3FC] flex items-center justify-center shrink-0">
-                        <Icon className="w-5 h-5" />
+                    <div className="flex items-center gap-4.5 mb-5">
+                      <div className="w-12 h-12 rounded-xl border border-white/10 bg-white/5 text-[#7DD3FC] flex items-center justify-center shrink-0">
+                        <Icon className="w-5.5 h-5.5" />
                       </div>
-                      <h3 className="font-heading font-bold text-sm text-white tracking-wider uppercase group-hover:text-[#7DD3FC] transition-colors duration-300">
+                      <h3 className="font-heading font-bold text-[15px] text-white tracking-wider uppercase group-hover:text-[#7DD3FC] transition-colors duration-300">
                         {sec.title}
                       </h3>
                     </div>
 
                     {/* Short Details */}
-                    <div className="border-t border-white/5 pt-3">
-                      <span className="font-heading text-[8px] font-extrabold tracking-widest text-gray-500 uppercase block mb-0.5">
+                    <div className="border-t border-white/5 pt-4">
+                      <span className="font-heading text-[9px] font-extrabold tracking-widest text-gray-500 uppercase block mb-1">
                         PROBLEM
                       </span>
-                      <p className="font-body text-[10px] text-gray-400 leading-normal font-light line-clamp-2">
+                      <p className="font-body text-[11.5px] text-gray-400 leading-relaxed font-light line-clamp-3">
                         {sec.problem}
                       </p>
                     </div>

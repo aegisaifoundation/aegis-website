@@ -336,5 +336,12 @@ export const SEARCH_INDEX: SearchItem[] = [
     description: "Core quote bridging the Hero and Vision sections.",
     targetId: "#vision",
     command: "Jump to Vision"
+  },
+  {
+    title: "The Age of Intelligence",
+    category: "Manifesto",
+    description: "Explore the era where intelligence itself becomes fundamental infrastructure.",
+    targetId: "#age-of-intelligence",
+    command: "Jump to Age of Intelligence"
   }
 ];
