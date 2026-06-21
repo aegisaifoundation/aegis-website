@@ -138,7 +138,7 @@ export default function SearchModal() {
         </div>
 
         {/* Results List */}
-        <div className="max-h-[360px] overflow-y-auto p-2 flex flex-col gap-1">
+        <div data-lenis-prevent className="max-h-[360px] overflow-y-auto p-2 flex flex-col gap-1">
           {filteredItems.length > 0 ? (
             filteredItems.map((item, idx) => {
               const isSelected = idx === selectedIndex;
