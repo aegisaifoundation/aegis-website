@@ -4,10 +4,11 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Activity, Landmark, Sprout, GraduationCap, Microscope, ShieldCheck, Factory, ShoppingCart, Zap, Truck, Phone, TreePine, Building2, Scale, Play, UserCheck, Home, Blocks, FlaskConical, X, ExternalLink, FileText } from "lucide-react";
+import { useCardContent } from "@/config/cardContent";
 
 interface SectorItem {
   title: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   problem: string;
   benefits: string;
   revenue: string;
@@ -18,6 +19,9 @@ interface SectorItem {
 export default function Sectors() {
   const [activeTab, setActiveTab] = useState<string>("All");
   const [selectedSector, setSelectedSector] = useState<SectorItem | null>(null);
+  const { sectors: savedSectors } = useCardContent();
+  const icons: Record<string, React.ComponentType<{ className?: string }>> = { Healthcare: Activity, Banking: Landmark, Agriculture: Sprout, Education: GraduationCap, Research: Microscope, Insurance: ShieldCheck, Manufacturing: Factory, Retail: ShoppingCart, Energy: Zap, Transportation: Truck, Telecom: Phone, Environment: TreePine, Government: Building2, Legal: Scale, Media: Play, HR: UserCheck, "Real Estate": Home, "Supply Chain": Blocks, Pharmaceuticals: FlaskConical };
+  const sectors: SectorItem[] = savedSectors.map((sector) => ({ ...sector, icon: icons[sector.title] || Blocks }));
 
   React.useEffect(() => {
     const handleSelectSector = (e: Event) => {
@@ -36,7 +40,7 @@ export default function Sectors() {
 
   const tabs = ["All", "Healthcare", "Banking", "Education", "Research", "Manufacturing", "Government", "Agriculture"];
 
-  const sectors: SectorItem[] = [
+  const defaultSectors: SectorItem[] = [
     { title: "Healthcare", icon: Activity, problem: "Data siloes impede accurate diagnoses.", benefits: "Privacy-preserving model fine-tuning.", revenue: "$240B potential size", category: "Healthcare", details: "Detailed diagnostic weight alignment specs and node hardware benchmarks for hospital installations. Aegis coordinates node enclaves to compute gradients homomorphically, ensuring zero patient record exposure." },
     { title: "Banking", icon: Landmark, problem: "Rampant transaction fraud leaks capital.", benefits: "Real-time outlier network alerts.", revenue: "$180B potential size", category: "Banking", details: "Federated transaction pattern modeling and secure homomorphic anomaly detection system data sheets. Leverages zero-knowledge proofs to coordinate fraud detection parameters across regional bank enclaves." },
     { title: "Agriculture", icon: Sprout, problem: "Erratic local crop yield yields.", benefits: "Localized soil & weather sensor models.", revenue: "$90B potential size", category: "Agriculture", details: "Distributed sensor node network details, local model weights adjustment schemas, and regional crop forecast charts based on decentralized satellite telemetry." },

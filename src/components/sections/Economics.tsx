@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Users, Sparkles, Coins, HelpCircle, Key, Globe2, FileText, Landmark, BadgeAlert, Cpu } from "lucide-react";
+import { useCardContent } from "@/config/cardContent";
 
 export default function Economics() {
   const loopStages = [
@@ -12,17 +13,8 @@ export default function Economics() {
     { title: "More Participants", desc: "Value returns attract further nodes.", icon: Users, position: "left" }
   ];
 
-  const models = [
-    { title: "Subscriptions", icon: Cpu, desc: "Flat rate plans for nodes accessing global consensus weights." },
-    { title: "Agent as a Service", icon: Sparkles, desc: "Lease domain-specific agents (Doctor, Legal, Banking) locally." },
-    { title: "API Access", icon: Key, desc: "Secure gateway endpoints for external applications querying models." },
-    { title: "White Label", icon: Globe2, desc: "Deploy custom partitioned networks for private enterprises." },
-    { title: "Marketplace", icon: Coins, desc: "Trade specialized LoRA adapters and custom knowledge graphs." },
-    { title: "Research Access", icon: FileText, desc: "Subsidized subscriptions for academic and non-profit centers." },
-    { title: "Government Contracts", icon: Landmark, desc: "Custom federal secure-node clusters and analytics layers." },
-    { title: "Certification", icon: BadgeAlert, desc: "Audit and verify third-party agent safety compliance states." },
-    { title: "Premium Intelligence", icon: HelpCircle, desc: "Access high-compute fine-tuned reasoning blocks." },
-  ];
+  const { revenue: models } = useCardContent();
+  const icons: Record<string, typeof Cpu> = { Subscriptions: Cpu, "Agent as a Service": Sparkles, "API Access": Key, "White Label": Globe2, Marketplace: Coins, "Research Access": FileText, "Government Contracts": Landmark, Certification: BadgeAlert, "Premium Intelligence": HelpCircle };
 
   return (
     <section 
@@ -139,7 +131,7 @@ export default function Economics() {
         {/* 9-Card Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-16">
           {models.map((mod, idx) => {
-            const Icon = mod.icon;
+            const Icon = icons[mod.title] || Coins;
             return (
               <motion.div
                 key={mod.title}
