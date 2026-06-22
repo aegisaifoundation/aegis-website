@@ -3,20 +3,11 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Microscope, Stethoscope, GraduationCap, Building, Shovel, Landmark, Scale, Factory, Heart, Truck } from "lucide-react";
+import { useCardContent } from "@/config/cardContent";
 
 export default function AgentEcosystem() {
-  const agents = [
-    { title: "Research Agent", icon: Microscope, desc: "Accelerates scientific discoveries, catalogs papers, and validates experimental models.", color: "text-blue-400 border-blue-500/20" },
-    { title: "Doctor Agent", icon: Stethoscope, desc: "Assists clinical diagnoses, parses medical history files, and structures patient care pathways.", color: "text-emerald-400 border-emerald-500/20" },
-    { title: "Education Agent", icon: GraduationCap, desc: "Personalizes learning curricula, answers academic questions, and generates interactive quizzes.", color: "text-amber-400 border-amber-500/20" },
-    { title: "Government Agent", icon: Building, desc: "Streamlines municipal filing processing, structures legislative databases, and audits public records.", color: "text-cyan-400 border-cyan-500/20" },
-    { title: "Agriculture Agent", icon: Shovel, desc: "Analyzes crop yields, tracks localized weather anomalies, and designs soil treatment regimes.", color: "text-teal-400 border-teal-500/20" },
-    { title: "Banking Agent", icon: Landmark, desc: "Identifies outlier transactions, reviews credit histories, and audits compliance policies.", color: "text-indigo-400 border-indigo-500/20" },
-    { title: "Legal Agent", icon: Scale, desc: "Indexes statutory precedents, checks case citations, and highlights contract clauses.", color: "text-purple-400 border-purple-500/20" },
-    { title: "Manufacturing Agent", icon: Factory, desc: "Predicts assembly machine breakdowns, monitors resource feeds, and maps logistics lines.", color: "text-pink-400 border-pink-500/20" },
-    { title: "Insurance Agent", icon: Heart, desc: "Models actuarial risk factors, automates claim filing pipelines, and checks policy limits.", color: "text-rose-400 border-rose-500/20" },
-    { title: "Supply Chain Agent", icon: Truck, desc: "Balances warehouse stock, optimizes delivery routes, and tracks vendor shipments.", color: "text-[#4D7CFE] border-[#4D7CFE]/20" },
-  ];
+  const { agents } = useCardContent();
+  const icons: Record<string, typeof Microscope> = { "Research Agent": Microscope, "Doctor Agent": Stethoscope, "Education Agent": GraduationCap, "Government Agent": Building, "Agriculture Agent": Shovel, "Banking Agent": Landmark, "Legal Agent": Scale, "Manufacturing Agent": Factory, "Insurance Agent": Heart, "Supply Chain Agent": Truck };
 
   return (
     <section 
@@ -60,7 +51,7 @@ export default function AgentEcosystem() {
         {/* Circular Grid Container of Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 w-full mb-16">
           {agents.map((agent, idx) => {
-            const Icon = agent.icon;
+            const Icon = icons[agent.title] || Microscope;
             return (
               <motion.div
                 key={agent.title}
@@ -70,7 +61,7 @@ export default function AgentEcosystem() {
                 transition={{ duration: 0.5, delay: idx * 0.05 }}
                 className="glass-card glass-card-hover p-6 flex flex-col items-center text-center group"
               >
-                <div className={`w-12 h-12 rounded-xl border flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 ${agent.color} bg-white/5`}>
+                <div className="w-12 h-12 rounded-xl border flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 text-[#7DD3FC] border-[#4D7CFE]/20 bg-white/5">
                   <Icon className="w-5.5 h-5.5" />
                 </div>
                 <h3 className="font-heading font-bold text-sm text-white tracking-wider mb-2 uppercase">

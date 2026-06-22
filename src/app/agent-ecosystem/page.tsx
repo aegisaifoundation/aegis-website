@@ -1,18 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Stethoscope, Scale, Microscope, Landmark, ChevronRight, Share2, ShieldCheck, Network, Activity, Database, Lock, BookOpen, Plus, Minus, RefreshCw, GraduationCap, Building, Shovel, Factory, Heart, Truck, Search, Cpu } from "lucide-react";
+import { ArrowLeft, Stethoscope, Scale, Microscope, Landmark, ChevronRight, Share2, ShieldCheck, Network, Activity, Database, Lock, BookOpen, Plus, Minus, GraduationCap, Building, Shovel, Factory, Heart, Truck, Search, Cpu } from "lucide-react";
 import Link from "next/link";
 import NetworkSphere from "@/components/3d/NetworkSphere";
 import { motion, AnimatePresence } from "framer-motion";
-
-interface Block {
-  height: number;
-  hash: string;
-  agent: string;
-  action: string;
-  timestamp: string;
-}
+import { useCardContent } from "@/config/cardContent";
 
 export default function AgentEcosystemPage() {
   const [activeStep, setActiveStep] = useState(0);
@@ -29,14 +22,6 @@ export default function AgentEcosystemPage() {
     avgLatencyMs: 142
   });
 
-  // Rolling block ledger state
-  const [blocks, setBlocks] = useState<Block[]>([
-    { height: 104285, hash: "0x8fa3...d91c", agent: "Doctor Agent", action: "Federated weights published", timestamp: "Just now" },
-    { height: 104284, hash: "0x3e12...b94f", agent: "Legal Agent", action: "Consent signatures verified", timestamp: "4s ago" },
-    { height: 104283, hash: "0x9c42...7ee1", agent: "Banking Agent", action: "Compute billing settled", timestamp: "8s ago" },
-    { height: 104282, hash: "0xf8a2...319b", agent: "Research Agent", action: "Data adaptation synced", timestamp: "12s ago" }
-  ]);
-
   // Telemetry real-time updates
   useEffect(() => {
     const timer = setInterval(() => {
@@ -48,44 +33,6 @@ export default function AgentEcosystemPage() {
       }));
     }, 2500);
     return () => clearInterval(timer);
-  }, []);
-
-  // Rolling Block Ledger updates
-  useEffect(() => {
-    const blockTimer = setInterval(() => {
-      const agents = ["Doctor Agent", "Legal Agent", "Research Agent", "Banking Agent", "Government Agent", "Supply Chain Agent", "Insurance Agent"];
-      const actions = [
-        "Anonymized telemetry synced",
-        "Consent signatures validated",
-        "Compute resource parameters update",
-        "Cross-node token adaptation finished",
-        "Consensus state block verified",
-        "Actuarial risk weights updated",
-        "Smart contract routing authorized"
-      ];
-      
-      const randomAgent = agents[Math.floor(Math.random() * agents.length)];
-      const randomAction = actions[Math.floor(Math.random() * actions.length)];
-      const randomHash = "0x" + Math.random().toString(16).substring(2, 6) + "..." + Math.random().toString(16).substring(2, 6);
-      
-      setBlocks((prev) => {
-        const nextHeight = prev[0].height + 1;
-        const newBlock = {
-          height: nextHeight,
-          hash: randomHash,
-          agent: randomAgent,
-          action: randomAction,
-          timestamp: "Just now"
-        };
-        const updatedPrev = prev.map((b, idx) => ({
-          ...b,
-          timestamp: `${(idx + 1) * 4}s ago`
-        }));
-        return [newBlock, ...updatedPrev.slice(0, 4)];
-      });
-    }, 4000);
-    
-    return () => clearInterval(blockTimer);
   }, []);
 
   const workflowStages = [
@@ -119,22 +66,9 @@ export default function AgentEcosystemPage() {
     }
   ];
 
-  const faqs = [
-    {
-      q: "How is data privacy maintained in cross-agent coordination?",
-      a: "AEGIS operates on a zero-trust architecture. Raw institutional data never leaves the local node boundary. Instead, nodes exchange anonymized parameter weights, mathematical tokens, and Zero-Knowledge Proofs (ZKPs) via cryptographic tunnels to achieve collaborative updates without exposing PII."
-    },
-    {
-      q: "What consensus engine powers the coordination state ledger?",
-      a: "The network uses a proprietary Byzantine Fault Tolerant (BFT) Proof-of-Authority consensus optimized for high-throughput microtransactions and low-latency state validation, keeping transaction response times under 150 milliseconds."
-    },
-    {
-      q: "How do institutions connect new specialized nodes to the ecosystem?",
-      a: "Institutions deploy the AEGIS Node Capsule on their local GPU hardware, complete local configuration adapters, and submit a cryptographic authorization request. Once verified by the coordination layer, the node registers its specialized agent class and begins coordinating."
-    }
-  ];
+  const { agentFaqs: faqs } = useCardContent();
 
-  const agentsData = [
+  const defaultAgentsData = [
     {
       title: "Research Agent",
       class: "AEGIS-RES-01",
@@ -286,6 +220,17 @@ export default function AgentEcosystemPage() {
       color: "text-[#4D7CFE] border-[#4D7CFE]/20 bg-[#4D7CFE]/5"
     }
   ];
+
+  const { agents } = useCardContent();
+  const agentIcons: Record<string, React.ComponentType<{ className?: string }>> = { "Research Agent": Microscope, "Doctor Agent": Stethoscope, "Education Agent": GraduationCap, "Government Agent": Building, "Agriculture Agent": Shovel, "Banking Agent": Landmark, "Legal Agent": Scale, "Manufacturing Agent": Factory, "Insurance Agent": Heart, "Supply Chain Agent": Truck };
+  const agentsData = agents.map((agent) => ({
+    ...agent,
+    icon: agentIcons[agent.title] || Cpu,
+    inputs: agent.inputs.split(",").map((item) => item.trim()).filter(Boolean),
+    coordination: agent.coordination.split(",").map((item) => item.trim()).filter(Boolean),
+    kpis: agent.kpis.split(";").map((item) => { const [label, value = ""] = item.split("|"); return { label: label.trim(), value: value.trim() }; }),
+    color: "text-[#7DD3FC] border-[#4D7CFE]/20 bg-[#4D7CFE]/5",
+  }));
 
   // Filter agents by search term
   const filteredAgents = agentsData.filter(agent => 
@@ -791,64 +736,6 @@ export default function AgentEcosystemPage() {
         </div>
       </section>
 
-      {/* Live Consensus block stream ticker */}
-      <section className="max-w-[80rem] mx-auto px-6 md:px-12 py-20 relative z-10 border-t border-white/5">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
-          <div className="text-left max-w-xl">
-            <span className="font-heading text-xs font-bold tracking-[0.2em] text-[#10B981] mb-3 block uppercase">
-              Consensus Ledger Stream
-            </span>
-            <h2 className="font-heading font-extrabold text-2xl sm:text-3xl tracking-tight text-white mb-2">
-              Cryptographic Block Audits
-            </h2>
-            <p className="font-body text-xs text-gray-400 leading-relaxed font-light">
-              Real-time audit stream showing blocks being confirmed by decentralized nodes. Each block certifies coordination state updates.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 px-4 py-2 border border-white/10 rounded-full bg-white/5 font-heading text-[10px] font-bold text-gray-400 uppercase tracking-wider shrink-0">
-            <RefreshCw className="w-3 h-3 text-[#10B981] animate-spin" /> Live Ticker Enabled
-          </div>
-        </div>
-
-        <div className="glass-card overflow-hidden border border-white/5 w-full">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left border-collapse min-w-[700px]">
-              <thead>
-                <tr className="border-b border-white/5 bg-white/[0.01]">
-                  <th className="p-4.5 font-heading text-[10px] font-bold text-gray-500 uppercase tracking-wider">Block Height</th>
-                  <th className="p-4.5 font-heading text-[10px] font-bold text-gray-500 uppercase tracking-wider">Block Hash</th>
-                  <th className="p-4.5 font-heading text-[10px] font-bold text-gray-500 uppercase tracking-wider">Signing Node</th>
-                  <th className="p-4.5 font-heading text-[10px] font-bold text-gray-500 uppercase tracking-wider">Coordination Event</th>
-                  <th className="p-4.5 font-heading text-[10px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="p-4.5 font-heading text-[10px] font-bold text-gray-500 uppercase tracking-wider">Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                <AnimatePresence initial={false}>
-                  {blocks.map((block) => (
-                    <tr 
-                      key={block.height} 
-                      className="border-b border-white/5 hover:bg-white/[0.01] transition-all"
-                    >
-                      <td className="p-4.5 text-xs font-bold text-white font-mono">{block.height.toLocaleString()}</td>
-                      <td className="p-4.5 text-xs text-gray-400 font-mono">{block.hash}</td>
-                      <td className="p-4.5 text-xs text-[#7DD3FC] font-semibold">{block.agent}</td>
-                      <td className="p-4.5 text-xs text-gray-300 font-light">{block.action}</td>
-                      <td className="p-4.5 text-xs">
-                        <span className="px-2.5 py-1 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          CONFIRMED
-                        </span>
-                      </td>
-                      <td className="p-4.5 text-xs text-gray-500 font-light">{block.timestamp}</td>
-                    </tr>
-                  ))}
-                </AnimatePresence>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
       {/* Accordion FAQ Section */}
       <section className="max-w-[50rem] mx-auto px-6 md:px-12 py-20 relative z-10 border-t border-white/5">
         <div className="text-center mb-12">
@@ -874,7 +761,7 @@ export default function AgentEcosystemPage() {
                 className="w-full p-5 flex items-center justify-between text-left cursor-pointer hover:bg-white/[0.01] transition-all"
               >
                 <span className="font-heading font-bold text-xs sm:text-sm tracking-wide text-white uppercase">
-                  {faq.q}
+                  {faq.question}
                 </span>
                 {openFaq === idx ? (
                   <Minus className="w-4 h-4 text-[#7DD3FC] shrink-0" />
@@ -892,7 +779,7 @@ export default function AgentEcosystemPage() {
                     transition={{ duration: 0.25 }}
                   >
                     <div className="p-5 pt-0 border-t border-white/[0.02] font-body text-xs text-gray-400 leading-relaxed font-light">
-                      {faq.a}
+                      {faq.answer}
                     </div>
                   </motion.div>
                 )}

@@ -3,19 +3,11 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Bot, Database, Search, Share2, Shield, Fingerprint, Layers, Cpu, Network } from "lucide-react";
+import { useCardContent } from "@/config/cardContent";
 
 export default function TechStack() {
-  const stack = [
-    { title: "Multi-Agent Systems", desc: "Collaborative, autonomous AI units executing complex multi-step reasoning cycles.", icon: Bot, spec: "Dynamic task delegation" },
-    { title: "RAG", desc: "Retrieval-Augmented Generation linking reasoning engines with secure context sources.", icon: Search, spec: "Semantic document vector indexing" },
-    { title: "Vector Databases", desc: "High-performance vector space engines optimized for semantic similarity queries.", icon: Database, spec: "Sub-millisecond retrieval speeds" },
-    { title: "Knowledge Graphs", desc: "Structured conceptual node maps connecting facts, relationships, and context.", icon: Network, spec: "Triple-store factual indexing" },
-    { title: "Federated Learning", desc: "Privacy-preserving collaborative training that compiles model updates locally.", icon: Share2, spec: "Zero-Knowledge model adjustments" },
-    { title: "Selective LoRA", desc: "Weight adaptation targeting specific transformer layers, minimizing overhead.", icon: Cpu, spec: "Parameter-efficient tuning" },
-    { title: "Secure Aggregation", desc: "Cryptographic consensus blending model gradients without weight exposure.", icon: Layers, spec: "Homomorphic encryption layers" },
-    { title: "Trust Engine", desc: "Adversarial shield analyzing queries and outputs for safety compliance.", icon: Shield, spec: "Real-time prompt protection" },
-    { title: "Blockchain Layer", desc: "Immutable distributed ledger verifying and logging node compute histories.", icon: Fingerprint, spec: "Smart-contract verified audits" },
-  ];
+  const { technology: stack } = useCardContent();
+  const icons: Record<string, typeof Bot> = { "Multi-Agent Systems": Bot, RAG: Search, "Vector Databases": Database, "Knowledge Graphs": Network, "Federated Learning": Share2, "Selective LoRA": Cpu, "Secure Aggregation": Layers, "Trust Engine": Shield, "Blockchain Layer": Fingerprint };
 
   return (
     <section 
@@ -59,7 +51,7 @@ export default function TechStack() {
         {/* Sequential Animation Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-16">
           {stack.map((item, idx) => {
-            const Icon = item.icon;
+            const Icon = icons[item.title] || Bot;
             return (
               <motion.div
                 key={item.title}
