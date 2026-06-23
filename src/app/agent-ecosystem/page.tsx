@@ -242,7 +242,7 @@ export default function AgentEcosystemPage() {
   return (
     <div className="min-h-screen bg-[#000000] text-white font-body selection:bg-[#4D7CFE]/30 selection:text-white relative overflow-hidden pb-32">
       {/* Subtle grid background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none z-0" />
       
       {/* Return to Home Header */}
       <header className="max-w-[80rem] mx-auto w-full px-6 md:px-12 pt-8 flex items-center justify-between relative z-20">
@@ -259,7 +259,7 @@ export default function AgentEcosystemPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-[60vh] flex flex-col items-center justify-center px-6 md:px-12 pt-16 pb-20">
+      <section className="relative min-h-[60vh] flex flex-col items-center justify-center px-6 md:px-12 pt-16 pb-20 overflow-hidden">
         <div className="max-w-4xl mx-auto text-center flex flex-col items-center relative z-10">
           <motion.span 
             initial={{ opacity: 0, y: 15 }}
@@ -291,7 +291,7 @@ export default function AgentEcosystemPage() {
         </div>
 
         {/* Dynamic Canvas Centerpiece */}
-        <div className="absolute inset-0 z-0 flex items-center justify-center opacity-65 pointer-events-none">
+        <div className="absolute inset-0 z-0 flex items-center justify-center opacity-65 pointer-events-none overflow-hidden">
           <NetworkSphere />
         </div>
       </section>

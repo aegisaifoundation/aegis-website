@@ -1,12 +1,15 @@
 "use client";
 
 import { useRef, useMemo, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 // Interactive Lat/Long Sphere Grid Component
 function LatLongSphere() {
   const groupRef = useRef<THREE.Group>(null);
+  const { size } = useThree();
+  const isMobile = size.width < 640;
+  const scale = isMobile ? 0.6 : 1.0;
   
   // Generate a clean latitude/longitude grid (no diagonals) for the sphere
   const sphereEdgesGeometry = useMemo(() => {
@@ -43,7 +46,7 @@ function LatLongSphere() {
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} scale={[scale, scale, scale]}>
       {/* Latitude / Longitude lines of the Earth */}
       <lineSegments geometry={sphereEdgesGeometry}>
         <lineBasicMaterial 
@@ -59,7 +62,7 @@ function LatLongSphere() {
 
 export default function NetworkSphere() {
   return (
-    <div className="three-canvas-container interactive-canvas">
+    <div className="three-canvas-container">
       <Canvas
         camera={{ position: [0, 0, 3.8], fov: 60 }}
         gl={{ antialias: true, alpha: true }}
