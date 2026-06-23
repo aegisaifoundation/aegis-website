@@ -1,13 +1,28 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Microscope, Stethoscope, GraduationCap, Building, Shovel, Landmark, Scale, Factory, Heart, Truck } from "lucide-react";
 import { useCardContent } from "@/config/cardContent";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function AgentEcosystem() {
   const { agents } = useCardContent();
-  const icons: Record<string, typeof Microscope> = { "Research Agent": Microscope, "Doctor Agent": Stethoscope, "Education Agent": GraduationCap, "Government Agent": Building, "Agriculture Agent": Shovel, "Banking Agent": Landmark, "Legal Agent": Scale, "Manufacturing Agent": Factory, "Insurance Agent": Heart, "Supply Chain Agent": Truck };
+  const { agents: agentsContent } = useGeneralContent();
+
+  const icons: Record<string, typeof Microscope> = { 
+    "Research Agent": Microscope, 
+    "Doctor Agent": Stethoscope, 
+    "Education Agent": GraduationCap, 
+    "Government Agent": Building, 
+    "Agriculture Agent": Shovel, 
+    "Banking Agent": Landmark, 
+    "Legal Agent": Scale, 
+    "Manufacturing Agent": Factory, 
+    "Insurance Agent": Heart, 
+    "Supply Chain Agent": Truck 
+  };
 
   return (
     <section 
@@ -26,7 +41,7 @@ export default function AgentEcosystem() {
             viewport={{ once: true }}
             className="font-heading text-xs font-bold tracking-[0.3em] text-[#4D7CFE] mb-4 block uppercase"
           >
-            THE NETWORK WORKFORCE
+            {agentsContent.badge}
           </motion.span>
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
@@ -35,7 +50,7 @@ export default function AgentEcosystem() {
             transition={{ delay: 0.1 }}
             className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white mb-6 leading-tight"
           >
-            Distributed Agent Ecosystem
+            {agentsContent.title}
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 15 }}
@@ -44,7 +59,7 @@ export default function AgentEcosystem() {
             transition={{ delay: 0.2 }}
             className="font-body text-base text-gray-400 font-light leading-relaxed"
           >
-            Specialized intelligent entities residing at local nodes, coordinating with other agents to address cross-domain institutional tasks.
+            {agentsContent.description}
           </motion.p>
         </div>
 

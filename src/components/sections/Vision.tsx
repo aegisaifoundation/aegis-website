@@ -1,16 +1,19 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Compass, AlertCircle, RefreshCw, Target } from "lucide-react";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function Vision() {
-  const visionCards = [
-    { title: "Problem", text: "Centralized AI concentrates power and compute control inside a few monopolistic gatekeepers.", icon: AlertCircle },
-    { title: "Paradox", text: "Scaling central nodes makes models incredibly powerful but fragile, biased, and inaccessible locally.", icon: RefreshCw },
-    { title: "Vision", text: "A cooperative public intelligence resource owned and operated by the global communities that use it.", icon: Compass },
-    { title: "Mission", text: "Build the secure coordination software layer that connects local nodes into a unified brain.", icon: Target },
-  ];
+  const { vision } = useGeneralContent();
+  const icons = [AlertCircle, RefreshCw, Compass, Target];
+
+  const cards = vision.cards.map((card, idx) => ({
+    ...card,
+    icon: icons[idx] || Compass,
+  }));
 
   return (
     <section 
@@ -28,7 +31,7 @@ export default function Vision() {
             viewport={{ once: true }}
             className="font-heading text-xs font-bold tracking-[0.3em] text-[#4D7CFE] mb-4 uppercase"
           >
-            THE AEGIS ARCHETYPE
+            {vision.badge}
           </motion.span>
           
           <motion.h2 
@@ -38,16 +41,23 @@ export default function Vision() {
             transition={{ delay: 0.1 }}
             className="font-heading font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight text-white mb-12 leading-tight"
           >
-            A Decentralized
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4D7CFE] to-[#7DD3FC] text-glow-blue">
-              Intelligence Network.
-            </span>
+            {vision.title.split("\n").map((line, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <br />}
+                {line.includes("Intelligence Network.") ? (
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4D7CFE] to-[#7DD3FC] text-glow-blue">
+                    {line}
+                  </span>
+                ) : (
+                  line
+                )}
+              </React.Fragment>
+            ))}
           </motion.h2>
 
           {/* 4-Card Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-10">
-            {visionCards.map((card, idx) => {
+            {cards.map((card, idx) => {
               const Icon = card.icon;
               return (
                 <motion.div
@@ -79,7 +89,7 @@ export default function Vision() {
             transition={{ delay: 0.4 }}
             className="font-heading font-bold text-base text-white mb-8 tracking-wide border-b-2 border-[#7DD3FC] pb-3"
           >
-            Collective intelligence emerges.
+            {vision.highlight}
           </motion.p>
 
           {/* Learn More */}
@@ -93,7 +103,7 @@ export default function Vision() {
               href="/the-vision"
               className="group inline-flex items-center gap-2 text-xs font-heading font-bold tracking-widest text-[#7DD3FC] hover:text-white transition-all duration-350"
             >
-              LEARN MORE ABOUT COLLECTIVE EMERGENCE
+              {vision.ctaText}
               <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </motion.div>

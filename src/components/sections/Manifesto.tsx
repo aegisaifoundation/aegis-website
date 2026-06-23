@@ -1,15 +1,12 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function Manifesto() {
-  const statements = [
-    "The future of AI may not belong only to giant data centers.",
-    "It may belong to connected communities.",
-    "Every institution becomes a node.",
-    "Every contribution improves the network.",
-    "Together they create something larger.",
-  ];
+  const { manifesto } = useGeneralContent();
+  const statements = manifesto.statements;
 
   return (
     <section 
@@ -28,7 +25,7 @@ export default function Manifesto() {
           viewport={{ once: true }}
           className="font-heading text-xs font-bold tracking-[0.4em] text-white mb-16 block uppercase"
         >
-          THE AEGIS MANIFESTO
+          {manifesto.badge}
         </motion.span>
 
         {/* Cinematic Typographic Reveal lines */}

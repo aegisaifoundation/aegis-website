@@ -1,21 +1,23 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowRight, Server, Zap, Coins, Users, Database } from "lucide-react";
+import { useGeneralContent } from "@/config/generalContent";
 
 // Dynamic import of 3D Server WebGL component
 const DataCenter3D = dynamic(() => import("../3d/DataCenter3D"), { ssr: false });
 
 export default function Problem() {
-  const requirements = [
-    { name: "Compute", icon: Server, desc: "Tens of thousands of specialized accelerators clustered in hyperscale facilities." },
-    { name: "Capital", icon: Coins, desc: "Billions of dollars required upfront to build and sustain operations." },
-    { name: "Energy", icon: Zap, desc: "Gigawatts of power drawing directly from critical grids." },
-    { name: "Talent", icon: Users, desc: "Concentration of specialized system engineers and researchers." },
-    { name: "Data", icon: Database, desc: "Aggregated global datasets siloed inside private network clouds." },
-  ];
+  const { problem } = useGeneralContent();
+  const icons = [Server, Coins, Zap, Users, Database];
+
+  const requirements = problem.requirements.map((req, idx) => ({
+    ...req,
+    icon: icons[idx] || Server,
+  }));
 
   return (
     <section 
@@ -35,7 +37,7 @@ export default function Problem() {
             viewport={{ once: true }}
             className="font-heading text-xs font-bold tracking-[0.3em] text-[#4D7CFE] mb-4 uppercase"
           >
-            THE CURRENT STATE
+            {problem.badge}
           </motion.span>
           
           <motion.h2 
@@ -45,10 +47,18 @@ export default function Problem() {
             transition={{ delay: 0.1 }}
             className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white mb-6 leading-tight"
           >
-            Intelligence Production<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-[#4D7CFE]">
-              Is Concentrated.
-            </span>
+            {problem.title.split("\n").map((line, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <br />}
+                {line.includes("Is Concentrated.") ? (
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-[#4D7CFE]">
+                    {line}
+                  </span>
+                ) : (
+                  line
+                )}
+              </React.Fragment>
+            ))}
           </motion.h2>
 
           <motion.p 
@@ -58,7 +68,7 @@ export default function Problem() {
             transition={{ delay: 0.2 }}
             className="font-body text-base text-gray-400 font-light leading-relaxed mb-8 max-w-lg"
           >
-            Advanced AI systems require massive clusters, creating single points of failure and monopolistic gatekeeping. The infrastructure to produce next-gen intelligence demands:
+            {problem.description}
           </motion.p>
 
           {/* Grid list of requirements */}
@@ -99,7 +109,7 @@ export default function Problem() {
             className="border-l-2 border-[#4D7CFE] pl-6 py-2 my-6 text-left"
           >
             <p className="font-heading font-medium text-lg italic text-gray-300 leading-relaxed mb-1">
-              &ldquo;The challenge is not intelligence. The challenge is infrastructure.&rdquo;
+              &ldquo;{problem.quote}&rdquo;
             </p>
           </motion.blockquote>
 
@@ -114,7 +124,7 @@ export default function Problem() {
               href="/the-problem"
               className="group inline-flex items-center gap-2 text-xs font-heading font-bold tracking-widest text-[#7DD3FC] hover:text-white transition-all duration-350"
             >
-              LEARN MORE ABOUT INFRASTRUCTURE CONSTRAINTS
+              {problem.ctaText}
               <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </motion.div>

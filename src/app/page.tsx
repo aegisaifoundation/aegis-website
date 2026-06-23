@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import LenisProvider from "@/components/LenisProvider";
 
@@ -22,7 +25,66 @@ import SearchModal from "@/components/SearchModal";
 import SidebarUX from "@/components/SidebarUX";
 import MobileExplore from "@/components/MobileExplore";
 
+import { db } from "@/config/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
+
+const sectionComponents: Record<string, React.ComponentType> = {
+  hero: Hero,
+  ageOfIntelligence: AgeOfIntelligence,
+  vision: Vision,
+  problem: Problem,
+  coreArchitecture: CoreArchitecture,
+  agents: AgentEcosystem,
+  technology: TechStack,
+  sectors: Sectors,
+  economics: Economics,
+  research: Research,
+  roadmap: Roadmap,
+  join: JoinNetwork,
+  manifesto: Manifesto,
+};
+
+const defaultHomeSections = [
+  { id: "hero", name: "Hero Section", visible: true },
+  { id: "ageOfIntelligence", name: "Age of Intelligence", visible: true },
+  { id: "vision", name: "Vision Section", visible: true },
+  { id: "problem", name: "Problem Section", visible: true },
+  { id: "coreArchitecture", name: "Core Architecture Flow", visible: true },
+  { id: "agents", name: "Agent Ecosystem Catalog", visible: true },
+  { id: "technology", name: "Tech Stack Modules", visible: true },
+  { id: "sectors", name: "Sectors Grid", visible: true },
+  { id: "economics", name: "Network Revenue Economics", visible: true },
+  { id: "roadmap", name: "Development Roadmap", visible: true },
+  { id: "research", name: "Research Publications List", visible: true },
+  { id: "join", name: "Join Network Form", visible: true },
+  { id: "manifesto", name: "Manifesto Cinematic Reveal", visible: true }
+];
+
 export default function Home() {
+  const [sections, setSections] = useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("aegis_homepage_layout");
+      if (saved) return JSON.parse(saved);
+    }
+    return defaultHomeSections;
+  });
+
+  useEffect(() => {
+    const docRef = doc(db, "website_pages", "home");
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.sections) {
+          setSections(data.sections);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("aegis_homepage_layout", JSON.stringify(data.sections));
+          }
+        }
+      }
+    }, (err) => console.warn("Layout sync failed:", err));
+    return unsubscribe;
+  }, []);
+
   return (
     <LenisProvider>
       {/* Background Universe */}
@@ -42,20 +104,18 @@ export default function Home() {
 
       {/* Main Content Layout (Standard Natural Scroll Flow) */}
       <main className="flex-1 relative z-10">
-        <Hero />
-        <HeroTransition />
-        <AgeOfIntelligence />
-        <Vision />
-        <Problem />
-        <CoreArchitecture />
-        <AgentEcosystem />
-        <TechStack />
-        <Sectors />
-        <Economics />
-        <Research />
-        <Roadmap />
-        <JoinNetwork />
-        <Manifesto />
+        {sections.map((section) => {
+          if (!section.visible) return null;
+          const Component = sectionComponents[section.id];
+          if (!Component) return null;
+          
+          return (
+            <div key={section.id}>
+              <Component />
+              {section.id === "hero" && <HeroTransition />}
+            </div>
+          );
+        })}
         <MinimalEnding />
       </main>
     </LenisProvider>

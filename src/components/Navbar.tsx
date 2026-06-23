@@ -3,13 +3,32 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Menu, X, ArrowRight, Search } from "lucide-react";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function Navbar() {
+  const { navbar } = useGeneralContent();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollYRef = useRef(0);
+
+  const [hasSession, setHasSession] = useState(false);
+
+  useEffect(() => {
+    const checkSession = () => {
+      const sess = localStorage.getItem("aegis_user_session_id");
+      setHasSession(!!sess);
+    };
+
+    checkSession();
+    
+    // Listen for custom login events
+    window.addEventListener("aegis-user-login-changed", checkSession);
+    return () => {
+      window.removeEventListener("aegis-user-login-changed", checkSession);
+    };
+  }, []);
 
   // Track page scrolls for nav styling & scroll direction reveal
   useEffect(() => {
@@ -102,7 +121,7 @@ export default function Navbar() {
             className="h-8 w-auto filter drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] transition-transform duration-300 group-hover:scale-105 group-hover:rotate-6"
           />
           <span className="font-heading font-extrabold text-lg tracking-[0.2em] bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">
-            AEGIS
+            {navbar.logoText}
           </span>
         </Link>
 
@@ -142,9 +161,24 @@ export default function Navbar() {
             href="#join"
             className="btn-glass flex items-center gap-1.5 text-[10px] lg:text-[9.5px] xl:text-[11px] font-heading font-bold tracking-widest text-white px-3.5 py-2 lg:px-3 lg:py-2 xl:px-4 xl:py-2.5 shrink-0 transition-all duration-300 hover:bg-gradient-to-r hover:from-[#4D7CFE] hover:to-[#7DD3FC] hover:border-transparent hover:text-white hover:shadow-[0_0_15px_rgba(77,124,254,0.3)] group"
           >
-            <span>JOIN NETWORK</span>
+            <span>{navbar.ctaText}</span>
             <ArrowRight className="w-3 h-3 transition-transform duration-300 group-hover:translate-x-0.5" />
           </Link>
+          {hasSession ? (
+            <Link
+              href="/dashboard"
+              className="text-[10px] lg:text-[9.5px] xl:text-[11px] font-heading font-bold tracking-widest text-[#7DD3FC] border border-[#7DD3FC]/25 hover:border-[#7DD3FC]/50 hover:bg-[#7DD3FC]/5 px-3.5 py-2 lg:px-3 lg:py-2 xl:px-4 xl:py-2.5 rounded-full transition-all shrink-0 cursor-pointer text-center"
+            >
+              DASHBOARD
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="text-[10px] lg:text-[9.5px] xl:text-[11px] font-heading font-bold tracking-widest text-[#7DD3FC] border border-[#7DD3FC]/25 hover:border-[#7DD3FC]/50 hover:bg-[#7DD3FC]/5 px-3.5 py-2 lg:px-3 lg:py-2 xl:px-4 xl:py-2.5 rounded-full transition-all shrink-0 cursor-pointer text-center"
+            >
+              LOGIN
+            </Link>
+          )}
         </div>
 
         {/* Mobile menu toggle */}
@@ -184,14 +218,34 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <Link
-          href="#join"
-          onClick={() => setIsMobileOpen(false)}
-          className="btn-glass flex items-center gap-2 text-sm font-heading font-semibold tracking-widest text-white px-8 py-4"
-        >
-          JOIN NETWORK
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+        <div className="flex flex-col gap-4 w-full px-8">
+          <Link
+            href="#join"
+            onClick={() => setIsMobileOpen(false)}
+            className="btn-glass flex items-center justify-center gap-2 text-sm font-heading font-semibold tracking-widest text-white py-4 w-full"
+          >
+            {navbar.ctaText}
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+          
+          {hasSession ? (
+            <Link
+              href="/dashboard"
+              onClick={() => setIsMobileOpen(false)}
+              className="text-center text-sm font-heading font-bold tracking-widest text-[#7DD3FC] border border-[#7DD3FC]/30 hover:bg-[#7DD3FC]/5 py-4 w-full rounded-xl transition-all"
+            >
+              USER DASHBOARD
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              onClick={() => setIsMobileOpen(false)}
+              className="text-center text-sm font-heading font-bold tracking-widest text-[#7DD3FC] border border-[#7DD3FC]/30 hover:bg-[#7DD3FC]/5 py-4 w-full rounded-xl transition-all"
+            >
+              PORTAL LOGIN
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

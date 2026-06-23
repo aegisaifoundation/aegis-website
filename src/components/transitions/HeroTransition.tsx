@@ -2,8 +2,11 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function HeroTransition() {
+  const { hero } = useGeneralContent();
+
   return (
     <section 
       className="relative w-full h-[60vh] flex flex-col items-center justify-center overflow-hidden border-y border-white/10 bg-transparent z-10"
@@ -29,7 +32,7 @@ export default function HeroTransition() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="font-heading font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-[#4D7CFE] max-w-4xl"
         >
-          "The Next Infrastructure Is Intelligence"
+          "{hero.cognitiveBridgeQuote}"
         </motion.h2>
       </div>
     </section>

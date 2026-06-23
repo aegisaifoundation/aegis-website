@@ -1,13 +1,27 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Bot, Database, Search, Share2, Shield, Fingerprint, Layers, Cpu, Network } from "lucide-react";
 import { useCardContent } from "@/config/cardContent";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function TechStack() {
   const { technology: stack } = useCardContent();
-  const icons: Record<string, typeof Bot> = { "Multi-Agent Systems": Bot, RAG: Search, "Vector Databases": Database, "Knowledge Graphs": Network, "Federated Learning": Share2, "Selective LoRA": Cpu, "Secure Aggregation": Layers, "Trust Engine": Shield, "Blockchain Layer": Fingerprint };
+  const { technology: techContent } = useGeneralContent();
+
+  const icons: Record<string, typeof Bot> = { 
+    "Multi-Agent Systems": Bot, 
+    RAG: Search, 
+    "Vector Databases": Database, 
+    "Knowledge Graphs": Network, 
+    "Federated Learning": Share2, 
+    "Selective LoRA": Cpu, 
+    "Secure Aggregation": Layers, 
+    "Trust Engine": Shield, 
+    "Blockchain Layer": Fingerprint 
+  };
 
   return (
     <section 
@@ -26,7 +40,7 @@ export default function TechStack() {
             viewport={{ once: true }}
             className="font-heading text-xs font-bold tracking-[0.3em] text-[#4D7CFE] mb-4 block uppercase"
           >
-            ENGINEERING SPECIFICATION
+            {techContent.badge}
           </motion.span>
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
@@ -35,7 +49,7 @@ export default function TechStack() {
             transition={{ delay: 0.1 }}
             className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white mb-6 leading-tight"
           >
-            Technology Stack
+            {techContent.title}
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 15 }}
@@ -44,7 +58,7 @@ export default function TechStack() {
             transition={{ delay: 0.2 }}
             className="font-body text-base text-gray-400 font-light leading-relaxed"
           >
-            An integrated stack of distributed systems, cryptographic security frameworks, and artificial intelligence models.
+            {techContent.description}
           </motion.p>
         </div>
 

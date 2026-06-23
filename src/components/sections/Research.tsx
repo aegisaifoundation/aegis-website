@@ -1,16 +1,26 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText, Layout, BookOpen, Download } from "lucide-react";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function Research() {
-  const documents = [
-    { title: "Whitepapers", filename: "AEGIS_Vision_Whitepaper.pdf", type: "Consensus Paper", icon: FileText, size: "4.2 MB", date: "Jan 2026", color: "hover:border-blue-500/30" },
-    { title: "Technical Papers", filename: "Federated_LoRA_Aggregation.pdf", type: "Core Technology", icon: BookOpen, size: "8.5 MB", date: "Mar 2026", color: "hover:border-cyan-500/30" },
-    { title: "Architecture Documents", filename: "Node_System_Specifications.pdf", type: "System Specs", icon: FileText, size: "12.1 MB", date: "Apr 2026", color: "hover:border-purple-500/30" },
-    { title: "Presentations", filename: "AEGIS_Deck_2026.pdf", type: "Intro Slides", icon: Layout, size: "15.4 MB", date: "May 2026", color: "hover:border-pink-500/30" },
-    { title: "Blogs", filename: "Why_Local_Nodes_Beat_Hyperscalers.md", type: "Network Essay", icon: BookOpen, size: "120 KB", date: "Jun 2026", color: "hover:border-emerald-500/30" },
+  const { research } = useGeneralContent();
+  const icons = [FileText, BookOpen, FileText, Layout, BookOpen];
+  const colors = [
+    "hover:border-blue-500/30",
+    "hover:border-cyan-500/30",
+    "hover:border-purple-500/30",
+    "hover:border-pink-500/30",
+    "hover:border-emerald-500/30"
   ];
+
+  const documents = research.documents.map((doc, idx) => ({
+    ...doc,
+    icon: icons[idx] || BookOpen,
+    color: colors[idx] || colors[0],
+  }));
 
   return (
     <section 
@@ -29,7 +39,7 @@ export default function Research() {
             viewport={{ once: true }}
             className="font-heading text-xs font-bold tracking-[0.3em] text-[#4D7CFE] mb-4 block uppercase"
           >
-            RESOURCE REPOSITORY
+            {research.badge}
           </motion.span>
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
@@ -38,7 +48,7 @@ export default function Research() {
             transition={{ delay: 0.1 }}
             className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white mb-6 leading-tight"
           >
-            Research & Documentation
+            {research.title}
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 15 }}
@@ -47,7 +57,7 @@ export default function Research() {
             transition={{ delay: 0.2 }}
             className="font-body text-base text-gray-400 font-light leading-relaxed"
           >
-            Read our scientific foundation papers, technical blueprints, architecture document specs, and essays.
+            {research.description}
           </motion.p>
         </div>
 
@@ -108,7 +118,7 @@ export default function Research() {
             href="/research"
             className="group inline-flex items-center gap-2 text-xs font-heading font-bold tracking-widest text-[#7DD3FC] hover:text-white transition-all duration-350"
           >
-            BROWSE COMPLETE REPOSITORY
+            {research.ctaText}
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
           </a>
         </motion.div>
