@@ -1,16 +1,26 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, User, Bot, Building2, ServerCrash, Cpu } from "lucide-react";
+import { ArrowRight, Bot, Building2, ServerCrash, Cpu } from "lucide-react";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function CoreArchitecture() {
-  const steps = [
-    { title: "Agents", desc: "Orchestrate local reasoning flows, tool usage, and custom sub-agents.", icon: Bot, color: "text-cyan-400 border-cyan-500/20 bg-cyan-500/5" },
-    { title: "Nodes", desc: "Compute locally using proprietary, secure data sources and local GPUs.", icon: Building2, color: "text-purple-400 border-purple-500/20 bg-purple-500/5" },
-    { title: "Aggregators", desc: "Compile zero-knowledge mathematical updates and models dynamically.", icon: ServerCrash, color: "text-[#4D7CFE] border-[#4D7CFE]/20 bg-[#4D7CFE]/5" },
-    { title: "AEGIS Core", desc: "The global coordination consensus that updates network layers.", icon: Cpu, color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/5" },
+  const { coreArchitecture } = useGeneralContent();
+  const icons = [Bot, Building2, ServerCrash, Cpu];
+  const colors = [
+    "text-cyan-400 border-cyan-500/20 bg-cyan-500/5",
+    "text-purple-400 border-purple-500/20 bg-purple-500/5",
+    "text-[#4D7CFE] border-[#4D7CFE]/20 bg-[#4D7CFE]/5",
+    "text-emerald-400 border-emerald-500/30 bg-emerald-500/5"
   ];
+
+  const steps = coreArchitecture.steps.map((step, idx) => ({
+    ...step,
+    icon: icons[idx] || Cpu,
+    color: colors[idx] || colors[3],
+  }));
 
   return (
     <section 
@@ -29,7 +39,7 @@ export default function CoreArchitecture() {
             viewport={{ once: true }}
             className="font-heading text-xs font-bold tracking-[0.3em] text-[#4D7CFE] mb-4 block uppercase"
           >
-            THE STACK
+            {coreArchitecture.badge}
           </motion.span>
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
@@ -38,7 +48,7 @@ export default function CoreArchitecture() {
             transition={{ delay: 0.1 }}
             className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white mb-6 leading-tight"
           >
-            Core Architecture
+            {coreArchitecture.title}
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 15 }}
@@ -47,7 +57,7 @@ export default function CoreArchitecture() {
             transition={{ delay: 0.2 }}
             className="font-body text-base text-gray-400 font-light leading-relaxed"
           >
-            The flow of intelligence through AEGIS: local requests remain local, weights compile cryptographically, and collective knowledge is distributed back to nodes.
+            {coreArchitecture.description}
           </motion.p>
         </div>
 
@@ -59,10 +69,18 @@ export default function CoreArchitecture() {
           className="glass-card glass-card-hover px-8 py-6 rounded-2xl mb-16 text-center max-w-2xl w-full"
         >
           <h3 className="font-heading font-extrabold text-xl sm:text-2xl tracking-wide text-white leading-relaxed">
-            No raw data moves.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4D7CFE] to-[#7DD3FC] text-glow-blue">
-              Only intelligence moves.
-            </span>
+            {coreArchitecture.statement.split("\n").map((line, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <br />}
+                {line.includes("Only intelligence moves.") ? (
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4D7CFE] to-[#7DD3FC] text-glow-blue">
+                    {line}
+                  </span>
+                ) : (
+                  line
+                )}
+              </React.Fragment>
+            ))}
           </h3>
         </motion.div>
 
@@ -116,7 +134,7 @@ export default function CoreArchitecture() {
             href="/core-architecture"
             className="group inline-flex items-center gap-2 text-xs font-heading font-bold tracking-widest text-[#7DD3FC] hover:text-white transition-all duration-350"
           >
-            LEARN MORE ABOUT THE DATA PROTOCOL
+            {coreArchitecture.ctaText}
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </motion.div>

@@ -81,12 +81,69 @@ export function readCardContent(): CardContent {
     return saved ? { ...defaultCardContent, ...saved } : defaultCardContent;
   } catch { return defaultCardContent; }
 }
-export function saveCardContent(content: CardContent) {
-  localStorage.setItem(storageKey, JSON.stringify(content));
-  window.dispatchEvent(new Event("aegis-card-content-changed"));
+
+import { db, auth } from "./firebase";
+import { doc, onSnapshot, setDoc, getDoc, collection } from "firebase/firestore";
+
+export async function saveCardContent(content: CardContent) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(storageKey, JSON.stringify(content));
+    window.dispatchEvent(new Event("aegis-card-content-changed"));
+  }
+  try {
+    const docRef = doc(db, "website_data", "cards");
+
+    // Version History backup
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const backupRef = doc(collection(db, "website_versions"));
+      await setDoc(backupRef, {
+        type: "cards",
+        content: snap.data(),
+        updatedBy: auth.currentUser?.email || "admin",
+        updatedAt: new Date().toISOString(),
+        timestamp: Date.now(),
+      });
+    }
+
+    await setDoc(docRef, content);
+  } catch (err) {
+    console.error("Firestore card content save and backup failed:", err);
+  }
 }
+
 export function useCardContent() {
-  const [content, setContent] = useState<CardContent>(defaultCardContent);
-  useEffect(() => { const sync = () => setContent(readCardContent()); sync(); window.addEventListener("aegis-card-content-changed", sync); return () => window.removeEventListener("aegis-card-content-changed", sync); }, []);
+  const [content, setContent] = useState<CardContent>(() => readCardContent());
+
+  useEffect(() => {
+    const sync = () => setContent(readCardContent());
+    window.addEventListener("aegis-card-content-changed", sync);
+
+    let unsubscribe = () => {};
+    try {
+      const docRef = doc(db, "website_data", "cards");
+      unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data() as CardContent;
+          setContent(data);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(storageKey, JSON.stringify(data));
+          }
+        } else {
+          setDoc(docRef, defaultCardContent).catch(console.error);
+        }
+      }, (err) => {
+        console.warn("Firestore card content listener warning:", err);
+      });
+    } catch (err) {
+      console.error("Firestore hook listener creation failed:", err);
+    }
+
+    return () => {
+      window.removeEventListener("aegis-card-content-changed", sync);
+      unsubscribe();
+    };
+  }, []);
+
   return content;
 }

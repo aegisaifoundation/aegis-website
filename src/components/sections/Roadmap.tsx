@@ -1,18 +1,28 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Calendar, Compass, Server, Network, ShieldCheck, Cpu } from "lucide-react";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function Roadmap() {
-  const steps = [
-    { year: "2026", title: "Prototype", desc: "Release of the AEGIS core engine, local node clients, and basic multi-agent validation.", icon: Calendar, color: "border-blue-500/20 text-blue-400" },
-    { year: "Q3 2026", title: "Pilot Institutions", desc: "Deploy private node installations across select university research centers.", icon: Compass, color: "border-cyan-500/20 text-cyan-400" },
-    { year: "2027", title: "100 Nodes", desc: "Establish network routes between research institutions, regional hospitals, and key servers.", icon: Server, color: "border-purple-500/20 text-purple-400" },
-    { year: "Q4 2027", title: "1000 Nodes", desc: "Scale global node connections, deploying LoRA updates and aggregating weights.", icon: Network, color: "border-pink-500/20 text-pink-400" },
-    { year: "2028", title: "Cross-sector Network", desc: "Unify sectors (Healthcare, Banking, Energy) into dynamic federated intelligence pipelines.", icon: ShieldCheck, color: "border-emerald-500/30 text-emerald-400" },
-    { year: "2029", title: "Intelligence Infrastructure", desc: "Achieve state coordinate consensus. AEGIS coordinates 10%+ of global compute nodes.", icon: Cpu, color: "border-amber-500/20 text-amber-400" },
+  const { roadmap } = useGeneralContent();
+  const icons = [Calendar, Compass, Server, Network, ShieldCheck, Cpu];
+  const colors = [
+    "border-blue-500/20 text-blue-400",
+    "border-cyan-500/20 text-cyan-400",
+    "border-purple-500/20 text-purple-400",
+    "border-pink-500/20 text-pink-400",
+    "border-emerald-500/30 text-emerald-400",
+    "border-amber-500/20 text-amber-400"
   ];
+
+  const steps = roadmap.steps.map((step, idx) => ({
+    ...step,
+    icon: icons[idx] || Cpu,
+    color: colors[idx] || colors[5],
+  }));
 
   return (
     <section 
@@ -31,7 +41,7 @@ export default function Roadmap() {
             viewport={{ once: true }}
             className="font-heading text-xs font-bold tracking-[0.3em] text-[#4D7CFE] mb-4 block uppercase"
           >
-            THE PLAN
+            {roadmap.badge}
           </motion.span>
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
@@ -40,7 +50,7 @@ export default function Roadmap() {
             transition={{ delay: 0.1 }}
             className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white mb-6 leading-tight"
           >
-            AEGIS Roadmap
+            {roadmap.title}
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 15 }}
@@ -49,7 +59,7 @@ export default function Roadmap() {
             transition={{ delay: 0.2 }}
             className="font-body text-base text-gray-400 font-light leading-relaxed"
           >
-            From prototype builds to a globally coordinated collective intelligence backbone.
+            {roadmap.description}
           </motion.p>
         </div>
 
@@ -71,7 +81,7 @@ export default function Roadmap() {
                    className="flex flex-col items-center lg:items-start text-center lg:text-left group"
                 >
                   {/* Timeline circle node */}
-                  <div className={`w-18 h-18 rounded-full glass-card flex items-center justify-center mb-6 shadow-xl ${step.color} relative z-10 group-hover:scale-105 transition-transform duration-300`}>
+                  <div className={`w-18 h-18 rounded-full glass-card flex items-center justify-center mb-6 shadow-xl ${step.color} relative z-10 group-hover:scale-105 transition-transform duration-350`}>
                     <Icon className="w-5.5 h-5.5" />
                     {/* Tiny index count badge */}
                     <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full border border-white/10 bg-white/5 font-heading text-[9px] font-bold flex items-center justify-center text-white">
@@ -108,7 +118,7 @@ export default function Roadmap() {
             href="/roadmap"
             className="group inline-flex items-center gap-2 text-xs font-heading font-bold tracking-widest text-[#7DD3FC] hover:text-white transition-all duration-350"
           >
-            LEARN MORE ABOUT DEVELOPMENT PIPELINES
+            {roadmap.ctaText}
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </motion.div>

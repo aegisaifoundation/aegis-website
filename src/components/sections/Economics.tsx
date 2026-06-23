@@ -1,11 +1,14 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Users, Sparkles, Coins, HelpCircle, Key, Globe2, FileText, Landmark, BadgeAlert, Cpu } from "lucide-react";
 import { useCardContent } from "@/config/cardContent";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function Economics() {
+  const { economics } = useGeneralContent();
   const loopStages = [
     { title: "More Participants", desc: "Institutions join the network as local nodes.", icon: Users, position: "top" },
     { title: "Better Intelligence", desc: "Shared weights improve overall models.", icon: Sparkles, position: "right" },
@@ -14,7 +17,17 @@ export default function Economics() {
   ];
 
   const { revenue: models } = useCardContent();
-  const icons: Record<string, typeof Cpu> = { Subscriptions: Cpu, "Agent as a Service": Sparkles, "API Access": Key, "White Label": Globe2, Marketplace: Coins, "Research Access": FileText, "Government Contracts": Landmark, Certification: BadgeAlert, "Premium Intelligence": HelpCircle };
+  const icons: Record<string, typeof Cpu> = { 
+    Subscriptions: Cpu, 
+    "Agent as a Service": Sparkles, 
+    "API Access": Key, 
+    "White Label": Globe2, 
+    Marketplace: Coins, 
+    "Research Access": FileText, 
+    "Government Contracts": Landmark, 
+    Certification: BadgeAlert, 
+    "Premium Intelligence": HelpCircle 
+  };
 
   return (
     <section 
@@ -118,13 +131,13 @@ export default function Economics() {
             viewport={{ once: true }}
             className="font-heading text-xs font-bold tracking-[0.3em] text-[#4D7CFE] mb-4 block uppercase"
           >
-            MONETIZATION LAYER
+            {economics.badge}
           </motion.span>
           <h2 className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white mb-6 leading-tight">
-            Revenue Model
+            {economics.title}
           </h2>
           <p className="font-body text-base text-gray-400 font-light leading-relaxed">
-            Sustaining the network requires a fair, transparent revenue distribution engine. Node providers receive payouts corresponding to verified work.
+            {economics.description}
           </p>
         </div>
 

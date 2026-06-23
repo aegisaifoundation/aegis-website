@@ -1,9 +1,13 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { ArrowUp } from "lucide-react";
+import { useGeneralContent } from "@/config/generalContent";
 
 export default function Footer() {
+  const { footer } = useGeneralContent();
+
   const links = [
     { name: "Vision", href: "#vision" },
     { name: "Architecture", href: "#architecture" },
@@ -70,16 +74,16 @@ export default function Footer() {
               className="h-10 w-auto filter drop-shadow-[0_0_12px_rgba(255,255,255,0.3)] transition-transform duration-300 group-hover:scale-105"
             />
             <span className="font-heading font-extrabold text-2xl tracking-[0.25em] bg-gradient-to-r from-white via-white to-gray-500 bg-clip-text text-transparent uppercase">
-              AEGIS
+              {footer.logoText}
             </span>
           </div>
           
           <span className="font-heading text-xs font-bold tracking-[0.25em] text-[#7DD3FC] mb-4 uppercase">
-            INTELLIGENCE INFRASTRUCTURE
+            {footer.subtitle}
           </span>
           
           <p className="font-body text-sm text-gray-400 font-light leading-relaxed">
-            Building Intelligence Through Connection. Supporting a global, distributed collective intelligence paradigm.
+            {footer.description}
           </p>
         </div>
 
@@ -113,8 +117,8 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="text-center border-t border-white/5 pt-8 w-full text-[10px] text-gray-600 font-body">
-          &copy; {new Date().getFullYear()} AEGIS PROTOCOL. ALL RIGHTS RESERVED. INVENTED BY CONNECTED COMMUNITIES.
+        <div className="text-center border-t border-white/5 pt-8 w-full text-[10px] text-gray-600 font-body animate-fade-in">
+          &copy; {new Date().getFullYear()} {footer.copyrightText}
         </div>
 
       </div>

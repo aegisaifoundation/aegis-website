@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useGeneralContent } from "@/config/generalContent";
 
 interface Metric {
   value: string;
@@ -21,18 +22,7 @@ interface Topic {
 }
 
 export default function AgeOfIntelligence() {
-  const metrics: Metric[] = [
-    { value: "100B+", label: "Connected Devices" },
-    { value: "1T+", label: "Daily Decisions" },
-    { value: "Infinite", label: "Knowledge Sources" },
-    { value: "24/7", label: "Distributed Intelligence" }
-  ];
-
-  const blocks: Block[] = [
-    { title: "INTELLIGENCE", desc: "Machines reason. Humans collaborate. Knowledge compounds." },
-    { title: "CONNECTION", desc: "Networks matter more than isolated systems." },
-    { title: "COORDINATION", desc: "The future belongs to systems capable of organizing intelligence." }
-  ];
+  const { ageOfIntelligence } = useGeneralContent();
 
   const topics: Topic[] = [
     { title: "The Problem", desc: "Why current intelligence systems remain centralized.", href: "#problem" },
@@ -80,10 +70,10 @@ export default function AgeOfIntelligence() {
         {/* Section Header */}
         <motion.div variants={itemVariants} className="w-full text-left">
           <span className="font-heading text-xs font-bold tracking-[0.3em] text-[#4D7CFE] block mb-4 uppercase">
-            THE AGE OF INTELLIGENCE
+            {ageOfIntelligence.badge}
           </span>
           <p className="font-heading text-lg sm:text-xl text-gray-400 font-light max-w-2xl leading-relaxed">
-            Human civilization is entering an era where intelligence itself becomes infrastructure.
+            {ageOfIntelligence.description}
           </p>
         </motion.div>
 
@@ -94,26 +84,27 @@ export default function AgeOfIntelligence() {
           <motion.div variants={itemVariants} className="lg:col-span-6 flex flex-col gap-10 max-w-[700px]">
             <div className="flex flex-col gap-4">
               <span className="font-heading text-[10px] font-extrabold tracking-[0.25em] text-[#4D7CFE] uppercase">
-                THE AGE OF INTELLIGENCE
+                {ageOfIntelligence.leftBadge}
               </span>
               <h2 className="font-heading font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight text-white leading-[1.1] max-w-2xl">
-                Intelligence Is Becoming<br />
-                A Fundamental Layer<br />
-                Of Civilization
+                {ageOfIntelligence.leftTitle.split("\n").map((line, i) => (
+                  <React.Fragment key={i}>
+                    {line}
+                    {i < ageOfIntelligence.leftTitle.split("\n").length - 1 && <br />}
+                  </React.Fragment>
+                ))}
               </h2>
             </div>
 
             <div className="flex flex-col gap-6 font-body text-[15px] sm:text-base text-gray-400 leading-relaxed font-light">
-              <p>Electricity transformed industry.</p>
-              <p>The internet transformed communication.</p>
-              <p>Artificial intelligence transforms decision-making.</p>
-              <p>The next infrastructure is not roads, cables, or data centers alone. It is intelligence itself.</p>
-              <p>Every organization, institution, and individual is becoming part of an emerging intelligence network.</p>
+              {ageOfIntelligence.paragraphs.split("\n").filter((p) => p.trim() !== "").map((para, idx) => (
+                <p key={idx}>{para}</p>
+              ))}
             </div>
 
             {/* Metrics Section */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 w-full">
-              {metrics.map((m) => (
+              {ageOfIntelligence.metrics.map((m) => (
                 <div 
                   key={m.label} 
                   className="flex flex-col gap-2 p-5 rounded-[32px] bg-white/[0.015] border border-white/[0.06] select-none text-left transition-colors duration-300 hover:border-white/10"
@@ -144,7 +135,7 @@ export default function AgeOfIntelligence() {
           variants={itemVariants}
           className="grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-white/5 pt-16 w-full"
         >
-          {blocks.map((b) => (
+          {ageOfIntelligence.blocks.map((b) => (
             <div key={b.title} className="flex flex-col gap-3 text-left">
               <h3 className="font-heading font-bold text-xs tracking-[0.3em] text-[#4D7CFE] uppercase">
                 {b.title}

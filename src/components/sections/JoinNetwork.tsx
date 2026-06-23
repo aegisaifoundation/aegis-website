@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Send, CheckCircle2 } from "lucide-react";
+import { useGeneralContent } from "@/config/generalContent";
+import { addNodeRequest } from "@/config/adminSubmissions";
 
 export default function JoinNetwork() {
+  const { joinNetwork } = useGeneralContent();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,11 +25,26 @@ export default function JoinNetwork() {
     if (!formData.name || !formData.email) return;
 
     setLoading(true);
-    // Simulate API database submission
+    // Persist request to admin dashboard
+    addNodeRequest({
+      name: formData.name,
+      email: formData.email,
+      country: formData.country,
+      institution: formData.institution,
+      role: formData.role,
+    });
+
     setTimeout(() => {
       setLoading(false);
       setSubmitted(true);
     }, 1500);
+  };
+
+  const getSuccessDesc = () => {
+    const desc = joinNetwork.successDesc || "Thank you, {name}. Our coordination aggregators will review your node request for {institution} and contact you soon.";
+    return desc
+      .replace("{name}", formData.name)
+      .replace("{institution}", formData.institution || "independent deployment");
   };
 
   return (
@@ -46,7 +64,7 @@ export default function JoinNetwork() {
             viewport={{ once: true }}
             className="font-heading text-xs font-bold tracking-[0.3em] text-[#4D7CFE] mb-4 block uppercase"
           >
-            PARTICIPATE
+            {joinNetwork.badge}
           </motion.span>
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
@@ -55,7 +73,7 @@ export default function JoinNetwork() {
             transition={{ delay: 0.1 }}
             className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white mb-6 leading-tight"
           >
-            Join The AEGIS Network
+            {joinNetwork.title}
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 15 }}
@@ -64,7 +82,7 @@ export default function JoinNetwork() {
             transition={{ delay: 0.2 }}
             className="font-body text-base text-gray-400 font-light leading-relaxed"
           >
-            Register your institution, spin up a secure compute node, or apply to join our core developer working groups.
+            {joinNetwork.description}
           </motion.p>
         </div>
 
@@ -171,7 +189,7 @@ export default function JoinNetwork() {
                     "PROV_SUBMISSION_ACTIVE..."
                   ) : (
                     <>
-                      SUBMIT APPLICATION
+                      {joinNetwork.submitText}
                       <Send className="w-3.5 h-3.5" />
                     </>
                   )}
@@ -187,10 +205,10 @@ export default function JoinNetwork() {
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
                 <h3 className="font-heading font-bold text-xl text-white tracking-wider mb-3">
-                  Application Received
+                  {joinNetwork.successTitle}
                 </h3>
                 <p className="font-body text-sm text-gray-400 font-light leading-relaxed max-w-sm mb-8">
-                  Thank you, <strong className="text-white">{formData.name}</strong>. Our coordination aggregators will review your node request for <strong className="text-white">{formData.institution || "independent deployment"}</strong> and contact you soon.
+                  {getSuccessDesc()}
                 </p>
                 <button
                   onClick={() => setSubmitted(false)}
