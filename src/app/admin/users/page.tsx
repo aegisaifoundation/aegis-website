@@ -219,17 +219,138 @@ export default function AdminUsersDirectory() {
   };
 
   const getRoleBadge = (role: string) => {
-    const styles: Record<string, string> = {
-      super_admin: "bg-red-500/10 text-red-400 border-red-500/20",
-      admin: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-      editor: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-      reviewer: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-      viewer: "bg-gray-500/10 text-gray-400 border-gray-500/20",
-    };
-    return styles[role] || "bg-gray-500/10 text-gray-400 border-gray-500/20";
+    let style = "bg-gray-500/10 text-gray-400 border-gray-500/20";
+    
+    const reds = ["super_admin", "ceo", "cto", "cfo", "coo", "cmo", "chro", "ciso", "cro", "cpo"];
+    const blues = ["admin", "co_admin", "vp_engineering", "engineering_manager", "project_manager", "program_manager", "operations_manager"];
+    const purples = ["editor", "reviewer", "content_writer", "brand_manager", "marketing_director", "digital_marketing_specialist"];
+    const cyans = ["chief_ai_officer", "ai_researcher", "ml_engineer", "federated_learning_engineer", "llm_engineer", "data_scientist", "mlops_engineer", "research_intern"];
+    const emeralds = ["backend_developer", "frontend_developer", "fullstack_developer", "mobile_developer", "devops_engineer", "qa_engineer", "system_engineer"];
+    const ambers = ["cloud_architect", "sre", "kubernetes_engineer", "network_engineer", "database_administrator", "infrastructure_operator"];
+    const pinks = ["product_manager", "product_owner", "business_analyst", "ux_researcher", "devrel_manager"];
+    const teals = ["security_architect", "penetration_tester", "soc_analyst", "compliance_officer", "privacy_officer", "security_officer", "node_auditor"];
+    const yellow = ["finance_manager", "accountant", "financial_analyst", "payroll_team", "investor_relations", "billing_manager"];
+    const orange = ["hr_manager", "recruiter", "talent_acquisition_specialist", "learning_development_team", "employee_relations_team"];
+    const rose = ["general_counsel", "legal_officer", "contract_manager", "compliance_manager", "data_protection_officer", "compliance_counsel"];
+    const fuchsias = ["researcher", "research_manager", "research_director", "data_curator"];
+
+    if (reds.includes(role)) style = "bg-red-500/10 text-red-400 border-red-500/20";
+    else if (blues.includes(role)) style = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+    else if (purples.includes(role)) style = "bg-purple-500/10 text-purple-400 border-purple-500/20";
+    else if (cyans.includes(role)) style = "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+    else if (emeralds.includes(role)) style = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+    else if (ambers.includes(role)) style = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+    else if (pinks.includes(role)) style = "bg-pink-500/10 text-pink-400 border-pink-500/20";
+    else if (teals.includes(role)) style = "bg-teal-500/10 text-teal-400 border-teal-500/20";
+    else if (yellow.includes(role)) style = "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
+    else if (orange.includes(role)) style = "bg-orange-500/10 text-orange-400 border-orange-500/20";
+    else if (rose.includes(role)) style = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+    else if (fuchsias.includes(role)) style = "bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20";
+
+    return style;
   };
 
   const isAuthorized = currentUserProfile && (currentUserProfile.role === "super_admin" || currentUserProfile.role === "admin");
+
+  const ROLES_LIST = [
+    { value: "super_admin", label: "Super Admin" },
+    { value: "admin", label: "Admin" },
+    { value: "co_admin", label: "Co-Admin" },
+    // Executive Leadership
+    { value: "ceo", label: "CEO" },
+    { value: "cto", label: "CTO" },
+    { value: "coo", label: "COO" },
+    { value: "cfo", label: "CFO" },
+    { value: "cmo", label: "CMO" },
+    { value: "chro", label: "CHRO" },
+    { value: "ciso", label: "CISO" },
+    // Technology
+    { value: "chief_ai_officer", label: "Chief AI Officer" },
+    { value: "vp_engineering", label: "VP Engineering" },
+    { value: "engineering_manager", label: "Engineering Manager" },
+    { value: "ai_researcher", label: "AI Research Scientist" },
+    { value: "ml_engineer", label: "Machine Learning Engineer" },
+    { value: "federated_learning_engineer", label: "Federated Learning Engineer" },
+    { value: "llm_engineer", label: "LLM Engineer" },
+    { value: "data_scientist", label: "Data Scientist" },
+    { value: "mlops_engineer", label: "MLOps Engineer" },
+    { value: "backend_developer", label: "Backend Developer" },
+    { value: "frontend_developer", label: "Frontend Developer" },
+    { value: "fullstack_developer", label: "Full Stack Developer" },
+    { value: "mobile_developer", label: "Mobile Developer" },
+    { value: "devops_engineer", label: "DevOps Engineer" },
+    { value: "qa_engineer", label: "QA Engineer" },
+    { value: "cloud_architect", label: "Cloud Architect" },
+    { value: "sre", label: "SRE" },
+    { value: "kubernetes_engineer", label: "Kubernetes Engineer" },
+    { value: "network_engineer", label: "Network Engineer" },
+    { value: "database_administrator", label: "Database Administrator" },
+    { value: "system_engineer", label: "System Engineer" },
+    // Product
+    { value: "cpo", label: "Chief Product Officer" },
+    { value: "product_manager", label: "Product Manager" },
+    { value: "product_owner", label: "Product Owner" },
+    { value: "business_analyst", label: "Business Analyst" },
+    { value: "ux_researcher", label: "UX Researcher" },
+    // Security
+    { value: "security_architect", label: "Security Architect" },
+    { value: "penetration_tester", label: "Penetration Tester" },
+    { value: "soc_analyst", label: "SOC Analyst" },
+    { value: "compliance_officer", label: "Compliance Officer" },
+    { value: "privacy_officer", label: "Privacy Officer" },
+    // Sales & Business Development
+    { value: "cro", label: "Chief Revenue Officer" },
+    { value: "enterprise_sales_manager", label: "Enterprise Sales Manager" },
+    { value: "solution_architect", label: "Solution Architect" },
+    { value: "business_development_manager", label: "Business Development Manager" },
+    { value: "account_manager", label: "Account Manager" },
+    // Marketing
+    { value: "marketing_director", label: "Marketing Director" },
+    { value: "digital_marketing_specialist", label: "Digital Marketing Specialist" },
+    { value: "content_writer", label: "Content Writer" },
+    { value: "brand_manager", label: "Brand Manager" },
+    { value: "community_manager", label: "Community Manager" },
+    // Operations
+    { value: "operations_manager", label: "Operations Manager" },
+    { value: "program_manager", label: "Program Manager" },
+    { value: "project_manager", label: "Project Manager" },
+    { value: "vendor_management", label: "Vendor Management" },
+    { value: "procurement_team", label: "Procurement Team" },
+    // Finance
+    { value: "finance_manager", label: "Finance Manager" },
+    { value: "accountant", label: "Accountant" },
+    { value: "financial_analyst", label: "Financial Analyst" },
+    { value: "payroll_team", label: "Payroll Team" },
+    { value: "investor_relations", label: "Investor Relations" },
+    // HR
+    { value: "hr_manager", label: "HR Manager" },
+    { value: "recruiter", label: "Recruiter" },
+    { value: "talent_acquisition_specialist", label: "Talent Acquisition Specialist" },
+    { value: "learning_development_team", label: "Learning & Development Team" },
+    { value: "employee_relations_team", label: "Employee Relations Team" },
+    // Legal
+    { value: "general_counsel", label: "General Counsel" },
+    { value: "legal_officer", label: "Legal Officer" },
+    { value: "contract_manager", label: "Contract Manager" },
+    { value: "compliance_manager", label: "Compliance Manager" },
+    { value: "data_protection_officer", label: "Data Protection Officer" },
+    // Legacy / Other
+    { value: "editor", label: "Editor" },
+    { value: "reviewer", label: "Reviewer" },
+    { value: "viewer", label: "Viewer" },
+    { value: "node_auditor", label: "Node Auditor" },
+    { value: "billing_manager", label: "Billing Manager" },
+    { value: "research_director", label: "Research Director" },
+    { value: "support_agent", label: "Support Agent" },
+    { value: "security_officer", label: "Security Officer" },
+    { value: "data_curator", label: "Data Curator" },
+    { value: "devrel_manager", label: "DevRel Manager" },
+    { value: "governance_delegate", label: "Governance Delegate" },
+    { value: "infrastructure_operator", label: "Infrastructure Operator" },
+    { value: "compliance_counsel", label: "Compliance Counsel" },
+    { value: "researcher", label: "Researcher" },
+    { value: "research_manager", label: "Research Manager" }
+  ];
 
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto flex flex-col gap-8 font-body">
@@ -279,12 +400,11 @@ export default function AdminUsersDirectory() {
                 onChange={(e) => setNewRole(e.target.value as UserRole)}
                 className="w-full rounded-lg bg-white/5 border border-white/10 p-3 text-xs text-white outline-none focus:border-[#4D7CFE] cursor-pointer"
               >
-                <option value="viewer">Viewer (Read Only)</option>
-                <option value="reviewer">Reviewer (Approve Changes)</option>
-                <option value="editor">Editor (Write Content)</option>
-                <option value="co_admin">Co-Admin</option>
-                <option value="admin">Admin (Website + Nodes)</option>
-                <option value="super_admin">Super Admin (Full Access)</option>
+                {ROLES_LIST.map((role) => (
+                  <option key={role.value} value={role.value}>
+                    {role.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -365,12 +485,11 @@ export default function AdminUsersDirectory() {
                             onChange={(e) => handleChangeRole(u.uid, u.email, e.target.value as UserRole)}
                             className="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white outline-none cursor-pointer"
                           >
-                            <option value="viewer">Viewer</option>
-                            <option value="reviewer">Reviewer</option>
-                            <option value="editor">Editor</option>
-                            <option value="co_admin">Co-Admin</option>
-                            <option value="admin">Admin</option>
-                            <option value="super_admin">Super Admin</option>
+                            {ROLES_LIST.map((role) => (
+                              <option key={role.value} value={role.value}>
+                                {role.label}
+                              </option>
+                            ))}
                           </select>
                         ) : (
                           <span className={`inline-block border text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${getRoleBadge(u.role || "node_operator")}`}>

@@ -81,7 +81,7 @@ export default function Economics() {
             <div className="w-10 h-10 rounded-full border border-[#4D7CFE]/20 bg-[#4D7CFE]/5 text-[#7DD3FC] flex items-center justify-center mb-2 shadow-lg">
               <Users className="w-4.5 h-4.5" />
             </div>
-            <h4 className="font-heading font-bold text-xs text-white tracking-wider uppercase mb-1">More Participants</h4>
+            <h3 className="font-heading font-bold text-xs text-white tracking-wider uppercase mb-1">More Participants</h3>
             <p className="font-body text-[9px] text-gray-400 font-light">Nodes join the network</p>
           </div>
 
@@ -90,7 +90,7 @@ export default function Economics() {
             <div className="w-10 h-10 rounded-full border border-purple-500/20 bg-purple-500/5 text-purple-400 flex items-center justify-center mb-2 shadow-lg">
               <Sparkles className="w-4.5 h-4.5" />
             </div>
-            <h4 className="font-heading font-bold text-xs text-white tracking-wider uppercase mb-1">Better Intelligence</h4>
+            <h3 className="font-heading font-bold text-xs text-white tracking-wider uppercase mb-1">Better Intelligence</h3>
             <p className="font-body text-[9px] text-gray-400 font-light">Weights improve locally</p>
           </div>
 
@@ -99,7 +99,7 @@ export default function Economics() {
             <div className="w-10 h-10 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 flex items-center justify-center mb-2 shadow-lg">
               <Coins className="w-4.5 h-4.5" />
             </div>
-            <h4 className="font-heading font-bold text-xs text-white tracking-wider uppercase mb-1">More Value</h4>
+            <h3 className="font-heading font-bold text-xs text-white tracking-wider uppercase mb-1">More Value</h3>
             <p className="font-body text-[9px] text-gray-400 font-light">Compounding yields returns</p>
           </div>
 
@@ -108,7 +108,7 @@ export default function Economics() {
             <div className="w-10 h-10 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 flex items-center justify-center mb-2 shadow-lg">
               <Users className="w-4.5 h-4.5" />
             </div>
-            <h4 className="font-heading font-bold text-xs text-white tracking-wider uppercase mb-1">More Participants</h4>
+            <h3 className="font-heading font-bold text-xs text-white tracking-wider uppercase mb-1">More Participants</h3>
             <p className="font-body text-[9px] text-gray-400 font-light">Value attracts nodes</p>
           </div>
         </div>

@@ -6,7 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { 
   ArrowLeft, Lock, LogOut, RotateCcw, LayoutDashboard, Edit, 
   Users, History, Image, Mail, Server, BookOpen, Settings, 
-  ClipboardCheck, Bell, Shield, Check, User
+  ClipboardCheck, Bell, Shield, Check, User,
+  KeyRound, Activity, BarChart3, Scale, HelpCircle, Terminal, 
+  Briefcase, AlertOctagon, FileText
 } from "lucide-react";
 import { defaultCardContent, saveCardContent } from "@/config/cardContent";
 import { defaultGeneralContent, saveGeneralContent } from "@/config/generalContent";
@@ -167,18 +169,91 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Contact Messages", href: "/admin/messages", icon: Mail, role: "reviewer" },
     { name: "Activity Logs", href: "/admin/logs", icon: History, role: "admin" },
     { name: "Site Settings", href: "/admin/settings", icon: Settings, role: "admin" },
+    { name: "API Token Manager", href: "/admin/tokens", icon: KeyRound, role: "security_officer" },
+    { name: "Network Diagnostics", href: "/admin/diagnostics", icon: Activity, role: "node_auditor" },
+    { name: "Revenue & Audits", href: "/admin/analytics", icon: BarChart3, role: "billing_manager" },
+    { name: "DAO Governance", href: "/admin/governance", icon: Scale, role: "governance_delegate" },
+    { name: "Helpdesk Support", href: "/admin/support", icon: HelpCircle, role: "support_agent" },
+    { name: "Operations Console", href: "/admin/console", icon: Terminal, role: "infrastructure_operator" },
+    { name: "Partners Index", href: "/admin/partners", icon: Briefcase, role: "devrel_manager" },
+    { name: "Alerts Manager", href: "/admin/alerts", icon: AlertOctagon, role: "node_auditor" },
+    { name: "Version Changelog", href: "/admin/changelog", icon: FileText, role: "infrastructure_operator" },
+    // Divisional Hubs
+    { 
+      name: "Executive Suite Hub", 
+      href: "/admin/executive-hub", 
+      icon: Shield, 
+      role: ["super_admin", "admin", "co_admin", "ceo", "cto", "coo", "cfo", "cmo", "chro", "ciso"] 
+    },
+    { 
+      name: "Tech & AI Division Hub", 
+      href: "/admin/tech-hub", 
+      icon: Terminal, 
+      role: ["super_admin", "admin", "co_admin", "ceo", "cto", "chief_ai_officer", "ai_researcher", "ml_engineer", "federated_learning_engineer", "llm_engineer", "data_scientist", "mlops_engineer", "research_intern", "vp_engineering", "engineering_manager", "backend_developer", "frontend_developer", "fullstack_developer", "mobile_developer", "devops_engineer", "qa_engineer", "cloud_architect", "sre", "kubernetes_engineer", "network_engineer", "database_administrator", "system_engineer", "node_auditor", "infrastructure_operator"] 
+    },
+    { 
+      name: "Product & UX Hub", 
+      href: "/admin/product-hub", 
+      icon: Edit, 
+      role: ["super_admin", "admin", "co_admin", "ceo", "cpo", "product_manager", "product_owner", "business_analyst", "ux_researcher", "frontend_developer"] 
+    },
+    { 
+      name: "Security & Auditing Hub", 
+      href: "/admin/security-hub", 
+      icon: Lock, 
+      role: ["super_admin", "admin", "co_admin", "ceo", "ciso", "security_architect", "penetration_tester", "soc_analyst", "compliance_officer", "privacy_officer", "security_officer", "node_auditor"] 
+    },
+    { 
+      name: "Sales & Marketing Hub", 
+      href: "/admin/sales-hub", 
+      icon: Briefcase, 
+      role: ["super_admin", "admin", "co_admin", "ceo", "cro", "cmo", "enterprise_sales_manager", "solution_architect", "business_development_manager", "account_manager", "marketing_director", "digital_marketing_specialist", "content_writer", "brand_manager", "community_manager", "devrel_manager"] 
+    },
+    { 
+      name: "Operations & Finance Hub", 
+      href: "/admin/operations-hub", 
+      icon: BarChart3, 
+      role: ["super_admin", "admin", "co_admin", "ceo", "coo", "cfo", "operations_manager", "program_manager", "project_manager", "vendor_management", "procurement_team", "finance_manager", "accountant", "financial_analyst", "payroll_team", "investor_relations", "billing_manager"] 
+    },
+    { 
+      name: "HR & Legal Suite Hub", 
+      href: "/admin/hr-hub", 
+      icon: Users, 
+      role: ["super_admin", "admin", "co_admin", "ceo", "chro", "hr_manager", "recruiter", "talent_acquisition_specialist", "learning_development_team", "employee_relations_team", "general_counsel", "legal_officer", "contract_manager", "compliance_manager", "data_protection_officer", "compliance_counsel"] 
+    },
   ];
 
   // Role Badge Styling helper
   const getRoleBadge = (role: string) => {
-    const styles: Record<string, string> = {
-      super_admin: "bg-red-500/10 text-red-400 border-red-500/20",
-      admin: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-      editor: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-      reviewer: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-      viewer: "bg-gray-500/10 text-gray-400 border-gray-500/20",
-    };
-    return styles[role] || "bg-gray-500/10 text-gray-400 border-gray-500/20";
+    let style = "bg-gray-500/10 text-gray-400 border-gray-500/20";
+    
+    const reds = ["super_admin", "ceo", "cto", "cfo", "coo", "cmo", "chro", "ciso", "cro", "cpo"];
+    const blues = ["admin", "co_admin", "vp_engineering", "engineering_manager", "project_manager", "program_manager", "operations_manager"];
+    const purples = ["editor", "reviewer", "content_writer", "brand_manager", "marketing_director", "digital_marketing_specialist"];
+    const cyans = ["chief_ai_officer", "ai_researcher", "ml_engineer", "federated_learning_engineer", "llm_engineer", "data_scientist", "mlops_engineer", "research_intern"];
+    const emeralds = ["backend_developer", "frontend_developer", "fullstack_developer", "mobile_developer", "devops_engineer", "qa_engineer", "system_engineer"];
+    const ambers = ["cloud_architect", "sre", "kubernetes_engineer", "network_engineer", "database_administrator", "infrastructure_operator"];
+    const pinks = ["product_manager", "product_owner", "business_analyst", "ux_researcher", "devrel_manager"];
+    const teals = ["security_architect", "penetration_tester", "soc_analyst", "compliance_officer", "privacy_officer", "security_officer", "node_auditor"];
+    const yellow = ["finance_manager", "accountant", "financial_analyst", "payroll_team", "investor_relations", "billing_manager"];
+    const orange = ["hr_manager", "recruiter", "talent_acquisition_specialist", "learning_development_team", "employee_relations_team"];
+    const rose = ["general_counsel", "legal_officer", "contract_manager", "compliance_manager", "data_protection_officer", "compliance_counsel"];
+    const fuchsias = ["researcher", "research_manager", "research_director", "data_curator"];
+
+    if (reds.includes(role)) style = "bg-red-500/10 text-red-400 border-red-500/20";
+    else if (blues.includes(role)) style = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+    else if (purples.includes(role)) style = "bg-purple-500/10 text-purple-400 border-purple-500/20";
+    else if (cyans.includes(role)) style = "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+    else if (emeralds.includes(role)) style = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+    else if (ambers.includes(role)) style = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+    else if (pinks.includes(role)) style = "bg-pink-500/10 text-pink-400 border-pink-500/20";
+    else if (teals.includes(role)) style = "bg-teal-500/10 text-teal-400 border-teal-500/20";
+    else if (yellow.includes(role)) style = "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
+    else if (orange.includes(role)) style = "bg-orange-500/10 text-orange-400 border-orange-500/20";
+    else if (rose.includes(role)) style = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+    else if (fuchsias.includes(role)) style = "bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20";
+
+    return style;
   };
 
   if (checking) {

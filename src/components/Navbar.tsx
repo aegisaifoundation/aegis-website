@@ -118,6 +118,7 @@ export default function Navbar() {
           <img
             src="/assets/logo.png"
             alt="AEGIS Logo"
+            fetchPriority="high"
             className="h-8 w-auto filter drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] transition-transform duration-300 group-hover:scale-105 group-hover:rotate-6"
           />
           <span className="font-heading font-extrabold text-lg tracking-[0.2em] bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">

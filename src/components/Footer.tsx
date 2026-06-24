@@ -71,6 +71,7 @@ export default function Footer() {
             <img
               src="/assets/logo.png"
               alt="AEGIS Logo"
+              loading="lazy"
               className="h-10 w-auto filter drop-shadow-[0_0_12px_rgba(255,255,255,0.3)] transition-transform duration-300 group-hover:scale-105"
             />
             <span className="font-heading font-extrabold text-2xl tracking-[0.25em] bg-gradient-to-r from-white via-white to-gray-500 bg-clip-text text-transparent uppercase">

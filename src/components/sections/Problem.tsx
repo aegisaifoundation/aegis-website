@@ -88,9 +88,9 @@ export default function Problem() {
                     <Icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-heading font-semibold text-sm tracking-wider text-white uppercase mb-1">
+                    <h3 className="font-heading font-semibold text-sm tracking-wider text-white uppercase mb-1">
                       {req.name}
-                    </h4>
+                    </h3>
                     <p className="font-body text-xs text-gray-400 font-light">
                       {req.desc}
                     </p>

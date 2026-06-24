@@ -1,0 +1,319 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Check if user is logged in
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+
+    // Get user role from admins collection
+    function getUserRole() {
+      return get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role;
+    }
+
+    // Users allowed to edit general content
+    function canEdit() {
+      return isLoggedIn() && (
+        getUserRole() == 'super_admin' ||
+        getUserRole() == 'admin' ||
+        getUserRole() == 'co_admin' ||
+        getUserRole() == 'editor' ||
+        getUserRole() == 'frontend_developer' ||
+        getUserRole() == 'cto' ||
+        getUserRole() == 'cpo'
+      );
+    }
+
+    // Administrative users
+    function isAdmin() {
+      return isLoggedIn() && (
+        getUserRole() == 'super_admin' ||
+        getUserRole() == 'admin' ||
+        getUserRole() == 'co_admin'
+      );
+    }
+
+    // Helper validation checks for divisional groups
+    function isExec() {
+      return isLoggedIn() && (
+        getUserRole() == 'super_admin' || getUserRole() == 'admin' || getUserRole() == 'co_admin' ||
+        getUserRole() == 'ceo' || getUserRole() == 'cto' || getUserRole() == 'coo' || 
+        getUserRole() == 'cfo' || getUserRole() == 'cmo' || getUserRole() == 'chro' || getUserRole() == 'ciso'
+      );
+    }
+
+    // Helper checks if the user belongs to Tech & AI division
+    function isTech() {
+      return isLoggedIn() && (
+        isExec() || 
+        getUserRole() == 'chief_ai_officer' || getUserRole() == 'ai_researcher' || getUserRole() == 'ml_engineer' || 
+        getUserRole() == 'federated_learning_engineer' || getUserRole() == 'llm_engineer' || getUserRole() == 'data_scientist' || 
+        getUserRole() == 'mlops_engineer' || getUserRole() == 'research_intern' || getUserRole() == 'vp_engineering' || 
+        getUserRole() == 'engineering_manager' || getUserRole() == 'backend_developer' || getUserRole() == 'frontend_developer' || 
+        getUserRole() == 'fullstack_developer' || getUserRole() == 'mobile_developer' || getUserRole() == 'devops_engineer' || 
+        getUserRole() == 'qa_engineer' || getUserRole() == 'cloud_architect' || getUserRole() == 'sre' || 
+        getUserRole() == 'kubernetes_engineer' || getUserRole() == 'network_engineer' || getUserRole() == 'database_administrator' ||
+        getUserRole() == 'node_auditor' || getUserRole() == 'infrastructure_operator' || getUserRole() == 'system_engineer' ||
+        getUserRole() == 'researcher'
+      );
+    }
+
+    // Helper check if user belongs to Product & UX division
+    function isProduct() {
+      return isLoggedIn() && (
+        isExec() || 
+        getUserRole() == 'cpo' || getUserRole() == 'product_manager' || getUserRole() == 'product_owner' || 
+        getUserRole() == 'business_analyst' || getUserRole() == 'ux_researcher' || getUserRole() == 'frontend_developer' ||
+        getUserRole() == 'editor' || getUserRole() == 'research_manager' || getUserRole() == 'research_director'
+      );
+    }
+
+    // Helper check if user belongs to Cybersecurity division
+    function isSecurity() {
+      return isLoggedIn() && (
+        isExec() || 
+        getUserRole() == 'security_architect' || getUserRole() == 'penetration_tester' || getUserRole() == 'soc_analyst' || 
+        getUserRole() == 'compliance_officer' || getUserRole() == 'privacy_officer' || getUserRole() == 'security_officer' ||
+        getUserRole() == 'node_auditor'
+      );
+    }
+
+    // Helper check if user belongs to Sales & Marketing division
+    function isSalesMarketing() {
+      return isLoggedIn() && (
+        isExec() || 
+        getUserRole() == 'cro' || getUserRole() == 'enterprise_sales_manager' || getUserRole() == 'solution_architect' || 
+        getUserRole() == 'business_development_manager' || getUserRole() == 'account_manager' || getUserRole() == 'marketing_director' || 
+        getUserRole() == 'digital_marketing_specialist' || getUserRole() == 'content_writer' || getUserRole() == 'brand_manager' || 
+        getUserRole() == 'community_manager' || getUserRole() == 'devrel_manager' || getUserRole() == 'editor'
+      );
+    }
+
+    // Helper check if user belongs to Finance or Operations division
+    function isOpsFinance() {
+      return isLoggedIn() && (
+        isExec() || 
+        getUserRole() == 'operations_manager' || getUserRole() == 'program_manager' || getUserRole() == 'project_manager' || 
+        getUserRole() == 'vendor_management' || getUserRole() == 'procurement_team' || getUserRole() == 'finance_manager' || 
+        getUserRole() == 'accountant' || getUserRole() == 'financial_analyst' || getUserRole() == 'payroll_team' || 
+        getUserRole() == 'investor_relations' || getUserRole() == 'billing_manager'
+      );
+    }
+
+    // Helper check if user belongs to HR or Legal division
+    function isHRLegal() {
+      return isLoggedIn() && (
+        isExec() || 
+        getUserRole() == 'hr_manager' || getUserRole() == 'recruiter' || getUserRole() == 'talent_acquisition_specialist' || 
+        getUserRole() == 'learning_development_team' || getUserRole() == 'employee_relations_team' || getUserRole() == 'general_counsel' || 
+        getUserRole() == 'legal_officer' || getUserRole() == 'contract_manager' || getUserRole() == 'compliance_manager' || 
+        getUserRole() == 'data_protection_officer' || getUserRole() == 'compliance_counsel'
+      );
+    }
+
+    // Sessions collection
+    match /sessions/{sessionId} {
+      allow read, write: if true;
+    }
+
+    // Public users collection
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Admin profiles
+    match /admins/{uid} {
+      allow read: if isLoggedIn();
+      allow write: if isLoggedIn();
+    }
+
+    // Legacy admin collection
+    match /admin/{document} {
+      allow read: if isLoggedIn();
+      allow write: if isLoggedIn();
+    }
+
+    // Website content
+    match /website_data/{document} {
+      allow read: if true;
+      allow write: if canEdit();
+    }
+
+    // Node requests
+    match /node_requests/{document} {
+      allow create: if true;
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
+    }
+
+    // Nodes registry
+    match /nodes/{document} {
+      allow read: if true;
+      allow write: if isAdmin() || isTech();
+    }
+
+    // Activity logs
+    match /activity_logs/{document} {
+      allow create: if isLoggedIn();
+      allow read: if isLoggedIn();
+    }
+
+    // Website page builder templates
+    match /website_pages/{document} {
+      allow read: if true;
+      allow write: if canEdit() || isProduct();
+    }
+
+    // Website version history
+    match /website_versions/{document} {
+      allow read: if isLoggedIn();
+      allow write: if canEdit();
+    }
+
+    // Research publications
+    match /research/{document} {
+      allow read: if true;
+      allow write: if canEdit() || isProduct() || isTech();
+    }
+
+    // Contact messages
+    match /contact_messages/{document} {
+      allow create: if true;
+      allow read, update, delete: if isLoggedIn();
+    }
+
+    // Notifications
+    match /notifications/{document} {
+      allow create: if true;
+      allow read, update, delete: if isLoggedIn();
+    }
+
+    // Pending approval queue
+    match /pending_changes/{document} {
+      allow create: if canEdit();
+      allow read: if isLoggedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Approved changes history
+    match /approved_changes/{document} {
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
+    }
+
+    // Media metadata
+    match /media/{document} {
+      allow read: if true;
+      allow write: if canEdit();
+    }
+
+    // Site settings & Calibrations
+    match /site_settings/{document} {
+      allow read: if true;
+      allow write: if isAdmin() || isExec() || isOpsFinance() || isHRLegal() || isProduct();
+    }
+
+    // Backup snapshots
+    match /backups/{document} {
+      allow read, write: if isAdmin();
+    }
+
+    // System notifications
+    match /system_notifications/{document} {
+      allow create: if isAdmin();
+      allow read, update, delete: if isLoggedIn();
+    }
+
+    // ==========================================
+    // DIVISIONAL WORKSPACE COLLECTIONS RULES
+    // ==========================================
+
+    // Executive Strategy Directives
+    match /executive_strategy/{document} {
+      allow read, write: if isExec();
+    }
+
+    // Executive Department statuses
+    match /department_statuses/{document} {
+      allow read: if isLoggedIn();
+      allow write: if isExec();
+    }
+
+    // API Tokens Manager (CISO, Security Team, DevOps)
+    match /api_tokens/{document} {
+      allow read, write: if isSecurity() || isTech();
+    }
+
+    // Network Diagnostics & Telemetry (Systems, DevOps, SREs)
+    match /diagnostic_logs/{document} {
+      allow read, write: if isTech() || isSecurity();
+    }
+
+    // Payout Transactions (CFO, COO, billing managers)
+    match /payout_transactions/{document} {
+      allow read, write: if isOpsFinance();
+    }
+
+    // DAO Governance Proposals (Tech Division delegates)
+    match /governance_proposals/{document} {
+      allow read, write: if isTech();
+    }
+
+    // Support Tickets (Support agents, HR, Legal teams)
+    match /support_tickets/{document} {
+      allow read, write: if isTech() || isHRLegal();
+    }
+
+    // Partners Index (Sales, Marketing, DevRel, BDMs)
+    match /partners/{document} {
+      allow read, write: if isSalesMarketing() || isOpsFinance();
+    }
+
+    // Active System Warnings (CISO, SREs, SOC Analysts)
+    match /system_alerts/{document} {
+      allow read, write: if isSecurity() || isTech();
+    }
+
+    // Software Version Changelogs (Infrastructure & DevOps)
+    match /changelogs/{document} {
+      allow read, write: if isTech();
+    }
+
+    // Research Proposals Workflow (Researchers, Research Managers)
+    match /research_proposals/{document} {
+      allow read, write: if isTech() || isProduct();
+    }
+
+    // UI Provisioning Requests (Research Managers, Developers)
+    match /ui_requests/{document} {
+      allow read, write: if isProduct() || isTech();
+    }
+
+    // Talent Acquisition Applicants (HR Managers, Recruiters)
+    match /talent_acquisition/{document} {
+      allow read, write: if isHRLegal();
+    }
+
+    // Legal Contracts Vault (General Counsel, Contract Managers)
+    match /legal_contracts/{document} {
+      allow read, write: if isHRLegal();
+    }
+
+    // AI Checkpoints (Data Scientists, ML Engineers)
+    match /model_checkpoints/{document} {
+      allow read, write: if isTech();
+    }
+
+    // PR campaign announcements (Marketing, Sales, Writers)
+    match /pr_drafts/{document} {
+      allow read, write: if isSalesMarketing();
+    }
+
+    // Client Invoices Ledger (CFO, Billing)
+    match /invoices/{document} {
+      allow read, write: if isOpsFinance();
+    }
+  }
+}
