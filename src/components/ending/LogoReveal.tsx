@@ -8,6 +8,7 @@ export default function LogoReveal() {
       <img
         src="/assets/logo.png"
         alt="AEGIS Logo"
+        loading="lazy"
         className="w-28 h-28 object-contain filter drop-shadow-[0_0_24px_rgba(255,255,255,0.2)] select-none"
       />
       
