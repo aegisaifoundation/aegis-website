@@ -140,3 +140,10 @@ html.lenis {
 .animate-float {
   animation: floatSlow 8s ease-in-out infinite;
 }
+
+/* Dark Mode Select Dropdowns & Options Override */
+select option {
+  background-color: #030712 !important;
+  color: #ffffff !important;
+}
+

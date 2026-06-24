@@ -17,7 +17,31 @@ export type UserRole =
   | "devrel_manager"
   | "governance_delegate"
   | "infrastructure_operator"
-  | "compliance_counsel";
+  | "compliance_counsel"
+  // Executive Leadership
+  | "ceo" | "cto" | "coo" | "cfo" | "cmo" | "chro" | "ciso"
+  // Technology Division
+  | "chief_ai_officer" | "ai_researcher" | "ml_engineer" | "federated_learning_engineer" | "llm_engineer" | "data_scientist" | "mlops_engineer" | "research_intern"
+  | "vp_engineering" | "engineering_manager" | "backend_developer" | "frontend_developer" | "fullstack_developer" | "mobile_developer" | "devops_engineer" | "qa_engineer"
+  | "cloud_architect" | "sre" | "kubernetes_engineer" | "network_engineer" | "database_administrator"
+  // Product Division
+  | "cpo" | "product_manager" | "product_owner" | "business_analyst" | "ux_researcher"
+  // Cybersecurity Division
+  | "security_architect" | "penetration_tester" | "soc_analyst" | "compliance_officer" | "privacy_officer"
+  // Sales & Business Development
+  | "cro" | "enterprise_sales_manager" | "solution_architect" | "business_development_manager" | "account_manager"
+  // Marketing Division
+  | "marketing_director" | "digital_marketing_specialist" | "content_writer" | "brand_manager" | "community_manager"
+  // Operations Division
+  | "operations_manager" | "program_manager" | "project_manager" | "vendor_management" | "procurement_team"
+  // Finance Division
+  | "finance_manager" | "accountant" | "financial_analyst" | "payroll_team" | "investor_relations"
+  // Human Resources Division
+  | "hr_manager" | "recruiter" | "talent_acquisition_specialist" | "learning_development_team" | "employee_relations_team"
+  // Legal & Compliance Division
+  | "general_counsel" | "legal_officer" | "contract_manager" | "compliance_manager" | "data_protection_officer"
+  // New workflow roles
+  | "researcher" | "research_manager" | "system_engineer";
 
 export interface UserProfile {
   uid: string;
@@ -99,7 +123,9 @@ export function hasRoleAccess(userRole: UserRole, requiredRole: UserRole | UserR
     "compliance_counsel",
     "data_curator",
     "editor",
+    "researcher",
     "research_director",
+    "research_manager",
     "devrel_manager",
     "node_auditor",
     "billing_manager",
@@ -108,7 +134,27 @@ export function hasRoleAccess(userRole: UserRole, requiredRole: UserRole | UserR
     "co_admin",
     "infrastructure_operator",
     "admin",
-    "super_admin"
+    "super_admin",
+    // Executive Leadership
+    "ceo", "cto", "coo", "cfo", "cmo", "chro", "ciso",
+    // Tech & AI Division
+    "chief_ai_officer", "ai_researcher", "ml_engineer", "federated_learning_engineer", "llm_engineer", "data_scientist", "mlops_engineer", "research_intern",
+    "vp_engineering", "engineering_manager", "backend_developer", "frontend_developer", "fullstack_developer", "mobile_developer", "devops_engineer", "qa_engineer",
+    "cloud_architect", "sre", "kubernetes_engineer", "network_engineer", "database_administrator", "system_engineer",
+    // Product Division
+    "cpo", "product_manager", "product_owner", "business_analyst", "ux_researcher",
+    // Security Division
+    "security_architect", "penetration_tester", "soc_analyst", "compliance_officer", "privacy_officer",
+    // Sales Division
+    "cro", "enterprise_sales_manager", "solution_architect", "business_development_manager", "account_manager",
+    // Marketing Division
+    "marketing_director", "digital_marketing_specialist", "content_writer", "brand_manager", "community_manager",
+    // Operations & Finance
+    "operations_manager", "program_manager", "project_manager", "vendor_management", "procurement_team",
+    "finance_manager", "accountant", "financial_analyst", "payroll_team", "investor_relations",
+    // HR & Legal
+    "hr_manager", "recruiter", "talent_acquisition_specialist", "learning_development_team", "employee_relations_team",
+    "general_counsel", "legal_officer", "contract_manager", "compliance_manager", "data_protection_officer"
   ];
   
   if (Array.isArray(requiredRole)) {
