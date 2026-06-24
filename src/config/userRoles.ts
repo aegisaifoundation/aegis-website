@@ -1,7 +1,23 @@
 import { db } from "./firebase";
 import { doc, getDoc, setDoc, getDocs, collection, limit, query, where, deleteDoc } from "firebase/firestore";
 
-export type UserRole = "super_admin" | "admin" | "co_admin" | "editor" | "reviewer" | "viewer";
+export type UserRole = 
+  | "super_admin" 
+  | "admin" 
+  | "co_admin" 
+  | "editor" 
+  | "reviewer" 
+  | "viewer"
+  | "node_auditor"
+  | "billing_manager"
+  | "research_director"
+  | "support_agent"
+  | "security_officer"
+  | "data_curator"
+  | "devrel_manager"
+  | "governance_delegate"
+  | "infrastructure_operator"
+  | "compliance_counsel";
 
 export interface UserProfile {
   uid: string;
@@ -76,7 +92,24 @@ export async function getOrCreateUserProfile(uid: string, email: string): Promis
 }
 
 export function hasRoleAccess(userRole: UserRole, requiredRole: UserRole | UserRole[]): boolean {
-  const rolesOrder: UserRole[] = ["viewer", "reviewer", "editor", "co_admin", "admin", "super_admin"];
+  const rolesOrder: UserRole[] = [
+    "viewer",
+    "support_agent",
+    "reviewer",
+    "compliance_counsel",
+    "data_curator",
+    "editor",
+    "research_director",
+    "devrel_manager",
+    "node_auditor",
+    "billing_manager",
+    "governance_delegate",
+    "security_officer",
+    "co_admin",
+    "infrastructure_operator",
+    "admin",
+    "super_admin"
+  ];
   
   if (Array.isArray(requiredRole)) {
     return requiredRole.includes(userRole);

@@ -6,7 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { 
   ArrowLeft, Lock, LogOut, RotateCcw, LayoutDashboard, Edit, 
   Users, History, Image, Mail, Server, BookOpen, Settings, 
-  ClipboardCheck, Bell, Shield, Check, User
+  ClipboardCheck, Bell, Shield, Check, User,
+  KeyRound, Activity, BarChart3, Scale, HelpCircle, Terminal, 
+  Briefcase, AlertOctagon, FileText
 } from "lucide-react";
 import { defaultCardContent, saveCardContent } from "@/config/cardContent";
 import { defaultGeneralContent, saveGeneralContent } from "@/config/generalContent";
@@ -167,6 +169,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Contact Messages", href: "/admin/messages", icon: Mail, role: "reviewer" },
     { name: "Activity Logs", href: "/admin/logs", icon: History, role: "admin" },
     { name: "Site Settings", href: "/admin/settings", icon: Settings, role: "admin" },
+    { name: "API Token Manager", href: "/admin/tokens", icon: KeyRound, role: "security_officer" },
+    { name: "Network Diagnostics", href: "/admin/diagnostics", icon: Activity, role: "node_auditor" },
+    { name: "Revenue & Audits", href: "/admin/analytics", icon: BarChart3, role: "billing_manager" },
+    { name: "DAO Governance", href: "/admin/governance", icon: Scale, role: "governance_delegate" },
+    { name: "Helpdesk Support", href: "/admin/support", icon: HelpCircle, role: "support_agent" },
+    { name: "Operations Console", href: "/admin/console", icon: Terminal, role: "infrastructure_operator" },
+    { name: "Partners Index", href: "/admin/partners", icon: Briefcase, role: "devrel_manager" },
+    { name: "Alerts Manager", href: "/admin/alerts", icon: AlertOctagon, role: "node_auditor" },
+    { name: "Version Changelog", href: "/admin/changelog", icon: FileText, role: "infrastructure_operator" },
   ];
 
   // Role Badge Styling helper
@@ -174,9 +185,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const styles: Record<string, string> = {
       super_admin: "bg-red-500/10 text-red-400 border-red-500/20",
       admin: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+      co_admin: "bg-blue-500/10 text-blue-400 border-blue-500/20",
       editor: "bg-purple-500/10 text-purple-400 border-purple-500/20",
       reviewer: "bg-amber-500/10 text-amber-400 border-amber-500/20",
       viewer: "bg-gray-500/10 text-gray-400 border-gray-500/20",
+      node_auditor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+      billing_manager: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+      research_director: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+      support_agent: "bg-teal-500/10 text-teal-400 border-teal-500/20",
+      security_officer: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+      data_curator: "bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20",
+      devrel_manager: "bg-pink-500/10 text-pink-400 border-pink-500/20",
+      governance_delegate: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+      infrastructure_operator: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+      compliance_counsel: "bg-rose-500/10 text-rose-400 border-rose-500/20",
     };
     return styles[role] || "bg-gray-500/10 text-gray-400 border-gray-500/20";
   };
