@@ -83,13 +83,9 @@ export default function AdminResearchCRUD() {
         list.push({ id: d.id, ...d.data() } as ResearchPaper);
       });
 
-      if (list.length === 0 && snapshot.empty) {
-        seedDefaultResearch();
-      } else {
-        list.sort((a, b) => b.timestamp - a.timestamp);
-        setPapers(list);
-        setLoading(false);
-      }
+      list.sort((a, b) => b.timestamp - a.timestamp);
+      setPapers(list);
+      setLoading(false);
     }, (err) => {
       console.error("Research sync failed:", err);
       setLoading(false);
@@ -113,42 +109,6 @@ export default function AdminResearchCRUD() {
 
     return unsubscribe;
   }, []);
-
-  const seedDefaultResearch = async () => {
-    const defaults: Omit<ResearchPaper, "id">[] = [
-      {
-        title: "AEGIS Network Coordination Vision Whitepaper",
-        slug: "aegis-vision-whitepaper",
-        category: "Consensus Protocol",
-        abstract: "This paper introduces the scientific framework and Zero-Knowledge consensus rules that power the AEGIS decentralized intelligence network. We analyze federated nodes communication pathways, weight adaptation layers, and security enclaves.",
-        authors: "Dr. Elena Rostova, Prof. Marcus Chen",
-        date: "Jan 2026",
-        pdfUrl: "/assets/documents/AEGIS_Vision_Whitepaper.pdf",
-        tags: "Consensus, Zero-Knowledge, Federated AI",
-        timestamp: Date.now() - 5000,
-      },
-      {
-        title: "Federated Parameter Aggregation via Secure Homomorphic Gradients",
-        slug: "federated-parameter-aggregation",
-        category: "Core Engine",
-        abstract: "We outline an efficient mathematical protocol for combining local Low-Rank Adaptations (LoRA) without exposing raw training samples. The scheme leverages Byzantine Fault Tolerant routing to ensure weight updates converge smoothly.",
-        authors: "Akira Tanaka, Sarah Jenkins",
-        date: "Mar 2026",
-        pdfUrl: "/assets/documents/Federated_LoRA_Aggregation.pdf",
-        tags: "LoRA, Homomorphic, Cryptography",
-        timestamp: Date.now() - 4000,
-      }
-    ];
-
-    try {
-      for (const paper of defaults) {
-        const id = `paper-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-        await setDoc(doc(db, "research", id), paper);
-      }
-    } catch (err) {
-      console.error("Failed to seed default research:", err);
-    }
-  };
 
   const generateSlug = (val: string) => {
     return val

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Shield, TrendingUp, Users, Server, Activity, Plus, Trash2, Award, Clock, Sparkles } from "lucide-react";
+import { Shield, TrendingUp, Users, Server, Activity, Plus, Trash2, Award, Clock, Sparkles, LayoutDashboard, Heart, BarChart3 } from "lucide-react";
 import { db, auth } from "@/config/firebase";
 import { collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { getOrCreateUserProfile, UserProfile } from "@/config/userRoles";
@@ -37,6 +37,7 @@ const DEPARTMENTS = [
 export default function ExecutiveSuiteHub() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeSubTab, setActiveSubTab] = useState<"directives" | "heartbeats" | "analytics">("directives");
   
   // Strategy logs
   const [strategyLogs, setStrategyLogs] = useState<StrategyLog[]>([]);
@@ -220,7 +221,7 @@ export default function ExecutiveSuiteHub() {
   }
 
   return (
-    <div className="p-8 flex flex-col gap-10 max-w-7xl mx-auto">
+    <div className="p-8 flex flex-col gap-8 max-w-7xl mx-auto">
       {/* Header Banner */}
       <div className="relative glass-card p-8 rounded-3xl border border-white/5 bg-gradient-to-r from-red-950/20 to-black overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full filter blur-3xl pointer-events-none" />
@@ -233,215 +234,153 @@ export default function ExecutiveSuiteHub() {
               Executive Suite Boardroom
             </h1>
             <p className="text-xs text-gray-400 mt-1 max-w-xl">
-              Central strategic center for CEO, CTO, and C-Suite leadership to audit core operations, set vision logs, and monitor divisional integrity.
+              C-Suite workspace to issue directives, calibrate operational statuses, and review high-level business diagnostics.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 rounded-2xl px-4 py-3 self-start md:self-auto font-mono text-[10px] text-gray-400">
-          <Clock className="w-3.5 h-3.5 text-red-400" />
-          <span>Strategic Sync Active</span>
+
+        {/* Sub-Tab Controls */}
+        <div className="flex bg-white/5 rounded-lg p-0.5 border border-white/10 shrink-0 self-start md:self-auto font-body">
+          <button
+            onClick={() => setActiveSubTab("directives")}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+              activeSubTab === "directives" ? "bg-red-500 text-white" : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <Award className="w-3.5 h-3.5" /> Directives
+          </button>
+          <button
+            onClick={() => setActiveSubTab("heartbeats")}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+              activeSubTab === "heartbeats" ? "bg-red-500 text-white" : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <Heart className="w-3.5 h-3.5" /> Heartbeats
+          </button>
+          <button
+            onClick={() => setActiveSubTab("analytics")}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+              activeSubTab === "analytics" ? "bg-red-500 text-white" : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" /> Analytics
+          </button>
         </div>
       </div>
 
       {/* Grid: Stats Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">C-Suite & Admins</span>
-            <span className="text-2xl font-bold font-heading text-white">{totalUsers}</span>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="glass-card p-4 rounded-xl border border-white/5 bg-white/[0.01] flex items-center justify-between">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">C-Suite Staff</span>
+            <span className="text-xl font-bold font-heading text-white">{totalUsers}</span>
           </div>
-          <div className="p-3 rounded-xl bg-blue-500/5 text-blue-400 border border-blue-500/10">
-            <Users className="w-5 h-5" />
-          </div>
+          <div className="p-2 rounded bg-blue-500/5 text-blue-400 border border-blue-500/10"><Users className="w-4 h-4" /></div>
         </div>
-
-        <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Active Compute Nodes</span>
-            <span className="text-2xl font-bold font-heading text-white">{totalNodes}</span>
+        <div className="glass-card p-4 rounded-xl border border-white/5 bg-white/[0.01] flex items-center justify-between">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Active Nodes</span>
+            <span className="text-xl font-bold font-heading text-white">{totalNodes}</span>
           </div>
-          <div className="p-3 rounded-xl bg-emerald-500/5 text-emerald-400 border border-emerald-500/10">
-            <Server className="w-5 h-5" />
-          </div>
+          <div className="p-2 rounded bg-emerald-500/5 text-emerald-400 border border-emerald-500/10"><Server className="w-4 h-4" /></div>
         </div>
-
-        <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Active Sessions</span>
-            <span className="text-2xl font-bold font-heading text-white">{activeSessions}</span>
+        <div className="glass-card p-4 rounded-xl border border-white/5 bg-white/[0.01] flex items-center justify-between">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">WebSocket Streams</span>
+            <span className="text-xl font-bold font-heading text-white">{activeSessions}</span>
           </div>
-          <div className="p-3 rounded-xl bg-purple-500/5 text-purple-400 border border-purple-500/10">
-            <Activity className="w-5 h-5" />
-          </div>
+          <div className="p-2 rounded bg-purple-500/5 text-purple-400 border border-purple-500/10"><Activity className="w-4 h-4" /></div>
         </div>
-
-        <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Audited Activity logs</span>
-            <span className="text-2xl font-bold font-heading text-white">{totalLogs}</span>
+        <div className="glass-card p-4 rounded-xl border border-white/5 bg-white/[0.01] flex items-center justify-between">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Audit logs</span>
+            <span className="text-xl font-bold font-heading text-white">{totalLogs}</span>
           </div>
-          <div className="p-3 rounded-xl bg-red-500/5 text-red-400 border border-red-500/10">
-            <TrendingUp className="w-5 h-5" />
-          </div>
+          <div className="p-2 rounded bg-red-500/5 text-red-400 border border-red-500/10"><TrendingUp className="w-4 h-4" /></div>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8 items-start">
-        {/* Left Column: Departmental Status Control */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
-          <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-6">
-            <div>
-              <h2 className="font-heading font-bold text-base text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-red-400" /> Divisional Heartbeats
-              </h2>
-              <p className="text-[10px] text-gray-400 mt-1">
-                Configure operational statuses for global departments visible to all administrators.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              {deptStatuses.map((dept) => (
-                <div key={dept.id} className="p-4 rounded-xl border border-white/5 bg-white/[0.01] flex flex-col gap-3 justify-between">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold text-white">{dept.name}</span>
-                    <span className={`text-[8px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${getStatusColor(dept.status)}`}>
-                      {dept.status}
-                    </span>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2 mt-1">
-                    <select
-                      value={dept.status}
-                      disabled={updatingDept === dept.id}
-                      onChange={(e) => handleStatusChange(dept.id, dept.name, e.target.value)}
-                      className="rounded bg-black border border-white/10 px-2 py-1 text-[10px] text-gray-300 outline-none focus:border-red-500"
-                    >
-                      <option value="Operational">Operational</option>
-                      <option value="Under Review">Under Review</option>
-                      <option value="Optimizing">Optimizing</option>
-                      <option value="Maintenance">Maintenance</option>
-                    </select>
-                    <div className="text-[8px] text-gray-500 flex flex-col text-right justify-center truncate">
-                      <span>By: {dept.updatedBy.split("@")[0]}</span>
-                      <span>{new Date(dept.updatedAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Columns: Strategy & Vision Board */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          {/* Create Vision Log */}
-          <form onSubmit={handlePostStrategy} className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4">
-            <h2 className="font-heading font-bold text-base text-white flex items-center gap-2">
-              <Plus className="w-5 h-5 text-red-400" /> Broadcast Strategy Directive
+      {/* Tab: Strategic Directives */}
+      {activeSubTab === "directives" && (
+        <div className="grid lg:grid-cols-3 gap-8 items-start">
+          <form onSubmit={handlePostStrategy} className="lg:col-span-1 glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4">
+            <h2 className="font-heading font-bold text-sm text-white flex items-center gap-2">
+              <Plus className="w-4 h-4 text-red-400" /> Broadcast Directive
             </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Directive Title</label>
-                <input
-                  type="text"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="e.g. Expand H100 Cluster footprint"
-                  className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-red-500 text-xs text-white"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Target Department</label>
-                  <select
-                    value={newDept}
-                    onChange={(e) => setNewDept(e.target.value)}
-                    className="rounded-lg bg-[#030712] border border-white/10 px-3 py-2 outline-none focus:border-red-500 text-xs text-gray-300"
-                  >
-                    {DEPARTMENTS.map((dept) => (
-                      <option key={dept} value={dept}>{dept}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Priority Level</label>
-                  <select
-                    value={newPriority}
-                    onChange={(e) => setNewPriority(e.target.value as any)}
-                    className="rounded-lg bg-[#030712] border border-white/10 px-3 py-2 outline-none focus:border-red-500 text-xs text-gray-300"
-                  >
-                    <option value="Low">Low Priority</option>
-                    <option value="Medium">Medium Priority</option>
-                    <option value="High">High Priority</option>
-                    <option value="Critical">Critical Alert</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Strategic Directive Details</label>
-              <textarea
-                value={newDetails}
-                onChange={(e) => setNewDetails(e.target.value)}
-                placeholder="Specify precise actionable parameters, timelines, and execution benchmarks..."
-                rows={4}
-                className="rounded-lg bg-white/5 border border-white/10 p-3.5 outline-none focus:border-red-500 text-xs text-white leading-relaxed resize-none"
+              <label className="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Directive Title</label>
+              <input
+                type="text"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="e.g. Purge CDN edge caches"
+                className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-red-500 text-xs text-white"
                 required
               />
             </div>
-
-            <button
-              type="submit"
-              disabled={submittingLog}
-              className="rounded-lg bg-red-500 hover:bg-red-600 disabled:bg-gray-700 py-2.5 text-xs font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)] self-end px-6 cursor-pointer"
-            >
-              {submittingLog ? "BROADCASTING..." : "BROADCAST DIRECTIVE"}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Target Department</label>
+              <select
+                value={newDept}
+                onChange={(e) => setNewDept(e.target.value)}
+                className="rounded-lg bg-[#030712] border border-white/10 px-3 py-2 outline-none focus:border-red-500 text-xs text-gray-300"
+              >
+                {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Priority Level</label>
+              <select
+                value={newPriority}
+                onChange={(e) => setNewPriority(e.target.value as any)}
+                className="rounded-lg bg-[#030712] border border-white/10 px-3 py-2 outline-none focus:border-red-500 text-xs text-gray-300"
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Critical">Critical</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Actionable parameters</label>
+              <textarea
+                value={newDetails}
+                onChange={(e) => setNewDetails(e.target.value)}
+                placeholder="Detail strategy metrics and timelines..."
+                rows={3}
+                className="rounded-lg bg-white/5 border border-white/10 p-3 outline-none focus:border-red-500 text-xs text-white resize-none"
+                required
+              />
+            </div>
+            <button type="submit" disabled={submittingLog} className="rounded bg-red-500 hover:bg-red-600 py-2 text-xs font-bold text-white transition-all cursor-pointer">
+              {submittingLog ? "BROADCASTING..." : "DISPATCH"}
             </button>
           </form>
 
-          {/* Strategy Logs History */}
-          <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-6">
-            <h2 className="font-heading font-bold text-base text-white flex items-center gap-2">
-              <Award className="w-4 h-4 text-red-400" /> Active Strategic Directives
+          <div className="lg:col-span-2 glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4">
+            <h2 className="font-heading font-bold text-sm text-white flex items-center gap-2">
+              <Award className="w-4 h-4 text-red-400" /> Active Directives
             </h2>
-
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               {strategyLogs.length === 0 ? (
-                <div className="py-12 text-center text-xs text-gray-500">
-                  No executive strategic directives currently active.
-                </div>
+                <div className="py-8 text-center text-xs text-gray-500">No active directives.</div>
               ) : (
                 strategyLogs.map((log) => (
-                  <div key={log.id} className="p-5 rounded-2xl border border-white/5 bg-white/[0.02] flex flex-col gap-3 hover:border-white/10 transition-all">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-heading font-bold text-white text-sm">{log.title}</span>
-                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${getPriorityColor(log.priority)}`}>
-                            {log.priority}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-gray-400 mt-1">Targeting: <strong className="text-white">{log.department}</strong></span>
+                  <div key={log.id} className="p-4 rounded-xl border border-white/5 bg-white/[0.02] flex flex-col gap-2">
+                    <div className="flex justify-between items-start gap-2">
+                      <div>
+                        <strong className="text-white text-xs block">{log.title}</strong>
+                        <span className="text-[9px] text-gray-400">Target: <strong className="text-gray-200">{log.department}</strong></span>
                       </div>
-                      
-                      <button
-                        onClick={() => handleDeleteLog(log.id, log.title)}
-                        className="p-1.5 rounded-lg border border-white/5 bg-white/5 hover:bg-red-500/10 text-gray-500 hover:text-red-400 hover:border-red-500/10 transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase ${getPriorityColor(log.priority)}`}>
+                        {log.priority}
+                      </span>
                     </div>
-
-                    <p className="text-xs text-gray-300 leading-relaxed font-light whitespace-pre-wrap">{log.details}</p>
-
-                    <div className="flex justify-between items-center border-t border-white/5 pt-3 text-[9px] text-gray-500">
-                      <span>Broadcast by: <strong className="text-gray-400 font-semibold">{log.author}</strong></span>
+                    <p className="text-xs text-gray-300 leading-normal font-light">{log.details}</p>
+                    <div className="flex justify-between items-center text-[8px] text-gray-500 border-t border-white/5 pt-2">
+                      <span>By: {log.author}</span>
                       <span>{new Date(log.timestamp).toLocaleString()}</span>
+                      <button onClick={() => handleDeleteLog(log.id, log.title)} className="text-red-400 hover:text-red-300 font-bold cursor-pointer">Delete</button>
                     </div>
                   </div>
                 ))
@@ -449,7 +388,89 @@ export default function ExecutiveSuiteHub() {
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Tab: Heartbeats */}
+      {activeSubTab === "heartbeats" && (
+        <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-6 max-w-2xl mx-auto w-full">
+          <div>
+            <h2 className="font-heading font-bold text-sm text-white flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-red-400" /> Departmental Operational Heartbeats
+            </h2>
+            <p className="text-[10px] text-gray-400 mt-1">Calibrate overall heartbeat statuses visible to public enclaves and developer nodes.</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            {deptStatuses.map((dept) => (
+              <div key={dept.id} className="p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between gap-4">
+                <div>
+                  <span className="text-xs font-semibold text-white block">{dept.name}</span>
+                  <span className="text-[8px] text-gray-500">Updated: {new Date(dept.updatedAt).toLocaleDateString()} by {dept.updatedBy.split("@")[0]}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className={`text-[8px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${getStatusColor(dept.status)}`}>
+                    {dept.status}
+                  </span>
+                  <select
+                    value={dept.status}
+                    disabled={updatingDept === dept.id}
+                    onChange={(e) => handleStatusChange(dept.id, dept.name, e.target.value)}
+                    className="rounded bg-black border border-white/10 px-2 py-1 text-[10px] text-gray-300 focus:border-red-500 outline-none"
+                  >
+                    <option value="Operational">Operational</option>
+                    <option value="Under Review">Under Review</option>
+                    <option value="Optimizing">Optimizing</option>
+                    <option value="Maintenance">Maintenance</option>
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Analytics */}
+      {activeSubTab === "analytics" && (
+        <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-6 max-w-3xl mx-auto w-full">
+          <div>
+            <h2 className="font-heading font-bold text-sm text-white flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-red-400" /> Executive Departmental Analytics Audit
+            </h2>
+            <p className="text-[10px] text-gray-400 mt-1">Aggregate system calibrations, consensus pings history, and database operations indexes.</p>
+          </div>
+
+          <div className="flex flex-col gap-4 font-mono text-xs">
+            <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01] flex flex-col gap-2">
+              <div className="flex justify-between items-center text-gray-400">
+                <span>Database Write Operations Load</span>
+                <span className="text-white font-bold">{totalLogs} ops</span>
+              </div>
+              <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                <div className="bg-red-500 h-full" style={{ width: `${Math.min(100, (totalLogs / 500) * 100)}%` }} />
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01] flex flex-col gap-2">
+              <div className="flex justify-between items-center text-gray-400">
+                <span>Consortium Node Infrastructure Capacity</span>
+                <span className="text-white font-bold">{totalNodes * 8} vCPUs ({totalNodes} nodes)</span>
+              </div>
+              <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                <div className="bg-[#4D7CFE] h-full" style={{ width: `${Math.min(100, (totalNodes / 20) * 100)}%` }} />
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01] flex flex-col gap-2">
+              <div className="flex justify-between items-center text-gray-400">
+                <span>Total Registered Staff & Administrators</span>
+                <span className="text-white font-bold">{totalUsers} admins</span>
+              </div>
+              <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                <div className="bg-purple-500 h-full" style={{ width: `${Math.min(100, (totalUsers / 30) * 100)}%` }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

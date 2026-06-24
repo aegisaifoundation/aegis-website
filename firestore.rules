@@ -43,6 +43,7 @@ service cloud.firestore {
       );
     }
 
+    // Helper checks if the user belongs to Tech & AI division
     function isTech() {
       return isLoggedIn() && (
         isExec() || 
@@ -58,6 +59,7 @@ service cloud.firestore {
       );
     }
 
+    // Helper check if user belongs to Product & UX division
     function isProduct() {
       return isLoggedIn() && (
         isExec() || 
@@ -67,6 +69,7 @@ service cloud.firestore {
       );
     }
 
+    // Helper check if user belongs to Cybersecurity division
     function isSecurity() {
       return isLoggedIn() && (
         isExec() || 
@@ -76,6 +79,7 @@ service cloud.firestore {
       );
     }
 
+    // Helper check if user belongs to Sales & Marketing division
     function isSalesMarketing() {
       return isLoggedIn() && (
         isExec() || 
@@ -86,6 +90,7 @@ service cloud.firestore {
       );
     }
 
+    // Helper check if user belongs to Finance or Operations division
     function isOpsFinance() {
       return isLoggedIn() && (
         isExec() || 
@@ -96,6 +101,7 @@ service cloud.firestore {
       );
     }
 
+    // Helper check if user belongs to HR or Legal division
     function isHRLegal() {
       return isLoggedIn() && (
         isExec() || 
@@ -206,7 +212,7 @@ service cloud.firestore {
     // Site settings & Calibrations
     match /site_settings/{document} {
       allow read: if true;
-      allow write: if isAdmin() || isExec() || isOpsFinance() || isHRLegal();
+      allow write: if isAdmin() || isExec() || isOpsFinance() || isHRLegal() || isProduct();
     }
 
     // Backup snapshots
@@ -293,6 +299,21 @@ service cloud.firestore {
     // Legal Contracts Vault (General Counsel, Contract Managers)
     match /legal_contracts/{document} {
       allow read, write: if isHRLegal();
+    }
+
+    // AI Checkpoints (Data Scientists, ML Engineers)
+    match /model_checkpoints/{document} {
+      allow read, write: if isTech();
+    }
+
+    // PR campaign announcements (Marketing, Sales, Writers)
+    match /pr_drafts/{document} {
+      allow read, write: if isSalesMarketing();
+    }
+
+    // Client Invoices Ledger (CFO, Billing)
+    match /invoices/{document} {
+      allow read, write: if isOpsFinance();
     }
   }
 }

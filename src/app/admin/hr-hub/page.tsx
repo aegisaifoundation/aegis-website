@@ -36,6 +36,7 @@ interface Checklist {
 export default function HrLegalHub() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeSubTab, setActiveSubTab] = useState<"talent" | "contracts" | "compliance">("talent");
 
   // Lists
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -133,25 +134,24 @@ export default function HrLegalHub() {
 
     try {
       const id = `cand-${Date.now()}`;
-      const data = {
+      await setDoc(doc(db, "talent_acquisition", id), {
         name: candName.trim(),
         email: candEmail.trim().toLowerCase(),
         role: candRole,
         status: candStatus,
         notes: candNotes.trim(),
         timestamp: Date.now()
-      };
+      });
 
-      await setDoc(doc(db, "talent_acquisition", id), data);
       await logActivity("ADD_CANDIDATE", `Logged candidate application: ${candName} for ${candRole}`);
-      await addNotification("HR", `New talent acquisition file logged for: ${candName}`);
+      await addNotification("HR", `New recruitment applicant logged: ${candName}`);
 
       setCandName("");
       setCandEmail("");
       setCandNotes("");
-      alert("Candidate profile registered successfully.");
+      alert("Candidate logged successfully.");
     } catch (err: any) {
-      alert("Failed to log candidate: " + err.message);
+      alert("Failed: " + err.message);
     } finally {
       setSubmittingCand(false);
     }
@@ -161,10 +161,9 @@ export default function HrLegalHub() {
     if (confirm(`Remove candidate entry "${name}"?`)) {
       try {
         await deleteDoc(doc(db, "talent_acquisition", id));
-        await logActivity("DELETE_CANDIDATE", `Deleted candidate entry ${name}`);
-        alert("Candidate record removed.");
+        await logActivity("DELETE_CANDIDATE", `Deleted candidate registry index for ${name}`);
       } catch (err: any) {
-        alert("Failed to delete candidate: " + err.message);
+        alert("Failed: " + err.message);
       }
     }
   };
@@ -176,23 +175,22 @@ export default function HrLegalHub() {
 
     try {
       const id = `contract-${Date.now()}`;
-      const data = {
+      await setDoc(doc(db, "legal_contracts", id), {
         title: contractTitle.trim(),
         party: contractParty.trim(),
         type: contractType,
         status: contractStatus,
         timestamp: Date.now()
-      };
+      });
 
-      await setDoc(doc(db, "legal_contracts", id), data);
-      await logActivity("ADD_CONTRACT", `Logged contract registry: ${contractTitle} with ${contractParty}`);
-      await addNotification("LEGAL", `New corporate legal contract logged: ${contractTitle}`);
+      await logActivity("ADD_CONTRACT", `Logged contract: ${contractTitle} with ${contractParty}`);
+      await addNotification("LEGAL", `New contract logged: ${contractTitle}`);
 
       setContractTitle("");
       setContractParty("");
-      alert("Contract logged into registry successfully.");
+      alert("Contract logged.");
     } catch (err: any) {
-      alert("Failed to log contract: " + err.message);
+      alert("Failed: " + err.message);
     } finally {
       setSubmittingContract(false);
     }
@@ -202,10 +200,8 @@ export default function HrLegalHub() {
     if (confirm(`Remove contract "${title}"?`)) {
       try {
         await deleteDoc(doc(db, "legal_contracts", id));
-        await logActivity("DELETE_CONTRACT", `Removed contract ${title}`);
-        alert("Contract record deleted.");
       } catch (err: any) {
-        alert("Failed to delete contract: " + err.message);
+        alert("Failed: " + err.message);
       }
     }
   };
@@ -223,7 +219,7 @@ export default function HrLegalHub() {
       await setDoc(doc(db, "site_settings", "compliance_checklist"), updated, { merge: true });
       await logActivity("TOGGLE_COMPLIANCE", `Compliance checklist toggled key: ${key}`);
     } catch (err: any) {
-      alert("Failed to update checklist: " + err.message);
+      alert("Failed: " + err.message);
     } finally {
       setUpdatingChecklist(false);
     }
@@ -255,7 +251,7 @@ export default function HrLegalHub() {
   }
 
   return (
-    <div className="p-8 flex flex-col gap-10 max-w-7xl mx-auto">
+    <div className="p-8 flex flex-col gap-10 max-w-7xl mx-auto font-body">
       {/* Header Banner */}
       <div className="relative glass-card p-8 rounded-3xl border border-white/5 bg-gradient-to-r from-orange-950/20 to-black overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full filter blur-3xl pointer-events-none" />
@@ -268,165 +264,53 @@ export default function HrLegalHub() {
               HR & Legal Suite Hub
             </h1>
             <p className="text-xs text-gray-400 mt-1 max-w-xl">
-              Recruitment and compliance registry. HR managers and legal counsel can review applicants portfolios, registry legal contracts, and toggle compliance audits.
+              Consolidated employee board. Track applicant files, monitor NDA legal vaults, and audit regulatory compliance parameters.
             </p>
           </div>
+        </div>
+
+        {/* Sub-Tab Controls */}
+        <div className="flex bg-white/5 rounded-lg p-0.5 border border-white/10 shrink-0">
+          <button
+            onClick={() => setActiveSubTab("talent")}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+              activeSubTab === "talent" ? "bg-orange-500 text-black font-extrabold" : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <Briefcase className="w-3.5 h-3.5" /> Talent Board
+          </button>
+          <button
+            onClick={() => setActiveSubTab("contracts")}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+              activeSubTab === "contracts" ? "bg-orange-500 text-black font-extrabold" : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" /> Contracts Vault
+          </button>
+          <button
+            onClick={() => setActiveSubTab("compliance")}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+              activeSubTab === "compliance" ? "bg-orange-500 text-black font-extrabold" : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <ClipboardCheck className="w-3.5 h-3.5" /> Compliance
+          </button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: HR & Legal Forms */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-          {/* Compliance Checklist */}
-          <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4">
-            <h2 className="font-heading font-bold text-base text-white flex items-center gap-2">
-              <ClipboardCheck className="w-4 h-4 text-orange-400" /> Compliance Checklists
-            </h2>
-            <p className="text-[10px] text-gray-400">
-              Audit operational status. Keep track of compliance reviews before deployment.
-            </p>
-
-            <div className="flex flex-col gap-3 mt-2">
-              <label className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checklist.gdprAudit}
-                  disabled={updatingChecklist}
-                  onChange={() => handleToggleChecklist("gdprAudit")}
-                  className="w-4 h-4 rounded border-white/10 bg-black outline-none accent-orange-500"
-                />
-                <span className="text-xs text-gray-300">EU GDPR Data Protection Audit</span>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checklist.privacyPolicy}
-                  disabled={updatingChecklist}
-                  onChange={() => handleToggleChecklist("privacyPolicy")}
-                  className="w-4 h-4 rounded border-white/10 bg-black outline-none accent-orange-500"
-                />
-                <span className="text-xs text-gray-300">Public Privacy Policy Revision Sync</span>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checklist.secFiling}
-                  disabled={updatingChecklist}
-                  onChange={() => handleToggleChecklist("secFiling")}
-                  className="w-4 h-4 rounded border-white/10 bg-black outline-none accent-orange-500"
-                />
-                <span className="text-xs text-gray-300">SEC Financial Transparency Filing</span>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checklist.nodeSecurityReview}
-                  disabled={updatingChecklist}
-                  onChange={() => handleToggleChecklist("nodeSecurityReview")}
-                  className="w-4 h-4 rounded border-white/10 bg-black outline-none accent-orange-500"
-                />
-                <span className="text-xs text-gray-300">Consortium Nodes Security Review</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Legal Contract Registry */}
-          <form onSubmit={handleRegisterContract} className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4">
-            <h2 className="font-heading font-bold text-base text-white flex items-center gap-2">
-              <FileText className="w-4 h-4 text-orange-400" /> Log Legal Contract
-            </h2>
-            <p className="text-[10px] text-gray-400">
-              Register corporate agreements and service NDAs.
-            </p>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Contract Title</label>
-              <input
-                type="text"
-                value={contractTitle}
-                onChange={(e) => setContractTitle(e.target.value)}
-                placeholder="e.g. Helix Master Node Licensing Agreement"
-                className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-orange-500 text-xs text-white"
-                required
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Counterparty Name</label>
-              <input
-                type="text"
-                value={contractParty}
-                onChange={(e) => setContractParty(e.target.value)}
-                placeholder="e.g. Helix Quantum Inc."
-                className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-orange-500 text-xs text-white"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Contract Type</label>
-                <select
-                  value={contractType}
-                  onChange={(e) => setContractType(e.target.value as any)}
-                  className="rounded-lg bg-[#030712] border border-white/10 px-3 py-2 outline-none focus:border-orange-500 text-xs text-gray-300"
-                >
-                  <option value="NDA">Non-Disclosure (NDA)</option>
-                  <option value="License Agreement">License Agreement</option>
-                  <option value="Consulting Service">Consulting Service</option>
-                  <option value="Employment Contract">Employment Contract</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Status State</label>
-                <select
-                  value={contractStatus}
-                  onChange={(e) => setContractStatus(e.target.value as any)}
-                  className="rounded-lg bg-[#030712] border border-white/10 px-3 py-2 outline-none focus:border-orange-500 text-xs text-gray-300"
-                >
-                  <option value="Draft">Draft Stage</option>
-                  <option value="Active">Active / Cleared</option>
-                  <option value="Expired">Expired</option>
-                </select>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={submittingContract}
-              className="rounded-lg bg-orange-500 hover:bg-orange-600 disabled:bg-gray-700 py-2.5 text-xs font-bold transition-all shadow-[0_0_15px_rgba(249,115,22,0.2)] mt-2 cursor-pointer text-black"
-            >
-              {submittingContract ? "LOGGING CONTRACT..." : "LOG CONTRACT RECORD"}
-            </button>
-          </form>
-        </div>
-
-        {/* Right Columns: Talent Board & Contracts Ledger */}
-        <div className="lg:col-span-7 flex flex-col gap-6">
-          {/* Candidates Talent Board */}
-          <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-6">
-            <div className="flex justify-between items-center">
-              <h2 className="font-heading font-bold text-base text-white flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-orange-400" /> Talent Acquisition Board
-              </h2>
-              <span className="text-[9px] font-mono text-gray-500">{candidates.length} active files</span>
-            </div>
-
-            {/* Candidate creation inline trigger form */}
-            <form onSubmit={handleRegisterCandidate} className="p-4 rounded-xl border border-dashed border-white/10 bg-white/[0.01] flex flex-col gap-3">
-              <span className="text-[9px] text-orange-400 font-bold uppercase tracking-wider">Log Candidate Application Entry</span>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {/* Tab Content: Talent Board */}
+      {activeSubTab === "talent" && (
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-5">
+            <form onSubmit={handleRegisterCandidate} className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-3">
+              <span className="text-[10px] text-orange-400 font-bold uppercase tracking-wider">Log Candidate Application</span>
+              <div className="flex flex-col gap-2">
                 <input
                   type="text"
                   value={candName}
                   onChange={(e) => setCandName(e.target.value)}
-                  placeholder="Candidate Full Name"
-                  className="rounded bg-black border border-white/10 px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500"
+                  placeholder="Candidate Name"
+                  className="rounded bg-black border border-white/10 px-3 py-2 text-xs text-white outline-none focus:border-orange-500"
                   required
                 />
                 <input
@@ -434,24 +318,23 @@ export default function HrLegalHub() {
                   value={candEmail}
                   onChange={(e) => setCandEmail(e.target.value)}
                   placeholder="Candidate Email"
-                  className="rounded bg-black border border-white/10 px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500"
+                  className="rounded bg-black border border-white/10 px-3 py-2 text-xs text-white outline-none focus:border-orange-500"
                   required
                 />
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <input
                   type="text"
                   value={candRole}
                   onChange={(e) => setCandRole(e.target.value)}
-                  placeholder="Applied Position (e.g. MLOps Engineer)"
-                  className="rounded bg-black border border-white/10 px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500"
+                  placeholder="Role (e.g. MLOps)"
+                  className="rounded bg-black border border-white/10 px-3 py-2 text-xs text-white outline-none focus:border-orange-500"
                   required
                 />
                 <select
                   value={candStatus}
                   onChange={(e) => setCandStatus(e.target.value as any)}
-                  className="rounded bg-black border border-white/10 px-3 py-1.5 text-xs text-gray-300 outline-none focus:border-orange-500"
+                  className="rounded bg-black border border-white/10 px-3 py-2 text-xs text-gray-300 outline-none"
                 >
                   <option value="Review">Under Review</option>
                   <option value="Interviewing">Interviewing</option>
@@ -459,98 +342,159 @@ export default function HrLegalHub() {
                   <option value="Rejected">Rejected</option>
                 </select>
               </div>
-
               <input
                 type="text"
                 value={candNotes}
                 onChange={(e) => setCandNotes(e.target.value)}
-                placeholder="Interview notes annotations summary..."
-                className="rounded bg-black border border-white/10 px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500"
+                placeholder="Interview notes..."
+                className="rounded bg-black border border-white/10 px-3 py-2 text-xs text-white outline-none focus:border-orange-500"
               />
-
-              <button
-                type="submit"
-                disabled={submittingCand}
-                className="rounded bg-orange-500/10 border border-orange-500/20 hover:bg-orange-500/20 text-white font-bold py-1.5 text-xs uppercase tracking-wider self-start px-4 cursor-pointer"
-              >
-                Log Candidate
+              <button type="submit" disabled={submittingCand} className="rounded bg-orange-500 hover:bg-orange-600 text-black py-2.5 text-xs font-bold transition-all cursor-pointer mt-2">
+                {submittingCand ? "LOGGING..." : "LOG APPLICANT"}
               </button>
             </form>
-
-            <div className="flex flex-col gap-3 max-h-[350px] overflow-y-auto pr-1">
-              {candidates.length === 0 ? (
-                <div className="py-6 text-center text-xs text-gray-500 font-mono">
-                  No recruitment applicant files logged.
-                </div>
-              ) : (
-                candidates.map((c) => (
-                  <div key={c.id} className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02] flex flex-col gap-2">
-                    <div className="flex justify-between items-start gap-2">
-                      <div>
-                        <strong className="text-white text-xs block">{c.name}</strong>
-                        <span className="text-[9px] text-gray-500 font-mono">{c.email}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[9px] font-semibold text-orange-400">{c.role}</span>
-                        <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${getCandStatusColor(c.status)}`}>
-                          {c.status}
-                        </span>
-                        <button
-                          onClick={() => handleDeleteCandidate(c.id, c.name)}
-                          className="p-1 rounded bg-white/5 border border-white/10 text-gray-400 hover:text-red-400 cursor-pointer"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                    {c.notes && (
-                      <p className="text-[10px] text-gray-400 leading-relaxed italic">"{c.notes}"</p>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
           </div>
 
-          {/* Legal Contracts Directory */}
-          <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4 font-mono text-xs">
+          <div className="lg:col-span-7 glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4 font-mono text-xs">
             <h2 className="font-heading font-bold text-base text-white flex items-center gap-2 font-body">
-              <FileText className="w-4 h-4 text-orange-400" /> Legal Agreements Registry
+              <Briefcase className="w-4 h-4 text-orange-400" /> Active Applicants Registry
             </h2>
-
-            <div className="flex flex-col gap-3 max-h-[350px] overflow-y-auto pr-1">
-              {contracts.length === 0 ? (
-                <div className="py-6 text-center text-xs text-gray-500">
-                  No legal agreements registered in vault.
-                </div>
-              ) : (
-                contracts.map((ct) => (
-                  <div key={ct.id} className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02] flex flex-col gap-2">
-                    <div className="flex justify-between items-start gap-2">
-                      <div>
-                        <strong className="text-white text-xs font-heading font-body">{ct.title}</strong>
-                        <span className="text-[9px] text-gray-500 block">Party: {ct.party}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[8px] text-orange-400 border border-orange-500/10 px-1.5 py-0.5 rounded bg-orange-500/5">{ct.type}</span>
-                        <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${getContractStatusColor(ct.status)}`}>
-                          {ct.status}
-                        </span>
-                        <button
-                          onClick={() => handleDeleteContract(ct.id, ct.title)}
-                          className="p-1 rounded bg-white/5 border border-white/10 text-gray-500 hover:text-red-400 cursor-pointer font-body"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
+            <div className="flex flex-col gap-3">
+              {candidates.map((c) => (
+                <div key={c.id} className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02] flex flex-col gap-2 font-body">
+                  <div className="flex justify-between items-center text-xs">
+                    <div>
+                      <strong className="text-white block font-heading">{c.name}</strong>
+                      <span className="text-[8px] text-gray-500 font-mono">{c.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-semibold text-orange-400">{c.role}</span>
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase ${getCandStatusColor(c.status)}`}>
+                        {c.status}
+                      </span>
                     </div>
                   </div>
-                ))
-              )}
+                  {c.notes && <p className="text-[10px] text-gray-400 italic">"{c.notes}"</p>}
+                  <button onClick={() => handleDeleteCandidate(c.id, c.name)} className="text-[9px] text-red-400 hover:text-red-300 self-end font-semibold font-body cursor-pointer">Delete Record</button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Tab: Contracts Vault */}
+      {activeSubTab === "contracts" && (
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-5">
+            <form onSubmit={handleRegisterContract} className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4">
+              <h2 className="font-heading font-bold text-base text-white flex items-center gap-2">
+                <FileText className="w-4 h-4 text-orange-400" /> Log Legal Agreement
+              </h2>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Agreement Title</label>
+                <input
+                  type="text"
+                  value={contractTitle}
+                  onChange={(e) => setContractTitle(e.target.value)}
+                  placeholder="e.g. Master Node licensing agreement"
+                  className="rounded bg-black border border-white/10 px-3 py-2 text-xs text-white outline-none"
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Counterparty Name</label>
+                <input
+                  type="text"
+                  value={contractParty}
+                  onChange={(e) => setContractParty(e.target.value)}
+                  placeholder="e.g. Helix Quantum Group"
+                  className="rounded bg-black border border-white/10 px-3 py-2 text-xs text-white outline-none"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Agreement Type</label>
+                  <select value={contractType} onChange={(e) => setContractType(e.target.value as any)} className="rounded bg-black border border-white/10 px-3 py-2 text-xs text-gray-300 outline-none">
+                    <option value="NDA">NDA</option>
+                    <option value="License Agreement">License Agreement</option>
+                    <option value="Consulting Service">Consulting Service</option>
+                    <option value="Employment Contract">Employment Contract</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Status</label>
+                  <select value={contractStatus} onChange={(e) => setContractStatus(e.target.value as any)} className="rounded bg-black border border-white/10 px-3 py-2 text-xs text-gray-300 outline-none">
+                    <option value="Draft">Draft</option>
+                    <option value="Active">Active</option>
+                    <option value="Expired">Expired</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" disabled={submittingContract} className="rounded bg-orange-500 hover:bg-orange-600 text-black py-2.5 text-xs font-bold transition-all cursor-pointer">
+                {submittingContract ? "LOGGING..." : "LOG AGREEMENT"}
+              </button>
+            </form>
+          </div>
+
+          <div className="lg:col-span-7 glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4 font-mono text-xs">
+            <h2 className="font-heading font-bold text-base text-white flex items-center gap-2 font-body">
+              <ShieldCheck className="w-4 h-4 text-orange-400" /> Legal Agreements Vault
+            </h2>
+            <div className="flex flex-col gap-3">
+              {contracts.map((ct) => (
+                <div key={ct.id} className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02] flex flex-col gap-2 font-body">
+                  <div className="flex justify-between items-center text-xs">
+                    <div>
+                      <strong className="text-white block font-heading">{ct.title}</strong>
+                      <span className="text-[8px] text-gray-500 font-mono">Party: {ct.party}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[8px] text-orange-400 border border-orange-500/10 px-1.5 py-0.5 rounded bg-orange-500/5">{ct.type}</span>
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase ${getContractStatusColor(ct.status)}`}>
+                        {ct.status}
+                      </span>
+                    </div>
+                  </div>
+                  <button onClick={() => handleDeleteContract(ct.id, ct.title)} className="text-[9px] text-red-400 hover:text-red-300 self-end font-semibold font-mono cursor-pointer">Delete Contract</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Compliance */}
+      {activeSubTab === "compliance" && (
+        <div className="glass-card p-6 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4 max-w-xl mx-auto w-full">
+          <div>
+            <h2 className="font-heading font-bold text-base text-white flex items-center gap-2">
+              <ClipboardCheck className="w-5 h-5 text-orange-400" /> Operational Compliance Checklists
+            </h2>
+            <p className="text-[10px] text-gray-400 mt-1">Audit enclaves status parameters to verify regulatory alignment.</p>
+          </div>
+
+          <div className="flex flex-col gap-3 mt-2">
+            <label className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] cursor-pointer">
+              <input type="checkbox" checked={checklist.gdprAudit} disabled={updatingChecklist} onChange={() => handleToggleChecklist("gdprAudit")} className="accent-orange-500 w-4 h-4 bg-black rounded" />
+              <span className="text-xs text-gray-300">EU GDPR Data Protection compliance Audit</span>
+            </label>
+            <label className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] cursor-pointer">
+              <input type="checkbox" checked={checklist.privacyPolicy} disabled={updatingChecklist} onChange={() => handleToggleChecklist("privacyPolicy")} className="accent-orange-500 w-4 h-4 bg-black rounded" />
+              <span className="text-xs text-gray-300">Public Privacy Policy Revision Sync</span>
+            </label>
+            <label className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] cursor-pointer">
+              <input type="checkbox" checked={checklist.secFiling} disabled={updatingChecklist} onChange={() => handleToggleChecklist("secFiling")} className="accent-orange-500 w-4 h-4 bg-black rounded" />
+              <span className="text-xs text-gray-300">SEC Financial Transparency Filing</span>
+            </label>
+            <label className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] cursor-pointer">
+              <input type="checkbox" checked={checklist.nodeSecurityReview} disabled={updatingChecklist} onChange={() => handleToggleChecklist("nodeSecurityReview")} className="accent-orange-500 w-4 h-4 bg-black rounded" />
+              <span className="text-xs text-gray-300">Consortium Nodes Security Review</span>
+            </label>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
