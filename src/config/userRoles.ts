@@ -166,3 +166,31 @@ export function hasRoleAccess(userRole: UserRole, requiredRole: UserRole | UserR
   
   return userIndex >= requiredIndex;
 }
+
+export const getUserDepartment = (role: string): string => {
+  const techRoles = [
+    'vp_engineering', 'engineering_manager', 'ml_engineer', 
+    'federated_learning_engineer', 'llm_engineer', 'data_scientist', 
+    'mlops_engineer', 'ai_researcher', 'research_intern', 'backend_developer', 
+    'frontend_developer', 'fullstack_developer', 'mobile_developer', 
+    'devops_engineer', 'qa_engineer', 'cloud_architect', 'sre', 
+    'kubernetes_engineer', 'network_engineer', 'database_administrator', 
+    'system_engineer', 'infrastructure_operator', 'node_auditor', 'cto', 
+    'chief_ai_officer', 'researcher'
+  ];
+  const productRoles = ['cpo', 'product_manager', 'product_owner', 'business_analyst', 'ux_researcher'];
+  const secRoles = ['ciso', 'security_architect', 'penetration_tester', 'soc_analyst', 'compliance_officer', 'privacy_officer', 'security_officer'];
+  const mktRoles = ['cro', 'cmo', 'enterprise_sales_manager', 'solution_architect', 'business_development_manager', 'account_manager', 'marketing_director', 'digital_marketing_specialist', 'content_writer', 'brand_manager', 'community_manager', 'devrel_manager'];
+  const opsRoles = ['coo', 'cfo', 'operations_manager', 'program_manager', 'project_manager', 'vendor_management', 'procurement_team', 'finance_manager', 'accountant', 'financial_analyst', 'payroll_team', 'investor_relations', 'billing_manager'];
+  const hrRoles = ['chro', 'hr_manager', 'recruiter', 'talent_acquisition_specialist', 'learning_development_team', 'employee_relations_team', 'general_counsel', 'legal_officer', 'contract_manager', 'compliance_manager', 'data_protection_officer', 'compliance_counsel'];
+  const resRoles = ['research_director', 'research_manager', 'data_curator'];
+
+  if (techRoles.includes(role)) return 'Technology & AI';
+  if (productRoles.includes(role)) return 'Product & UX';
+  if (secRoles.includes(role)) return 'Cybersecurity & SOC';
+  if (mktRoles.includes(role)) return 'Sales & Marketing';
+  if (opsRoles.includes(role)) return 'Operations & Finance';
+  if (hrRoles.includes(role)) return 'HR & Legal';
+  if (resRoles.includes(role)) return 'Research';
+  return 'Executive';
+};

@@ -14,9 +14,112 @@ import { defaultCardContent, saveCardContent } from "@/config/cardContent";
 import { defaultGeneralContent, saveGeneralContent } from "@/config/generalContent";
 import { auth, db } from "@/config/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
-import { getOrCreateUserProfile, UserProfile, hasRoleAccess, UserRole } from "@/config/userRoles";
+import { getOrCreateUserProfile, UserProfile, hasRoleAccess, UserRole, getUserDepartment } from "@/config/userRoles";
 import { collection, onSnapshot, query, orderBy, limit, doc, updateDoc, getDocs } from "firebase/firestore";
 import { logActivity } from "@/config/activityLogger";
+
+const hasTabAccess = (role: UserRole, href: string): boolean => {
+  // Executives and Admins have unrestricted access to all tabs
+  const execRoles = ["super_admin", "admin", "co_admin", "ceo", "coo", "cfo", "chro", "ciso", "cto", "cpo", "cro", "cmo"];
+  if (execRoles.includes(role)) return true;
+
+  // General tabs accessible to all authenticated users
+  if (href === "/admin" || href === "/admin/tickets") return true;
+
+  // Define allowed roles for each path
+  switch (href) {
+    case "/admin/content": // Website Content
+      return [
+        "editor", "viewer", "product_manager", "product_owner", 
+        "business_analyst", "ux_researcher", "frontend_developer", "fullstack_developer"
+      ].includes(role);
+
+    case "/admin/approval": // Approval Queue
+      return ["reviewer", "editor", "product_manager", "product_owner", "research_manager"].includes(role);
+
+    case "/admin/users": // User Directory
+      return ["hr_manager", "talent_acquisition_specialist", "recruiter"].includes(role);
+
+    case "/admin/nodes": // Nodes Registry
+      return [
+        "node_auditor", "infrastructure_operator", "devops_engineer", "sre", 
+        "cloud_architect", "system_engineer", "security_architect", "soc_analyst"
+      ].includes(role);
+
+    case "/admin/research": // Research Publications
+      return ["research_director", "research_manager", "researcher", "data_curator", "editor"].includes(role);
+
+    case "/admin/media": // Media Indexer
+      return ["editor", "content_writer", "brand_manager", "digital_marketing_specialist", "ux_researcher"].includes(role);
+
+    case "/admin/messages": // Contact Messages
+      return ["reviewer", "support_agent", "hr_manager", "recruiter", "devrel_manager", "account_manager"].includes(role);
+
+    case "/admin/logs": // Activity Logs
+      return ["security_officer", "node_auditor", "compliance_officer", "privacy_officer"].includes(role);
+
+    case "/admin/settings": // Site Settings
+      return false; // Only Executives/Admins
+
+    case "/admin/tokens": // API Token Manager
+      return ["security_officer", "security_architect", "devops_engineer", "sre"].includes(role);
+
+    case "/admin/diagnostics": // Network Diagnostics
+      return ["node_auditor", "sre", "devops_engineer", "network_engineer", "kubernetes_engineer", "system_engineer"].includes(role);
+
+    case "/admin/analytics": // Revenue & Audits
+      return ["billing_manager", "finance_manager", "accountant", "financial_analyst"].includes(role);
+
+    case "/admin/governance": // DAO Governance
+      return ["governance_delegate"].includes(role);
+
+    case "/admin/support": // Helpdesk Support
+      return ["support_agent"].includes(role);
+
+    case "/admin/console": // Operations Console
+      return ["infrastructure_operator", "devops_engineer", "sre", "kubernetes_engineer"].includes(role);
+
+    case "/admin/partners": // Partners Index
+      return ["devrel_manager", "enterprise_sales_manager", "business_development_manager", "account_manager"].includes(role);
+
+    case "/admin/alerts": // Alerts Manager
+      return ["node_auditor", "soc_analyst", "security_officer", "sre", "devops_engineer"].includes(role);
+
+    case "/admin/changelog": // Version Changelog
+      return [
+        "infrastructure_operator", "devops_engineer", "sre", "backend_developer", 
+        "fullstack_developer", "frontend_developer", "engineering_manager", "vp_engineering"
+      ].includes(role);
+
+    // Divisional Hubs
+    case "/admin/executive-hub":
+      return false; // Only Executives/Admins
+    case "/admin/tech-hub":
+      return [
+        'vp_engineering', 'engineering_manager', 'ml_engineer', 
+        'federated_learning_engineer', 'llm_engineer', 'data_scientist', 
+        'mlops_engineer', 'ai_researcher', 'research_intern', 'backend_developer', 
+        'frontend_developer', 'fullstack_developer', 'mobile_developer', 
+        'devops_engineer', 'qa_engineer', 'cloud_architect', 'sre', 
+        'kubernetes_engineer', 'network_engineer', 'database_administrator', 
+        'system_engineer', 'infrastructure_operator', 'node_auditor', 'cto', 
+        'chief_ai_officer', 'researcher'
+      ].includes(role);
+    case "/admin/product-hub":
+      return ['cpo', 'product_manager', 'product_owner', 'business_analyst', 'ux_researcher'].includes(role);
+    case "/admin/security-hub":
+      return ['ciso', 'security_architect', 'penetration_tester', 'soc_analyst', 'compliance_officer', 'privacy_officer', 'security_officer', 'node_auditor'].includes(role);
+    case "/admin/sales-hub":
+      return ['cro', 'cmo', 'enterprise_sales_manager', 'solution_architect', 'business_development_manager', 'account_manager', 'marketing_director', 'digital_marketing_specialist', 'content_writer', 'brand_manager', 'community_manager', 'devrel_manager'].includes(role);
+    case "/admin/operations-hub":
+      return ['coo', 'cfo', 'operations_manager', 'program_manager', 'project_manager', 'vendor_management', 'procurement_team', 'finance_manager', 'accountant', 'financial_analyst', 'payroll_team', 'investor_relations', 'billing_manager'].includes(role);
+    case "/admin/hr-hub":
+      return ['chro', 'hr_manager', 'recruiter', 'talent_acquisition_specialist', 'learning_development_team', 'employee_relations_team', 'general_counsel', 'legal_officer', 'contract_manager', 'compliance_manager', 'data_protection_officer', 'compliance_counsel'].includes(role);
+
+    default:
+      return false;
+  }
+};
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -160,6 +263,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Nav list with role gates
   const navigationItems = [
     { name: "Dashboard Overview", href: "/admin", icon: LayoutDashboard, role: "viewer" },
+    { name: "Ticket Management", href: "/admin/tickets", icon: ClipboardCheck, role: "viewer" },
     { name: "Website Content", href: "/admin/content", icon: Edit, role: "viewer" },
     { name: "Approval Queue", href: "/admin/approval", icon: ClipboardCheck, role: "reviewer" },
     { name: "User Directory", href: "/admin/users", icon: Users, role: "admin" },
@@ -302,6 +406,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  // Page level route guard
+  const currentNavItem = navigationItems.find(item => pathname === item.href);
+  const hasPageAccess = !currentNavItem || !profile || hasTabAccess(profile.role, currentNavItem.href);
+
   return (
     <main className="min-h-screen bg-black text-white grid lg:grid-cols-[300px_1fr] font-body">
       {/* Sidebar Navigation */}
@@ -342,7 +450,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Nav Links */}
           <nav className="flex flex-col gap-1.5">
             {profile && navigationItems.map((item) => {
-                if (!hasRoleAccess(profile.role, item.role as UserRole)) return null;
+                if (!hasTabAccess(profile.role, item.href)) return null;
               
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -465,7 +573,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Content scrolling workspace */}
         <div className="overflow-y-auto bg-[#000000]">
-          {children}
+          {hasPageAccess ? (
+            children
+          ) : (
+            <div className="p-8 md:p-12 max-w-2xl mx-auto flex flex-col items-center gap-6 text-center mt-20 glass-card border border-red-500/20 bg-red-950/5 rounded-2xl animate-fade-in">
+              <Shield className="w-12 h-12 text-red-400 animate-pulse" />
+              <div>
+                <h2 className="font-heading font-extrabold text-2xl text-white">ACCESS DENIED</h2>
+                <p className="text-sm text-gray-400 mt-2">
+                  Unresolved credentials. Your active organizational scope does not authorize access to this secure enclave node.
+                </p>
+              </div>
+              <button
+                onClick={() => router.push("/admin")}
+                className="px-6 py-2.5 rounded-lg bg-[#4D7CFE] hover:bg-[#3b66d9] text-xs font-bold uppercase tracking-wider text-white transition-all cursor-pointer shadow-[0_0_15px_rgba(77,124,254,0.3)]"
+              >
+                Return to Dashboard
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </main>
