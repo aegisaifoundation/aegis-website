@@ -126,13 +126,15 @@ service cloud.firestore {
     // Admin profiles
     match /admins/{uid} {
       allow read: if isLoggedIn();
-      allow write: if isLoggedIn();
+      allow create: if isLoggedIn() && (isAdmin() || request.auth.uid == uid);
+      allow update: if isLoggedIn() && (isAdmin() || (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin'])));
+      allow delete: if isLoggedIn() && isAdmin();
     }
 
     // Legacy admin collection
     match /admin/{document} {
       allow read: if isLoggedIn();
-      allow write: if isLoggedIn();
+      allow write: if isAdmin();
     }
 
     // Website content
@@ -314,6 +316,117 @@ service cloud.firestore {
     // Client Invoices Ledger (CFO, Billing)
     match /invoices/{document} {
       allow read, write: if isOpsFinance();
+    }
+
+    // ==========================================
+    // TICKET MANAGEMENT MODULE SECURITY RULES
+    // ==========================================
+
+    function getUserDepartment(role) {
+      return (role == 'vp_engineering' || role == 'engineering_manager' || role == 'ml_engineer' || role == 'federated_learning_engineer' || role == 'llm_engineer' || role == 'data_scientist' || role == 'mlops_engineer' || role == 'ai_researcher' || role == 'research_intern' || role == 'backend_developer' || role == 'frontend_developer' || role == 'fullstack_developer' || role == 'mobile_developer' || role == 'devops_engineer' || role == 'qa_engineer' || role == 'cloud_architect' || role == 'sre' || role == 'kubernetes_engineer' || role == 'network_engineer' || role == 'database_administrator' || role == 'system_engineer' || role == 'infrastructure_operator' || role == 'node_auditor' || role == 'cto' || role == 'chief_ai_officer') ? 'Technology & AI' :
+             (role == 'cpo' || role == 'product_manager' || role == 'product_owner' || role == 'business_analyst' || role == 'ux_researcher') ? 'Product & UX' :
+             (role == 'ciso' || role == 'security_architect' || role == 'penetration_tester' || role == 'soc_analyst' || role == 'compliance_officer' || role == 'privacy_officer' || role == 'security_officer') ? 'Cybersecurity & SOC' :
+             (role == 'cro' || role == 'cmo' || role == 'enterprise_sales_manager' || role == 'solution_architect' || role == 'business_development_manager' || role == 'account_manager' || role == 'marketing_director' || role == 'digital_marketing_specialist' || role == 'content_writer' || role == 'brand_manager' || role == 'community_manager' || role == 'devrel_manager') ? 'Sales & Marketing' :
+             (role == 'coo' || role == 'cfo' || role == 'operations_manager' || role == 'program_manager' || role == 'project_manager' || role == 'vendor_management' || role == 'procurement_team' || role == 'finance_manager' || role == 'accountant' || role == 'financial_analyst' || role == 'payroll_team' || role == 'investor_relations' || role == 'billing_manager') ? 'Operations & Finance' :
+             (role == 'chro' || role == 'hr_manager' || role == 'recruiter' || role == 'talent_acquisition_specialist' || role == 'learning_development_team' || role == 'employee_relations_team' || role == 'general_counsel' || role == 'legal_officer' || role == 'contract_manager' || role == 'compliance_manager' || role == 'data_protection_officer' || role == 'compliance_counsel') ? 'HR & Legal' :
+             (role == 'research_director' || role == 'research_manager' || role == 'researcher' || role == 'data_curator') ? 'Research' : 'Other';
+    }
+
+    function isManagerOfDept(dept) {
+      return isLoggedIn() && (
+        (dept == "Technology & AI" && (getUserRole() == 'cto' || getUserRole() == 'vp_engineering' || getUserRole() == 'engineering_manager' || getUserRole() == 'chief_ai_officer')) ||
+        (dept == "Product & UX" && (getUserRole() == 'cpo' || getUserRole() == 'product_manager' || getUserRole() == 'product_owner')) ||
+        (dept == "Cybersecurity & SOC" && (getUserRole() == 'ciso' || getUserRole() == 'security_officer')) ||
+        (dept == "Sales & Marketing" && (getUserRole() == 'cro' || getUserRole() == 'cmo' || getUserRole() == 'marketing_director' || getUserRole() == 'enterprise_sales_manager')) ||
+        (dept == "Operations & Finance" && (getUserRole() == 'coo' || getUserRole() == 'cfo' || getUserRole() == 'operations_manager' || getUserRole() == 'finance_manager')) ||
+        (dept == "HR & Legal" && (getUserRole() == 'chro' || getUserRole() == 'hr_manager' || getUserRole() == 'general_counsel')) ||
+        (dept == "Research" && (getUserRole() == 'research_director' || getUserRole() == 'research_manager'))
+      );
+    }
+
+    function isAnyManager() {
+      return isLoggedIn() && (
+        getUserRole() == 'cto' || getUserRole() == 'vp_engineering' || getUserRole() == 'engineering_manager' || getUserRole() == 'chief_ai_officer' ||
+        getUserRole() == 'cpo' || getUserRole() == 'product_manager' || getUserRole() == 'product_owner' ||
+        getUserRole() == 'ciso' || getUserRole() == 'security_officer' ||
+        getUserRole() == 'cro' || getUserRole() == 'cmo' || getUserRole() == 'marketing_director' || getUserRole() == 'enterprise_sales_manager' ||
+        getUserRole() == 'coo' || getUserRole() == 'cfo' || getUserRole() == 'operations_manager' || getUserRole() == 'finance_manager' ||
+        getUserRole() == 'chro' || getUserRole() == 'hr_manager' || getUserRole() == 'general_counsel' ||
+        getUserRole() == 'research_director' || getUserRole() == 'research_manager'
+      );
+    }
+
+    // Tickets Collection Rules
+    match /tickets/{ticketId} {
+      allow read: if isLoggedIn() && (
+        isExec() || 
+        resource.data.assigneeId == request.auth.uid ||
+        resource.data.reporterId == request.auth.uid ||
+        (getUserDepartment(getUserRole()) == resource.data.department && isManagerOfDept(resource.data.department))
+      );
+      allow create: if isLoggedIn() && (
+        isExec() || 
+        (getUserDepartment(getUserRole()) == request.resource.data.department && isManagerOfDept(request.resource.data.department))
+      );
+      allow update: if isLoggedIn() && (
+        isExec() || 
+        (getUserDepartment(getUserRole()) == resource.data.department && isManagerOfDept(resource.data.department)) ||
+        (resource.data.assigneeId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'timestamp', 'technicalNotes']))
+      );
+      allow delete: if isLoggedIn() && (
+        isExec() || 
+        (getUserDepartment(getUserRole()) == resource.data.department && isManagerOfDept(resource.data.department))
+      );
+    }
+
+    // Comments & Discussions
+    match /ticket_comments/{document} {
+      allow read, write: if isLoggedIn();
+    }
+
+    // Activity Log Audit Trail
+    match /ticket_activity/{document} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+    }
+
+    // Attachments Metadata
+    match /ticket_attachments/{document} {
+      allow read, write: if isLoggedIn();
+    }
+
+    // Employee & Department Directory
+    match /department_members/{document} {
+      allow read: if isLoggedIn();
+      allow write: if isAdmin() || isHRLegal() || isExec();
+    }
+
+    // Ticket Assignments Map
+    match /ticket_assignments/{document} {
+      allow read, write: if isLoggedIn();
+    }
+
+    // Ticket Notifications
+    match /ticket_notifications/{document} {
+      allow read, write: if isLoggedIn();
+    }
+
+    // Metadata & Projects
+    match /ticket_projects/{document} {
+      allow read: if isLoggedIn();
+      allow write: if isExec() || isAdmin() || isAnyManager();
+    }
+
+    // Sprints
+    match /ticket_sprints/{document} {
+      allow read: if isLoggedIn();
+      allow write: if isExec() || isAdmin() || isAnyManager();
+    }
+
+    // Milestones
+    match /ticket_milestones/{document} {
+      allow read: if isLoggedIn();
+      allow write: if isExec() || isAdmin() || isAnyManager();
     }
   }
 }
