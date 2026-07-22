@@ -91,9 +91,24 @@ export default function Roadmap() {
 
                   {/* Card Info */}
                   <div className="p-5 w-full flex-1 text-center lg:text-left">
-                    <span className="font-heading text-[10px] font-extrabold tracking-widest text-[#7DD3FC] block mb-1">
-                      {step.year}
-                    </span>
+                    {(() => {
+                      // Support "Phase X-Y (YYYY)" or plain year strings
+                      const match = step.year.match(/^(.+?)\s*\((\d{4}[^)]*)\)$/);
+                      return match ? (
+                        <>
+                          <span className="font-heading text-[9px] font-extrabold tracking-widest text-[#4D7CFE] block mb-0.5 uppercase">
+                            {match[1]}
+                          </span>
+                          <span className="font-heading text-[8px] font-bold tracking-widest text-[#7DD3FC]/60 block mb-1 uppercase">
+                            {match[2]}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="font-heading text-[10px] font-extrabold tracking-widest text-[#7DD3FC] block mb-1">
+                          {step.year}
+                        </span>
+                      );
+                    })()}
                     <h3 className="font-heading font-bold text-sm text-white tracking-wider uppercase mb-2">
                       {step.title}
                     </h3>

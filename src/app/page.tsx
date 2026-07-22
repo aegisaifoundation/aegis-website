@@ -10,6 +10,7 @@ import AgeOfIntelligence from "@/components/sections/AgeOfIntelligence";
 import Vision from "@/components/sections/Vision";
 import Problem from "@/components/sections/Problem";
 import CoreArchitecture from "@/components/sections/CoreArchitecture";
+import SandboxSimulator from "@/components/sections/SandboxSimulator";
 import AgentEcosystem from "@/components/sections/AgentEcosystem";
 import TechStack from "@/components/sections/TechStack";
 import Sectors from "@/components/sections/Sectors";
@@ -34,6 +35,7 @@ const sectionComponents: Record<string, React.ComponentType> = {
   vision: Vision,
   problem: Problem,
   coreArchitecture: CoreArchitecture,
+  sandbox: SandboxSimulator,
   agents: AgentEcosystem,
   technology: TechStack,
   sectors: Sectors,
@@ -50,6 +52,7 @@ const defaultHomeSections = [
   { id: "vision", name: "Vision Section", visible: true },
   { id: "problem", name: "Problem Section", visible: true },
   { id: "coreArchitecture", name: "Core Architecture Flow", visible: true },
+  { id: "sandbox", name: "Interactive Sandbox Simulator", visible: true },
   { id: "agents", name: "Agent Ecosystem Catalog", visible: true },
   { id: "technology", name: "Tech Stack Modules", visible: true },
   { id: "sectors", name: "Sectors Grid", visible: true },

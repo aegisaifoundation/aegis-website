@@ -12,8 +12,8 @@ import { logActivity, addNotification } from "@/config/activityLogger";
 
 type CollectionKey = keyof CardContent;
 type Tab =
-  | "card-technology" | "card-sectors" | "card-revenue" | "card-agents" | "card-agentFaqs"
-  | "section-navbarFooter" | "section-hero" | "section-ageOfIntelligence" | "section-vision" | "section-problem" | "section-coreArchitecture" | "section-research" | "section-roadmap" | "section-joinNetwork" | "section-manifesto"
+  | "card-technology" | "card-sectors" | "card-revenue" | "card-agents" | "card-agentFaqs" | "card-websiteFaqs" | "card-subsystems"
+  | "section-navbarFooter" | "section-hero" | "section-ageOfIntelligence" | "section-vision" | "section-problem" | "section-coreArchitecture" | "section-research" | "section-roadmap" | "section-joinNetwork" | "section-manifesto" | "section-blogEssay"
   | "section-sectors" | "section-economics" | "section-technology" | "section-agents"
   | "version-history";
 
@@ -23,6 +23,8 @@ const cardLabels: Record<CollectionKey, string> = {
   revenue: "Revenue cards",
   agents: "Agent ecosystem cards",
   agentFaqs: "Agent ecosystem FAQs",
+  websiteFaqs: "Technical FAQs",
+  subsystems: "Core Subsystems (Blog)",
 };
 
 const sectionLabels: Record<string, string> = {
@@ -36,6 +38,7 @@ const sectionLabels: Record<string, string> = {
   roadmap: "Roadmap Section",
   joinNetwork: "Join Network",
   manifesto: "Manifesto Section",
+  blogEssay: "Blog Essay Settings",
   sectors: "Sectors Section Header",
   economics: "Economics Section Header",
   technology: "Tech Stack Header",
@@ -48,6 +51,8 @@ const newCardItem = (collection: CollectionKey) => {
   if (collection === "revenue") return { id, title: "New revenue model", desc: "Describe this revenue model." };
   if (collection === "agents") return { id, title: "New agent", class: "AEGIS-NEW-01", desc: "Describe this agent.", inputs: "Data source", consensus: "Describe consensus.", coordination: "Related Agent", kpis: "Metric|Value" };
   if (collection === "agentFaqs") return { id, question: "New question", answer: "Add the answer." };
+  if (collection === "websiteFaqs") return { id, question: "New question", answer: "Add the answer.", category: "Microkernel" };
+  if (collection === "subsystems") return { id, name: "New subsystem", short: "Subsystem short name", desc: "Describe subsystem.", features: "Feature 1, Feature 2" };
   return { id, title: "New sector", category: "Healthcare", problem: "Describe the problem.", benefits: "Describe the benefit.", revenue: "$0 potential size", details: "Add details." };
 };
 
@@ -416,7 +421,7 @@ export default function AdminContentEditor() {
                     }`}
                   >
                     <span className="block text-xs font-semibold truncate">
-                      {"title" in card ? card.title : card.question}
+                      {"title" in card ? card.title : "name" in card ? card.name : card.question}
                     </span>
                     <span className="block text-[10px] text-gray-500 truncate mt-0.5">
                       {"desc" in card ? card.desc : "problem" in card ? card.problem : "answer" in card ? card.answer : ""}
@@ -433,7 +438,7 @@ export default function AdminContentEditor() {
                       <div>
                         <span className="text-[9px] font-bold tracking-widest text-[#7DD3FC] uppercase">Edit Card Data</span>
                         <h2 className="font-heading font-bold text-lg mt-1 text-white">
-                          {"title" in selectedCard ? selectedCard.title : selectedCard.question}
+                          {"title" in selectedCard ? selectedCard.title : "name" in selectedCard ? selectedCard.name : selectedCard.question}
                         </h2>
                       </div>
                       {isWritable && (
@@ -1243,6 +1248,75 @@ export default function AdminContentEditor() {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+          )}          {/* SECTION: BLOG ESSAY */}
+          {tab === "section-blogEssay" && (
+            <div className="glass-card p-6 border border-white/5 bg-[#030712]/20 rounded-xl flex flex-col gap-6">
+              <h2 className="font-heading font-bold text-lg border-b border-white/10 pb-3 text-white">Blog Essay Settings</h2>
+
+              <div className="grid gap-5">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-bold tracking-widest text-gray-500 uppercase">Blog Title</label>
+                    <input
+                      value={generalContent.blogEssay.title}
+                      onChange={(e) => updateGeneralField("blogEssay", "title", e.target.value)}
+                      disabled={!isWritable}
+                      className="w-full rounded-lg bg-white/5 border border-white/10 p-3 text-xs text-white outline-none focus:border-[#4D7CFE] disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-bold tracking-widest text-gray-500 uppercase">Blog Subtitle</label>
+                    <input
+                      value={generalContent.blogEssay.subtitle}
+                      onChange={(e) => updateGeneralField("blogEssay", "subtitle", e.target.value)}
+                      disabled={!isWritable}
+                      className="w-full rounded-lg bg-white/5 border border-white/10 p-3 text-xs text-white outline-none focus:border-[#4D7CFE] disabled:opacity-50"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-bold tracking-widest text-gray-500 uppercase">Author Name</label>
+                    <input
+                      value={generalContent.blogEssay.author}
+                      onChange={(e) => updateGeneralField("blogEssay", "author", e.target.value)}
+                      disabled={!isWritable}
+                      className="w-full rounded-lg bg-white/5 border border-white/10 p-3 text-xs text-white outline-none focus:border-[#4D7CFE] disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-bold tracking-widest text-gray-500 uppercase">Published Date</label>
+                    <input
+                      value={generalContent.blogEssay.date}
+                      onChange={(e) => updateGeneralField("blogEssay", "date", e.target.value)}
+                      disabled={!isWritable}
+                      className="w-full rounded-lg bg-white/5 border border-white/10 p-3 text-xs text-white outline-none focus:border-[#4D7CFE] disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-bold tracking-widest text-gray-500 uppercase">Read Time (e.g. 8 min read)</label>
+                    <input
+                      value={generalContent.blogEssay.readTime}
+                      onChange={(e) => updateGeneralField("blogEssay", "readTime", e.target.value)}
+                      disabled={!isWritable}
+                      className="w-full rounded-lg bg-white/5 border border-white/10 p-3 text-xs text-white outline-none focus:border-[#4D7CFE] disabled:opacity-50"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9px] font-bold tracking-widest text-gray-500 uppercase">Essay Content Paragraphs (double returns split blocks)</label>
+                  <textarea
+                    value={generalContent.blogEssay.paragraphs}
+                    onChange={(e) => updateGeneralField("blogEssay", "paragraphs", e.target.value)}
+                    disabled={!isWritable}
+                    rows={8}
+                    className="w-full rounded-lg bg-white/5 border border-white/10 p-3 text-xs text-white outline-none focus:border-[#4D7CFE] leading-relaxed disabled:opacity-50"
+                  />
                 </div>
               </div>
             </div>

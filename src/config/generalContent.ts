@@ -99,6 +99,14 @@ export interface GeneralContent {
     description: string;
     copyrightText: string;
   };
+  blogEssay: {
+    title: string;
+    subtitle: string;
+    author: string;
+    date: string;
+    readTime: string;
+    paragraphs: string;
+  };
 }
 
 export const defaultGeneralContent: GeneralContent = {
@@ -189,12 +197,12 @@ export const defaultGeneralContent: GeneralContent = {
     title: "AEGIS Roadmap",
     description: "From prototype builds to a globally coordinated collective intelligence backbone.",
     steps: [
-      { year: "2026", title: "Prototype", desc: "Release of the AEGIS core engine, local node clients, and basic multi-agent validation." },
-      { year: "Q3 2026", title: "Pilot Institutions", desc: "Deploy private node installations across select university research centers." },
-      { year: "2027", title: "100 Nodes", desc: "Establish network routes between research institutions, regional hospitals, and key servers." },
-      { year: "Q4 2027", title: "1000 Nodes", desc: "Scale global node connections, deploying LoRA updates and aggregating weights." },
-      { year: "2028", title: "Cross-sector Network", desc: "Unify sectors (Healthcare, Banking, Energy) into dynamic federated intelligence pipelines." },
-      { year: "2029", title: "Intelligence Infrastructure", desc: "Achieve state coordinate consensus. AEGIS coordinates 10%+ of global compute nodes." }
+      { year: "Phase 1-3 (2025)", title: "Core Platform", desc: "Release of the AEGIS microkernel runtime, local memory gateway, Named Pipe IPC, and native C++ base daemon (Completed)." },
+      { year: "Phase 4-7 (2026)", title: "Distributed Swarm", desc: "Deployment of STUN NAT traversal overlay, Noise_IK tunnels, and Swarm FedAvg weight aggregates (Completed)." },
+      { year: "Phase 8-10 (Active)", title: "Autonomous Agent Flow", desc: "Autonomous multi-agent planning enclaves, sandbox tool permissions, and memory projection engines." },
+      { year: "Phase 11 (2027)", title: "Hardware Synthesis", desc: "Native NPU/TPU hardware acceleration bindings and zero-copy intra-node IPC transport namespaces." },
+      { year: "Phase 12 (2028)", title: "Unified Intelligence", desc: "Federated coordination consensus across edge networks and automatic model checkpoint validation." },
+      { year: "Phase 13 (2029)", title: "SDK & ASCI Integration", desc: "Cross-language interfaces for Flutter, Python, and C++ nodes complying with state audit consensus rules." }
     ],
     ctaText: "LEARN MORE ABOUT DEVELOPMENT PIPELINES"
   },
@@ -241,6 +249,14 @@ export const defaultGeneralContent: GeneralContent = {
     subtitle: "INTELLIGENCE INFRASTRUCTURE",
     description: "Building Intelligence Through Connection. Supporting a global, distributed collective intelligence paradigm.",
     copyrightText: "AEGIS PROTOCOL. ALL RIGHTS RESERVED. INVENTED BY CONNECTED COMMUNITIES."
+  },
+  blogEssay: {
+    title: "Demystifying AEGIS: The Sovereign, Privacy-First Collective Intelligence Network",
+    subtitle: "How decentralized runtime kernels, localized vector graphs, and swarm learning topology unify independent node clusters without data exposure.",
+    author: "AEGIS AI Foundation",
+    date: "June 2026",
+    readTime: "8 min read",
+    paragraphs: "In an era dominated by centralized artificial intelligence giants, a critical question looms: Can we build a global collective intelligence without sacrificing local sovereignty, data ownership, and individual privacy?\n\nThe answer is AEGIS.\n\nAEGIS (Advanced Engine for General Intelligence and Sovereignty) represents a paradigm shift in how AI models are executed, optimized, and connected. It is a production-grade, decentralized platform designed to keep raw data firmly under the user's control while enabling sovereign nodes to securely collaborate, learn, and grow together.\n\nCentralized cloud AI has structural limitations that are increasingly hitting walls: privacy violations where models require uploading raw user databases, high API subscription costs, latency, and single points of control/failure. AEGIS resolves these by moving execution local, scrubbing PII, and using federated learning to aggregate math updates (gradients/deltas) instead of data files."
   }
 };
 

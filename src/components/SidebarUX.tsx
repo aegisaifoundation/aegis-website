@@ -55,6 +55,7 @@ export default function SidebarUX() {
     { label: "Vision", target: "#vision" },
     { label: "Problem", target: "#problem" },
     { label: "Architecture", target: "#architecture" },
+    { label: "Sandbox", target: "#sandbox" },
     { label: "Agents", target: "#agents" },
     { label: "Technology", target: "#technology" },
     { label: "Sectors", target: "#sectors" },
