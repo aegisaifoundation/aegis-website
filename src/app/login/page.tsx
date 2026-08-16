@@ -4,8 +4,9 @@ import { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, ArrowLeft, Cpu, ShieldCheck } from "lucide-react";
-import { db } from "@/config/firebase";
-import { collection, query, where, getDocs, doc, setDoc } from "firebase/firestore";
+import { db, auth } from "@/config/firebase";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { collection, query, where, getDocs, doc, setDoc, updateDoc, deleteField } from "firebase/firestore";
 
 // Helper to hash password using SHA-256
 async function hashSHA256(str: string): Promise<string> {
@@ -34,11 +35,12 @@ export default function UserLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // If already logged in, redirect to dashboard
-    const activeSession = localStorage.getItem("aegis_user_session_id");
-    if (activeSession) {
-      router.push("/dashboard");
-    }
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        router.push("/dashboard");
+      }
+    });
+    return unsubscribe;
   }, [router]);
 
   const handleLogin = async (e: FormEvent) => {
@@ -55,9 +57,9 @@ export default function UserLoginPage() {
 
     try {
       // 1. Query Firestore for the user doc by userId
-      const qUser = query(collection(db, "users"), where("userId", "==", inputName));
-      const snapUser = await getDocs(qUser);
       let userDoc = null;
+      let qUser = query(collection(db, "users"), where("userId", "==", inputName));
+      let snapUser = await getDocs(qUser);
 
       if (snapUser.empty) {
         // Fallback: Query by email
@@ -71,13 +73,20 @@ export default function UserLoginPage() {
       }
 
       if (!userDoc) {
+        // Direct Firebase Auth login (handles pre-migrated or username-less logins if email format is used)
+        if (inputName.includes("@")) {
+          await signInWithEmailAndPassword(auth, inputName, password);
+          router.push("/dashboard");
+          return;
+        }
         setError("Invalid username or password.");
         setLoading(false);
         return;
       }
 
       const userData = userDoc.data();
-      
+      const email = userData.email;
+
       // Check if user account is active
       if (userData.status === "disabled") {
         setError("Your account has been disabled. Please contact support.");
@@ -85,39 +94,67 @@ export default function UserLoginPage() {
         return;
       }
 
-      // 2. Hash input password and verify
-      const hashedInput = await hashSHA256(password);
-      if (userData.password !== hashedInput) {
-        setError("Invalid username or password.");
-        setLoading(false);
-        return;
+      // 2. Migration Check: Check if this user has a legacy password in Firestore
+      if (userData.password) {
+        const hashedInput = await hashSHA256(password);
+        if (userData.password !== hashedInput) {
+          setError("Invalid username or password.");
+          setLoading(false);
+          return;
+        }
+
+        // Valid legacy credentials. Migrate to Firebase Auth!
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const operatorUid = userCredential.user.uid;
+
+          // Write new secure profile document using UID
+          await setDoc(doc(db, "users", operatorUid), {
+            uid: operatorUid,
+            userId: userData.userId,
+            email: email,
+            role: userData.role || "node_operator",
+            status: userData.status || "active",
+            createdAt: userData.createdAt || new Date().toISOString(),
+            lastLogin: new Date().toISOString(),
+            requestId: userData.requestId || "",
+          });
+
+          // Update the legacy document: clear password hash and set uid reference
+          await updateDoc(userDoc.ref, {
+            password: deleteField(),
+            uid: operatorUid,
+          });
+
+        } catch (signUpErr: any) {
+          if (signUpErr.code === "auth/email-already-in-use") {
+            // Already created in Auth (maybe migration partially completed). Log in!
+            await signInWithEmailAndPassword(auth, email, password);
+            // Clean up password field from legacy doc
+            await updateDoc(userDoc.ref, {
+              password: deleteField(),
+            });
+          } else {
+            throw signUpErr;
+          }
+        }
+      } else {
+        // Direct Firebase Auth login (No password hash in Firestore)
+        await signInWithEmailAndPassword(auth, email, password);
       }
 
-      // 3. Create session record in Firestore
-      const newSessionId = generateSessionId();
-      const sessionRef = doc(db, "sessions", newSessionId);
-      
-      await setDoc(sessionRef, {
-        sessionId: newSessionId,
-        userId: userData.userId,
-        email: userData.email,
-        role: userData.role || "node_operator",
-        createdAt: new Date().toISOString(),
-      });
-
-      // 4. Save session ID to browser
-      localStorage.setItem("aegis_user_session_id", newSessionId);
-      localStorage.setItem("aegis_user_id", userData.userId);
-      localStorage.setItem("aegis_user_email", userData.email);
-
-      // 5. Fire event to trigger Navbar updates
+      // Fire event to trigger Navbar updates
       window.dispatchEvent(new Event("aegis-user-login-changed"));
 
-      // 6. Redirect to operator dashboard
+      // Redirect to operator dashboard
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Login verification failed:", err);
-      setError(err.message || "An unexpected error occurred during login.");
+      if (err.code === "auth/wrong-password" || err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
+        setError("Invalid username or password.");
+      } else {
+        setError(err.message || "An unexpected error occurred during login.");
+      }
     } finally {
       setLoading(false);
     }

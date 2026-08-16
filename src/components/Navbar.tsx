@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Menu, X, ArrowRight, Search } from "lucide-react";
 import { useGeneralContent } from "@/config/generalContent";
+import { auth } from "@/config/firebase";
 
 export default function Navbar() {
   const { navbar } = useGeneralContent();
@@ -16,16 +17,18 @@ export default function Navbar() {
   const [hasSession, setHasSession] = useState(false);
 
   useEffect(() => {
-    const checkSession = () => {
-      const sess = localStorage.getItem("aegis_user_session_id");
-      setHasSession(!!sess);
-    };
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setHasSession(!!user);
+    });
 
-    checkSession();
-    
-    // Listen for custom login events
+    // Also support custom login events for immediate rendering transition if needed
+    const checkSession = () => {
+      setHasSession(!!auth.currentUser);
+    };
     window.addEventListener("aegis-user-login-changed", checkSession);
+
     return () => {
+      unsubscribe();
       window.removeEventListener("aegis-user-login-changed", checkSession);
     };
   }, []);

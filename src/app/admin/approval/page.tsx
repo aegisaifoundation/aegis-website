@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { ClipboardCheck, Check, X, ArrowUp, ArrowDown, Eye, EyeOff, Layout, AlertCircle, RefreshCw, Server, BookOpen, User, ShieldAlert } from "lucide-react";
-import { db, auth } from "@/config/firebase";
+import { db, auth, firebaseConfig } from "@/config/firebase";
+import { initializeApp, getApps, deleteApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc, getDoc, query, orderBy, limit } from "firebase/firestore";
 import { getOrCreateUserProfile, UserProfile, hasRoleAccess } from "@/config/userRoles";
 import { logActivity, addNotification } from "@/config/activityLogger";
@@ -318,13 +320,24 @@ export default function AdminApprovalsBuilder() {
 
       const generatedUserId = generateUniqueUserId(req.name);
       const generatedPassword = generateRandomPassword();
-      const hashedPass = await hashSHA256(generatedPassword);
 
-      await setDoc(doc(db, "users", generatedUserId), {
-        uid: generatedUserId,
+      // Initialize temporary secondary Firebase App to create operator Auth account
+      const tempAppName = `TempApp-${Date.now()}`;
+      const tempApp = initializeApp(firebaseConfig, tempAppName);
+      const tempAuth = getAuth(tempApp);
+      
+      const userCredential = await createUserWithEmailAndPassword(tempAuth, req.email, generatedPassword);
+      const operatorUid = userCredential.user.uid;
+      
+      // Sign out and delete the temp app to clean up connections
+      await signOut(tempAuth);
+      await deleteApp(tempApp);
+
+      // Write the operator profile using operatorUid as doc ID. No password saved to Firestore!
+      await setDoc(doc(db, "users", operatorUid), {
+        uid: operatorUid,
         userId: generatedUserId,
         email: req.email,
-        password: hashedPass,
         role: "node_operator",
         status: "active",
         createdAt: new Date().toISOString(),
@@ -332,13 +345,14 @@ export default function AdminApprovalsBuilder() {
         requestId: req.id,
       });
 
+      // Update the request status
       await updateDoc(doc(db, "node_requests", req.id), {
         status: "approved",
         approvedUserId: generatedUserId,
-        approvedPassword: generatedPassword,
+        approvedPassword: "Firebase Auth Registered",
       });
 
-      await logActivity("APPROVE_APPLICATION", `Approved operator application for ${req.email}`);
+      await logActivity("APPROVE_APPLICATION", `Approved operator application for ${req.email} (Auth account registered)`);
       
       setCredentialsModal({
         show: true,

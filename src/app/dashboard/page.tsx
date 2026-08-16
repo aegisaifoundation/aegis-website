@@ -58,8 +58,9 @@ import {
   WalletCards,
   X,
 } from "lucide-react";
-import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
-import { db } from "@/config/firebase";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
+import { db, auth } from "@/config/firebase";
+import { signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 
 interface UserProfile {
   userId: string;
@@ -838,44 +839,59 @@ export default function UserDashboard() {
   }, []);
 
   useEffect(() => {
-    async function verifySession() {
-      const sessionId = localStorage.getItem("aegis_user_session_id");
-      if (!sessionId) {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (!user) {
         router.push("/login");
         return;
       }
 
       try {
-        // 1. Fetch Session from Firestore
-        const sessionRef = doc(db, "sessions", sessionId);
-        const sessionSnap = await getDoc(sessionRef);
-
-        if (!sessionSnap.exists()) {
-          // Stale session, clean up
-          localStorage.removeItem("aegis_user_session_id");
-          localStorage.removeItem("aegis_user_id");
-          localStorage.removeItem("aegis_user_email");
-          window.dispatchEvent(new Event("aegis-user-login-changed"));
-          router.push("/login");
-          return;
-        }
-
-        const sessionData = sessionSnap.data();
-
-        // 2. Fetch User Profile
-        const userRef = doc(db, "users", sessionData.userId);
+        // Fetch User Profile from Firestore using user.uid
+        const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-          setError("User profile not found.");
+          // Fallback check by email (handles legacy accounts before full migration profile write)
+          const qUser = query(collection(db, "users"), where("email", "==", user.email));
+          const snapUser = await getDocs(qUser);
+          
+          if (snapUser.empty) {
+            setError("User profile not found. Please contact support.");
+            setLoading(false);
+            return;
+          }
+          
+          const userData = snapUser.docs[0].data();
+          if (userData.status === "disabled") {
+            setError("Your account has been disabled. Please contact support.");
+            await signOut(auth);
+            router.push("/login");
+            return;
+          }
+          
+          setProfile({
+            userId: user.uid,
+            email: user.email || "",
+            role: userData.role || "node_operator",
+            status: userData.status || "active",
+            createdAt: userData.createdAt || new Date().toISOString(),
+          });
           setLoading(false);
           return;
         }
 
         const userData = userSnap.data();
+        
+        if (userData.status === "disabled") {
+          setError("Your account has been disabled. Please contact support.");
+          await signOut(auth);
+          router.push("/login");
+          return;
+        }
+
         setProfile({
-          userId: userData.userId,
-          email: userData.email,
+          userId: user.uid,
+          email: user.email || "",
           role: userData.role || "node_operator",
           status: userData.status || "active",
           createdAt: userData.createdAt || new Date().toISOString(),
@@ -886,9 +902,9 @@ export default function UserDashboard() {
       } finally {
         setLoading(false);
       }
-    }
+    });
 
-    verifySession();
+    return unsubscribe;
   }, [router]);
 
   // Sync operator's nodes and requests in real-time
@@ -946,21 +962,11 @@ export default function UserDashboard() {
   }, [profile]);
 
   const handleLogout = async () => {
-    const sessionId = localStorage.getItem("aegis_user_session_id");
-    if (sessionId) {
-      try {
-        // Delete session document from Firestore to save storage space
-        const sessionRef = doc(db, "sessions", sessionId);
-        await deleteDoc(sessionRef);
-      } catch (err) {
-        console.error("Failed to delete session on Firestore:", err);
-      }
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error("Failed to sign out on Firebase Auth:", err);
     }
-
-    // Clear local storage
-    localStorage.removeItem("aegis_user_session_id");
-    localStorage.removeItem("aegis_user_id");
-    localStorage.removeItem("aegis_user_email");
 
     // Dispatch event to update navbar buttons
     window.dispatchEvent(new Event("aegis-user-login-changed"));
@@ -1041,36 +1047,26 @@ export default function UserDashboard() {
     setPassLoading(true);
 
     try {
-      // 1. Fetch user doc from Firestore
-      const userRef = doc(db, "users", profile.userId);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        setPassError("User profile not found.");
+      const user = auth.currentUser;
+      if (!user) {
+        setPassError("User session not found. Please log in again.");
         return;
       }
 
-      const userData = userSnap.data();
+      // Reauthenticate user before password update
+      const credential = EmailAuthProvider.credential(user.email || "", currentPassword);
+      await reauthenticateWithCredential(user, credential);
 
-      // 2. Hash and check current password
-      const hashedCurrent = await hashPasswordSHA256(currentPassword);
-      if (userData.password !== hashedCurrent) {
-        setPassError("Current password is incorrect.");
-        return;
-      }
-
-      // 3. Hash and update new password
-      const hashedNew = await hashPasswordSHA256(newPassword);
-      await updateDoc(userRef, {
-        password: hashedNew,
-      });
+      // Update password using Firebase Auth
+      await updatePassword(user, newPassword);
 
       setPassSuccess("Password updated successfully!");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err: unknown) {
-      setPassError("Failed to update password: " + getErrorMessage(err));
+    } catch (err: any) {
+      console.error("Password change failed:", err);
+      setPassError(err.message || "Failed to update password.");
     } finally {
       setPassLoading(false);
     }

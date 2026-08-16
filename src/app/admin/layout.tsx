@@ -206,20 +206,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       await signInWithEmailAndPassword(auth, emailInput, password);
     } catch (err: any) {
       if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
-        try {
-          await createUserWithEmailAndPassword(auth, emailInput, password);
-        } catch (signUpErr: any) {
-          if (signUpErr.code === "auth/email-already-in-use") {
-            setError("Incorrect password for this account.");
-          } else {
-            setError(signUpErr.message || "Failed to sign in.");
-          }
-          setChecking(false);
-        }
+        setError("Invalid username or password.");
       } else {
         setError(err.message || "Failed to sign in.");
-        setChecking(false);
       }
+      setChecking(false);
     }
   };
 

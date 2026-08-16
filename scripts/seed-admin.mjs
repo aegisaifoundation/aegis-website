@@ -18,9 +18,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Seeding configuration
-const email = "aegisaifoundation@gmail.com";
-const password = "adminpassword123"; // You can change this password
+// Seeding configuration from environment variables
+const email = process.env.ADMIN_SEED_EMAIL;
+const password = process.env.ADMIN_SEED_PASSWORD;
+
+if (!email || !password) {
+  console.error("ERROR: ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD environment variables must be set.");
+  process.exit(1);
+}
 
 async function seedAdmin() {
   console.log("==========================================");
@@ -32,7 +37,6 @@ async function seedAdmin() {
   let uid;
   try {
     // 1. Create User in Firebase Auth
-    // Note: Firebase Auth securely hashes the password on Google's authentication servers.
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     uid = userCredential.user.uid;
     console.log(`[AUTH] User registered successfully in Firebase Authentication.`);
@@ -54,12 +58,10 @@ async function seedAdmin() {
     }
   }
 
-  // 2. Create User Profile in Firestore with 'super_admin' role and seed 'admin' collection
+  // 2. Create User Profile in Firestore with 'super_admin' role
   try {
-    // Hash the password using SHA-256 for the Firestore 'admin'/'admins' collections
-    const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
-
     // Write to 'admins' collection (plural) for core permissions & profile gating
+    // Note: We do NOT store password hashes in Firestore.
     const userDocRef = doc(db, "admins", uid);
     await setDoc(userDocRef, {
       uid,
@@ -67,24 +69,13 @@ async function seedAdmin() {
       role: "super_admin",
       status: "active",
       createdAt: new Date().toISOString(),
-      lastLogin: new Date().toISOString(),
-      password: hashedPassword
+      lastLogin: new Date().toISOString()
     });
     console.log(`[FIRESTORE] Super Admin profile document created/updated in 'admins' collection (plural).`);
-
-    // Write to 'admin' collection (singular) as requested
-    const adminDocRef = doc(db, "admin", email);
-    await setDoc(adminDocRef, {
-      email,
-      password: hashedPassword,
-      createdAt: new Date().toISOString()
-    });
-    console.log(`[FIRESTORE] Admin credentials document created/updated in 'admin' collection (singular).`);
     
     console.log("\n==========================================");
     console.log("SUCCESS: Seeding completed successfully!");
     console.log(`You can now log in as: ${email}`);
-    console.log(`Password: ${password}`);
     console.log("==========================================");
     process.exit(0);
   } catch (error) {

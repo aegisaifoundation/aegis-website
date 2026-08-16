@@ -301,8 +301,13 @@ const defaultResearchPublications = [
   }
 ];
 
-const email = "aegisaifoundation@gmail.com";
-const password = "adminpassword123";
+const email = process.env.ADMIN_SEED_EMAIL;
+const password = process.env.ADMIN_SEED_PASSWORD;
+
+if (!email || !password) {
+  console.error("ERROR: ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD environment variables must be set.");
+  process.exit(1);
+}
 
 async function seedWebsiteData() {
   console.log("==========================================");

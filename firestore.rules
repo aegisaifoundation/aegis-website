@@ -7,6 +7,11 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Check if user has an admin profile document
+    function isMember() {
+      return isLoggedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
     // Get user role from admins collection
     function getUserRole() {
       return get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role;
@@ -112,29 +117,42 @@ service cloud.firestore {
       );
     }
 
-    // Sessions collection
+    // Sessions collection (deprecated)
     match /sessions/{sessionId} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
 
     // Public users collection
     match /users/{userId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isLoggedIn() && (
+        isAdmin() || (
+          request.auth.uid == userId && 
+          request.resource.data.role == "node_operator" && 
+          request.resource.data.status == "active" &&
+          request.resource.data.uid == request.auth.uid &&
+          request.resource.data.email == request.auth.token.email
+        )
+      );
+      allow update: if isLoggedIn() && (
+        isAdmin() || 
+        (request.auth.uid == userId && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password', 'lastLogin'])) ||
+        (resource.data.email == request.auth.token.email && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password', 'lastLogin', 'uid']))
+      );
+      allow delete: if isAdmin();
     }
 
     // Admin profiles
     match /admins/{uid} {
       allow read: if isLoggedIn();
-      allow create: if isLoggedIn() && (isAdmin() || request.auth.uid == uid);
+      allow create: if isLoggedIn() && (isAdmin() || (request.auth.uid == uid && request.auth.token.email == 'aegisaifoundation@gmail.com'));
       allow update: if isLoggedIn() && (isAdmin() || (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin'])));
       allow delete: if isLoggedIn() && isAdmin();
     }
 
     // Legacy admin collection
     match /admin/{document} {
-      allow read: if isLoggedIn();
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     // Website content
@@ -146,7 +164,7 @@ service cloud.firestore {
     // Node requests
     match /node_requests/{document} {
       allow create: if true;
-      allow read: if isLoggedIn();
+      allow read: if isLoggedIn() && (isAdmin() || resource.data.userId == request.auth.uid || resource.data.email == request.auth.token.email);
       allow write: if isAdmin();
     }
 
@@ -183,13 +201,13 @@ service cloud.firestore {
     // Contact messages
     match /contact_messages/{document} {
       allow create: if true;
-      allow read, update, delete: if isLoggedIn();
+      allow read, update, delete: if isLoggedIn() && isAdmin();
     }
 
     // Notifications
     match /notifications/{document} {
       allow create: if true;
-      allow read, update, delete: if isLoggedIn();
+      allow read, update, delete: if isLoggedIn() && (isAdmin() || resource.data.userId == request.auth.uid || resource.data.email == request.auth.token.email);
     }
 
     // Pending approval queue
@@ -381,51 +399,51 @@ service cloud.firestore {
 
     // Comments & Discussions
     match /ticket_comments/{document} {
-      allow read, write: if isLoggedIn();
+      allow read, write: if isMember();
     }
 
     // Activity Log Audit Trail
     match /ticket_activity/{document} {
-      allow read: if isLoggedIn();
-      allow create: if isLoggedIn();
+      allow read: if isMember();
+      allow create: if isMember();
     }
 
     // Attachments Metadata
     match /ticket_attachments/{document} {
-      allow read, write: if isLoggedIn();
+      allow read, write: if isMember();
     }
 
     // Employee & Department Directory
     match /department_members/{document} {
-      allow read: if isLoggedIn();
+      allow read: if isMember();
       allow write: if isAdmin() || isHRLegal() || isExec();
     }
 
     // Ticket Assignments Map
     match /ticket_assignments/{document} {
-      allow read, write: if isLoggedIn();
+      allow read, write: if isMember();
     }
 
     // Ticket Notifications
     match /ticket_notifications/{document} {
-      allow read, write: if isLoggedIn();
+      allow read, write: if isMember();
     }
 
     // Metadata & Projects
     match /ticket_projects/{document} {
-      allow read: if isLoggedIn();
+      allow read: if isMember();
       allow write: if isExec() || isAdmin() || isAnyManager();
     }
 
     // Sprints
     match /ticket_sprints/{document} {
-      allow read: if isLoggedIn();
+      allow read: if isMember();
       allow write: if isExec() || isAdmin() || isAnyManager();
     }
 
     // Milestones
     match /ticket_milestones/{document} {
-      allow read: if isLoggedIn();
+      allow read: if isMember();
       allow write: if isExec() || isAdmin() || isAnyManager();
     }
   }
