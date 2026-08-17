@@ -64,15 +64,21 @@ const defaultHomeSections = [
 ];
 
 export default function Home() {
-  const [sections, setSections] = useState<any[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("aegis_homepage_layout");
-      if (saved) return JSON.parse(saved);
-    }
-    return defaultHomeSections;
-  });
+  const [sections, setSections] = useState<any[]>(defaultHomeSections);
 
   useEffect(() => {
+    // Load client-side layout override from localStorage
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("aegis_homepage_layout");
+      if (saved) {
+        try {
+          setSections(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to parse local layout:", e);
+        }
+      }
+    }
+
     const docRef = doc(db, "website_pages", "home");
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
