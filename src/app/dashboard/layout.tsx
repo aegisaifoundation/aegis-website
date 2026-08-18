@@ -5,9 +5,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  Home, Cpu, CircleEllipsis, PackageOpen, CloudDownload, Activity, CreditCard, Headphones, Settings,
+  Home, Server, FileText, ShoppingBag, ArrowDownToLine, Activity, CreditCard, Headphones, Settings,
   Bell, Command, X, LogOut, ChevronDown, ShieldCheck, Shield, KeyRound, Layers, ArrowRight,
-  Download, Bot, Database, MessageSquare, BookOpen, Building2, WalletCards
+  Download, Bot, Database, MessageSquare, BookOpen, Building2, WalletCards, Cpu, CircleEllipsis, PackageOpen, CloudDownload
 } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -90,10 +90,10 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
 
   const navigation = [
     { id: "dashboard", label: "Overview", icon: Home, href: "/dashboard" },
-    { id: "my-nodes", label: "My Nodes", icon: Cpu, href: "/dashboard/my-nodes" },
-    { id: "requests", label: "Requests", icon: CircleEllipsis, href: "/dashboard/requests" },
-    { id: "marketplace", label: "Marketplace", icon: PackageOpen, href: "/dashboard/marketplace" },
-    { id: "downloads", label: "Downloads", icon: CloudDownload, href: "/dashboard/downloads" },
+    { id: "my-nodes", label: "My Nodes", icon: Server, href: "/dashboard/my-nodes" },
+    { id: "requests", label: "Requests", icon: FileText, href: "/dashboard/requests" },
+    { id: "marketplace", label: "Marketplace", icon: ShoppingBag, href: "/dashboard/marketplace" },
+    { id: "downloads", label: "Downloads", icon: ArrowDownToLine, href: "/dashboard/downloads" },
     { id: "usage", label: "Usage", icon: Activity, href: "/dashboard/usage" },
     { id: "billing", label: "Billing", icon: CreditCard, href: "/dashboard/billing" },
     { id: "support", label: "Support", icon: Headphones, href: "/dashboard/support" },
@@ -103,16 +103,15 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   return (
     <main className="h-screen w-screen overflow-hidden bg-[#f8fafc] text-slate-800 font-body flex">
       {/* Dark Sidebar Left */}
-      <aside className="w-72 bg-[#0d1424] text-white shrink-0 flex flex-col justify-between py-6 border-r border-white/5 select-none z-20 h-full overflow-y-auto">
-        <div className="flex flex-col gap-8">
+      <aside className="w-64 bg-[#0B0F19] text-white shrink-0 flex flex-col justify-between py-6 border-r border-white/5 select-none z-20 h-full overflow-y-auto">
+        <div className="flex flex-col gap-7">
           <Link href="/" className="flex items-center gap-3 px-6">
-            <div className="p-2.5 bg-white/10 rounded-xl">
-              <Cpu className="h-6 w-6 text-[#7DD3FC]" />
-            </div>
-            <div>
-              <div className="font-heading text-2xl font-bold tracking-[0.08em] text-white">AEGIS</div>
-              <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-sans">Private AI Workspace</div>
-            </div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <circle cx="12" cy="11" r="4.5" strokeWidth="1.5" />
+              <circle cx="12" cy="11" r="1.8" fill="currentColor" />
+            </svg>
+            <span className="font-heading text-lg font-extrabold tracking-wider text-white">AEGIS</span>
           </Link>
 
           <nav className="flex flex-col gap-1 px-4 text-xs font-semibold">
@@ -123,13 +122,13 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.id}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all ${
+                  className={`flex items-center gap-3.5 rounded-xl px-4 py-2.5 text-left text-sm font-medium transition-all ${
                     active 
-                      ? "bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] border-l-4 border-[#4D7CFE]" 
+                      ? "bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] font-semibold" 
                       : "text-slate-400 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <Icon className={`h-4.5 w-4.5 ${active ? "text-[#7DD3FC]" : "text-slate-500"}`} />
+                  <Icon className={`h-4.5 w-4.5 ${active ? "text-white" : "text-slate-400"}`} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -138,70 +137,72 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Profile and Logout Box */}
-        <div className="px-4">
-          <div className="rounded-2xl bg-white/5 border border-white/5 p-4 flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-full bg-[#4D7CFE]/20 text-[#7DD3FC] font-heading font-bold text-sm">
-                OP
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-white truncate">Operator</p>
-                <p className="text-[10px] text-slate-500 truncate">{profile.email}</p>
-              </div>
+        <div className="px-4 flex flex-col gap-2">
+          <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] p-4 flex items-center gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-slate-800 text-white font-heading font-bold text-xs border border-white/[0.08]">
+              OP
             </div>
-
-            <button
-              onClick={handleLogout}
-              className="flex items-center justify-center gap-2 w-full rounded-xl bg-white/5 hover:bg-red-500/10 hover:text-red-400 border border-white/5 py-2.5 text-[11px] font-bold transition-all text-slate-300 cursor-pointer"
-            >
-              <LogOut className="h-3.5 w-3.5" /> Logout
-            </button>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-white truncate">Operator</p>
+              <p className="text-[10px] text-slate-400 truncate">{profile.email}</p>
+            </div>
           </div>
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3.5 rounded-xl px-4 py-2.5 text-left text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all cursor-pointer"
+          >
+            <LogOut className="h-4.5 w-4.5 text-slate-400" />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
 
       {/* Main Panel Right */}
       <section className="flex-1 flex flex-col min-w-0 bg-[#f8fafc] h-full overflow-y-auto">
         {/* Header */}
-        <header className="flex justify-between items-center px-10 py-6 border-b border-slate-200 bg-white">
-          <div>
-            <h1 className="font-heading font-extrabold text-2xl text-slate-900 tracking-tight capitalize">
-              {activeView === "dashboard" ? "Overview" : activeView.replace("-", " ")}
-            </h1>
-            <p className="text-xs text-slate-500 mt-1 font-medium font-sans">
-              {activeView === "dashboard" && "Welcome back, Operator. Here's what's happening with your AEGIS network."}
-              {activeView === "settings" && "Manage your operator settings and application security parameters."}
-              {activeView === "my-nodes" && "Register, inspect, and connect local GPU infrastructure."}
-              {activeView === "requests" && "Manage approval pipelines with comments, attachments, reviewer context, and activity history."}
-              {activeView === "marketplace" && "Featured, verified, partner, and community components for AI deployment workflows."}
-              {activeView === "downloads" && "Search components, compare versions, inspect requirements, and request secure access."}
-              {activeView === "usage" && "Monitor and analyze your resource consumption across all nodes."}
-              {activeView === "billing" && "Compare plans, billing settings, GST tax invoices, and account subscriptions."}
-              {activeView === "support" && "Create support tickets, open live chat, report bugs, request features, and check system status."}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => router.push("/dashboard/settings")}
-              className="p-2 border border-slate-200 rounded-full hover:bg-slate-50 transition-colors text-slate-500 cursor-pointer"
-            >
-              <Bell className="h-4.5 w-4.5" />
-            </button>
-
-            <div className="h-6 w-px bg-slate-200" />
-
-            <div className="flex items-center gap-2">
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-[#4D7CFE]/10 text-[#4D7CFE] font-heading font-bold text-xs">
-                OP
-              </div>
-              <ChevronDown className="h-4 w-4 text-slate-400" />
+        {activeView !== "support" && (
+          <header className="flex justify-between items-center px-8 py-5 border-b border-slate-200/60 bg-white">
+            <div>
+              <h1 className="font-heading font-extrabold text-2xl text-slate-900 tracking-tight capitalize">
+                {activeView === "dashboard" ? "Overview" : activeView.replace("-", " ")}
+              </h1>
+              <p className="text-xs text-slate-500 mt-1 font-medium font-sans">
+                {activeView === "dashboard" && "Welcome back, Operator. Here's what's happening with your AEGIS network."}
+                {activeView === "settings" && "Manage your operator settings and application security parameters."}
+                {activeView === "my-nodes" && "Register, inspect, and connect local GPU infrastructure."}
+                {activeView === "requests" && "Manage approval pipelines with comments, attachments, reviewer context, and activity history."}
+                {activeView === "marketplace" && "Featured, verified, partner, and community components for AI deployment workflows."}
+                {activeView === "downloads" && "Search components, compare versions, inspect requirements, and request secure access."}
+                {activeView === "usage" && "Monitor and analyze your resource consumption across all nodes."}
+                {activeView === "billing" && "Compare plans, billing settings, GST tax invoices, and account subscriptions."}
+                {activeView === "support" && "Create support tickets, open live chat, report bugs, request features, and check system status."}
+              </p>
             </div>
-          </div>
-        </header>
+
+            <div className="flex items-center gap-4.5">
+              <button 
+                onClick={() => router.push("/dashboard/settings")}
+                className="relative p-1.5 text-slate-400 hover:text-slate-800 transition-colors cursor-pointer"
+              >
+                <Bell className="h-5 w-5" />
+              </button>
+
+              <button 
+                onClick={() => router.push("/dashboard/settings")}
+                className="flex items-center gap-2 pl-3 pr-2.5 py-1.5 bg-slate-100/85 hover:bg-slate-200/60 rounded-full border border-slate-200/40 text-slate-700 transition-colors cursor-pointer text-xs font-bold font-sans"
+              >
+                <span className="grid h-6.5 w-6.5 place-items-center rounded-full bg-slate-200 text-slate-800 text-[10px] font-bold">
+                  OP
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
+              </button>
+            </div>
+          </header>
+        )}
 
         {/* Content Pane */}
-        <div className="p-10 flex-1">
+        <div className={`flex-1 ${activeView === "support" ? "" : "p-10"}`}>
           {children}
         </div>
       </section>

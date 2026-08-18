@@ -186,7 +186,7 @@ export default function RequestsPage() {
                   const matchesStatus = statusFilter === "All Status" || 
                     (statusFilter === "Pending" && reqStatus === "pending") || 
                     (statusFilter === "Approved" && reqStatus === "approved") || 
-                    (statusFilter === "In Review" && reqStatus === "security") || 
+                    (statusFilter === "In Review" && reqStatus === "quarantined") || 
                     (statusFilter === "Rejected" && reqStatus === "rejected");
                   return matchesSearch && matchesType && matchesStatus;
                 })
@@ -227,11 +227,11 @@ export default function RequestsPage() {
                             ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
                             : reqStatus === "rejected"
                             ? "bg-red-50 text-red-600 border border-red-100"
-                            : reqStatus === "security"
+                            : reqStatus === "quarantined"
                             ? "bg-amber-50 text-amber-600 border border-amber-100"
                             : "bg-blue-50 text-blue-600 border border-blue-100"
                         }`}>
-                          {reqStatus === "security" ? "In Review" : reqStatus}
+                          {reqStatus === "quarantined" ? "In Review" : reqStatus}
                         </span>
                       </td>
                       <td className="py-3.5 pr-2">
@@ -293,11 +293,11 @@ export default function RequestsPage() {
                 ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
                 : currentStatus(selectedRequest.id, selectedRequest.status) === "rejected"
                 ? "bg-red-50 text-red-600 border border-red-100"
-                : currentStatus(selectedRequest.id, selectedRequest.status) === "security"
+                : currentStatus(selectedRequest.id, selectedRequest.status) === "quarantined"
                 ? "bg-amber-50 text-amber-600 border border-amber-100"
                 : "bg-blue-50 text-blue-600 border border-blue-100"
             }`}>
-              {currentStatus(selectedRequest.id, selectedRequest.status) === "security" ? "In Review" : currentStatus(selectedRequest.id, selectedRequest.status)}
+              {currentStatus(selectedRequest.id, selectedRequest.status) === "quarantined" ? "In Review" : currentStatus(selectedRequest.id, selectedRequest.status)}
             </span>
           </div>
 
@@ -318,7 +318,7 @@ export default function RequestsPage() {
             </div>
             <div className="flex justify-between items-center border-t border-slate-50 pt-2">
               <span className="text-slate-400 font-medium">Status</span>
-              <span className="text-slate-900 capitalize font-bold">{currentStatus(selectedRequest.id, selectedRequest.status) === "security" ? "In Review" : currentStatus(selectedRequest.id, selectedRequest.status)}</span>
+              <span className="text-slate-900 capitalize font-bold">{currentStatus(selectedRequest.id, selectedRequest.status) === "quarantined" ? "In Review" : currentStatus(selectedRequest.id, selectedRequest.status)}</span>
             </div>
           </div>
 

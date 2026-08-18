@@ -1,7 +1,7 @@
 import {
   CloudDownload, CircleEllipsis, PackageOpen, KeyRound, Activity, BookOpen, WalletCards, CreditCard,
   FileText, User, Shield, Bell, Headphones, Bot, Database, Monitor, BriefcaseBusiness, Terminal,
-  Cpu, ShieldCheck, Sparkles, Building2, MessageSquare, Copy, Trash2, Gauge, Layers
+  Cpu, ShieldCheck, Sparkles, Building2, MessageSquare, Copy, Trash2, Gauge, Layers, Download
 } from "lucide-react";
 
 export type DashboardView =
