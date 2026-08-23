@@ -12,7 +12,7 @@ interface PageConfig {
   id: string; // The slug
   title: string;
   description: string;
-  template: "publication" | "grid" | "canvas";
+  template: "publication" | "grid" | "canvas" | "modular";
   authors?: string;
   category?: string;
   date?: string;
@@ -21,6 +21,7 @@ interface PageConfig {
   cards?: { title: string; description: string; badge?: string; link?: string }[];
   formEnabled?: boolean;
   formTitle?: string;
+  blocks?: any[];
 }
 
 interface UIRequest {
@@ -62,7 +63,113 @@ export default function ProductUXHub() {
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [template, setTemplate] = useState<"publication" | "grid" | "canvas">("publication");
+  const [template, setTemplate] = useState<"publication" | "grid" | "canvas" | "modular">("publication");
+
+  // Modular Block Builder states
+  const [blocks, setBlocks] = useState<any[]>([]);
+  const [selectedBlockIdx, setSelectedBlockIdx] = useState<number | null>(null);
+
+  const handleAddBlock = (type: string) => {
+    const defaultBlock: any = { type };
+    if (type === "hero") {
+      defaultBlock.title = "New Hero Section";
+      defaultBlock.description = "Detailed subtext goes here.";
+      defaultBlock.badge = "ANNOUNCEMENT";
+      defaultBlock.primaryBtnText = "Get Started";
+      defaultBlock.primaryBtnLink = "/";
+      defaultBlock.secondaryBtnText = "Learn More";
+      defaultBlock.secondaryBtnLink = "/";
+    } else if (type === "terminal") {
+      defaultBlock.title = "Core CLI Console";
+      defaultBlock.commands = [{ cmd: "aegis status", output: "All systems green." }];
+    } else if (type === "grid") {
+      defaultBlock.title = "Explore Architecture";
+      defaultBlock.cards = [{ title: "Item Title", description: "Brief description.", badge: "NEW", link: "" }];
+    } else if (type === "stats") {
+      defaultBlock.stats = [{ value: "100%", label: "Verified Enclave", subtext: "Hardware-level security" }];
+    } else if (type === "roadmap") {
+      defaultBlock.title = "Development Roadmap";
+      defaultBlock.roadmapItems = [{ title: "Phase 1: Enclave Rollout", desc: "Setting up secure network nodes.", status: "active" }];
+    } else if (type === "features") {
+      defaultBlock.title = "Core Advantages";
+      defaultBlock.description = "Key architectural features of our platform.";
+      defaultBlock.badge = "SYSTEM BENEFITS";
+      defaultBlock.featuresList = [{ title: "High Throughput", description: "Processes operations with low latency." }];
+    } else if (type === "comparison") {
+      defaultBlock.title = "Node Configurations";
+      defaultBlock.comparisonTiers = [{ name: "Standard Node", specs: [{ label: "CPU", value: "2 Cores" }, { label: "RAM", value: "8 GB" }], featured: false, ctaText: "Deploy Node", ctaLink: "" }];
+    } else if (type === "contact-form") {
+      defaultBlock.formTitle = "Submit Query Capsule";
+      defaultBlock.description = "Enter specifications to dispatch requests.";
+    } else if (type === "faq") {
+      defaultBlock.title = "Technical FAQs";
+      defaultBlock.faqItems = [{ question: "How are enclaves secure?", answer: "We use SGX hardware verification modules." }];
+    } else if (type === "rich-text") {
+      defaultBlock.title = "Technical Specifications Overview";
+      defaultBlock.subtitle = "PROTOCOL SPECIFICATION v2";
+      defaultBlock.bodyText = "Detailed documentation paragraphs go here.";
+    } else if (type === "video-hero") {
+      defaultBlock.title = "Cinematic Manifesto Video";
+      defaultBlock.description = "Watch the full visual projection.";
+      defaultBlock.badge = "FILMED PROJECTION";
+    }
+    setBlocks(prev => [...prev, defaultBlock]);
+    setSelectedBlockIdx(blocks.length);
+  };
+
+  const updateBlockField = (index: number, field: string, value: any) => {
+    setBlocks(prev => prev.map((b, i) => i === index ? { ...b, [field]: value } : b));
+  };
+
+  const updateBlockArrayItem = (bIdx: number, arrayField: string, itemIdx: number, subField: string, value: any) => {
+    setBlocks(prev => prev.map((b, i) => {
+      if (i !== bIdx) return b;
+      const list = [...(b[arrayField] || [])];
+      list[itemIdx] = { ...list[itemIdx], [subField]: value };
+      return { ...b, [arrayField]: list };
+    }));
+  };
+
+  const addBlockArrayItem = (bIdx: number, arrayField: string, defaultValue: any) => {
+    setBlocks(prev => prev.map((b, i) => {
+      if (i !== bIdx) return b;
+      const list = [...(b[arrayField] || []), defaultValue];
+      return { ...b, [arrayField]: list };
+    }));
+  };
+
+  const removeBlockArrayItem = (bIdx: number, arrayField: string, itemIdx: number) => {
+    setBlocks(prev => prev.map((b, i) => {
+      if (i !== bIdx) return b;
+      const list = (b[arrayField] || []).filter((_: any, idx: number) => idx !== itemIdx);
+      return { ...b, [arrayField]: list };
+    }));
+  };
+
+  const moveBlock = (index: number, direction: "up" | "down") => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === blocks.length - 1) return;
+
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    const list = [...blocks];
+    const temp = list[index];
+    list[index] = list[targetIdx];
+    list[targetIdx] = temp;
+
+    setBlocks(list);
+    if (selectedBlockIdx === index) {
+      setSelectedBlockIdx(targetIdx);
+    } else if (selectedBlockIdx === targetIdx) {
+      setSelectedBlockIdx(index);
+    }
+  };
+
+  const deleteBlock = (index: number) => {
+    if (confirm("Are you sure you want to remove this block?")) {
+      setBlocks(prev => prev.filter((_, i) => i !== index));
+      setSelectedBlockIdx(null);
+    }
+  };
   
   // Publication fields
   const [authors, setAuthors] = useState("");
@@ -202,6 +309,8 @@ export default function ProductUXHub() {
     setCards(page.cards || []);
     setFormEnabled(page.formEnabled || false);
     setFormTitle(page.formTitle || "Initiate Query Portal");
+    setBlocks(page.blocks || []);
+    setSelectedBlockIdx(null);
     setActiveUiReq(null);
     setActiveSubTab("creator");
   };
@@ -237,6 +346,8 @@ export default function ProductUXHub() {
         pageData.bodyParagraphs = bodyText.split("\n\n").map(p => p.trim()).filter(Boolean);
         pageData.formEnabled = formEnabled;
         pageData.formTitle = formTitle.trim();
+      } else if (template === "modular") {
+        pageData.blocks = blocks;
       }
 
       await setDoc(doc(db, "website_pages", cleanSlug), pageData);
@@ -258,6 +369,8 @@ export default function ProductUXHub() {
       setBodyText("");
       setCards([]);
       setFormEnabled(false);
+      setBlocks([]);
+      setSelectedBlockIdx(null);
       setEditingId(null);
       setActiveUiReq(null);
 
@@ -398,6 +511,7 @@ export default function ProductUXHub() {
                     <option value="publication">Research Publication</option>
                     <option value="grid">Feature Showcase Grid</option>
                     <option value="canvas">Canvas Contact Landing</option>
+                    <option value="modular">Modular Block Builder</option>
                   </select>
                 </div>
               </div>
@@ -455,6 +569,412 @@ export default function ProductUXHub() {
                     <label htmlFor="formEnabled" className="text-xs text-gray-300 cursor-pointer">Enable Contact Form</label>
                   </div>
                   {formEnabled && <input type="text" value={formTitle} onChange={(e) => setFormTitle(e.target.value)} placeholder="Form Title" className="rounded bg-black border border-white/10 px-3 py-2 text-xs text-white" />}
+                </div>
+              )}
+
+              {template === "modular" && (
+                <div className="flex flex-col gap-6 p-4 rounded-xl border border-white/5 bg-white/[0.01] w-full text-left">
+                  <div className="grid md:grid-cols-[240px_1fr] gap-6 items-start">
+                    {/* Left Side: Blocks List */}
+                    <div className="flex flex-col gap-3 border-r border-white/5 pr-4">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Blocks Layout</span>
+                        <select
+                          value=""
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleAddBlock(e.target.value);
+                              e.target.value = "";
+                            }
+                          }}
+                          className="rounded bg-black border border-white/10 px-2 py-1 text-[9px] text-pink-400 outline-none focus:border-pink-500 font-bold uppercase tracking-wider cursor-pointer"
+                        >
+                          <option value="">+ ADD BLOCK</option>
+                          <option value="hero">Hero Banner</option>
+                          <option value="terminal">Interactive CLI Console</option>
+                          <option value="grid">Showcase Cards Grid</option>
+                          <option value="stats">Pulsing Stats Row</option>
+                          <option value="roadmap">Roadmap Timeline</option>
+                          <option value="features">Advantage Split</option>
+                          <option value="comparison">Tech Matrix Table</option>
+                          <option value="contact-form">Custom Query Form</option>
+                          <option value="faq">FAQ Accordion</option>
+                          <option value="rich-text">Rich Text & Snippets</option>
+                          <option value="video-hero">Cinematic Media</option>
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
+                        {blocks.length === 0 ? (
+                          <div className="text-center text-[10px] text-gray-500 font-mono py-4">No blocks. Choose one to add.</div>
+                        ) : (
+                          blocks.map((b, bIdx) => (
+                            <div
+                              key={bIdx}
+                              onClick={() => setSelectedBlockIdx(bIdx)}
+                              className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition-all cursor-pointer ${
+                                selectedBlockIdx === bIdx ? "border-pink-500 bg-pink-500/5" : "border-white/5 bg-white/[0.01] hover:border-white/10"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-[9px] font-mono text-pink-400 uppercase font-bold">{b.type}</span>
+                                <div className="flex gap-1">
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); moveBlock(bIdx, "up"); }} className="p-0.5 rounded hover:bg-white/10 text-gray-400 hover:text-white text-[9px]">▲</button>
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); moveBlock(bIdx, "down"); }} className="p-0.5 rounded hover:bg-white/10 text-gray-400 hover:text-white text-[9px]">▼</button>
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); deleteBlock(bIdx); }} className="p-0.5 rounded hover:bg-white/10 text-gray-400 hover:text-red-400 text-[9px]">✕</button>
+                                </div>
+                              </div>
+                              <span className="text-xs text-gray-300 font-bold truncate">
+                                {b.title || b.formTitle || `Untitled ${b.type}`}
+                              </span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right Side: Selected Block Editor */}
+                    <div className="flex-1 flex flex-col gap-5">
+                      {selectedBlockIdx !== null && blocks[selectedBlockIdx] ? (
+                        (() => {
+                          const activeBlock = blocks[selectedBlockIdx];
+                          return (
+                            <div className="flex flex-col gap-4 animate-fade-in">
+                              <div className="border-b border-white/5 pb-2 mb-1 flex items-center justify-between">
+                                <span className="text-xs font-bold text-white uppercase">Edit {activeBlock.type} Block</span>
+                                <span className="text-[9px] font-mono text-gray-500">Block Index: #{selectedBlockIdx}</span>
+                              </div>
+
+                              {/* Adaptive field rendering based on block type */}
+                              {/* HERO FIELDS */}
+                              {activeBlock.type === "hero" && (
+                                <div className="grid gap-3">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Badge Text</label>
+                                      <input type="text" value={activeBlock.badge || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "badge", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Hero Title</label>
+                                      <input type="text" value={activeBlock.title || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "title", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Description Subtext</label>
+                                    <textarea value={activeBlock.description || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "description", e.target.value)} rows={3} className="rounded bg-black border border-white/10 p-2.5 text-xs text-white resize-none" />
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Primary Button Text</label>
+                                      <input type="text" value={activeBlock.primaryBtnText || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "primaryBtnText", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Primary Button Link</label>
+                                      <input type="text" value={activeBlock.primaryBtnLink || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "primaryBtnLink", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Secondary Button Text</label>
+                                      <input type="text" value={activeBlock.secondaryBtnText || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "secondaryBtnText", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Secondary Button Link</label>
+                                      <input type="text" value={activeBlock.secondaryBtnLink || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "secondaryBtnLink", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* TERMINAL FIELDS */}
+                              {activeBlock.type === "terminal" && (
+                                <div className="grid gap-3">
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Console Window Title</label>
+                                    <input type="text" value={activeBlock.title || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "title", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                  </div>
+                                  <div className="border border-white/5 p-3 rounded-lg flex flex-col gap-2">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-[9px] text-gray-400 font-bold uppercase">Interactive Commands</span>
+                                      <button type="button" onClick={() => addBlockArrayItem(selectedBlockIdx, "commands", { cmd: "aegis run", output: "Command response." })} className="text-[9px] text-pink-400 hover:text-white font-bold">+ ADD COMMAND</button>
+                                    </div>
+                                    <div className="flex flex-col gap-3 mt-1">
+                                      {(activeBlock.commands || []).map((cmdObj: any, cmdIdx: number) => (
+                                        <div key={cmdIdx} className="p-3 bg-black border border-white/10 rounded flex flex-col gap-2 relative">
+                                          <button type="button" onClick={() => removeBlockArrayItem(selectedBlockIdx, "commands", cmdIdx)} className="absolute top-2 right-2 text-gray-500 hover:text-red-400 text-xs">✕</button>
+                                          <input type="text" value={cmdObj.cmd || ""} placeholder="Command name (e.g. aegis verify)" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "commands", cmdIdx, "cmd", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                          <textarea value={cmdObj.output || ""} placeholder="Console response output text..." rows={2} onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "commands", cmdIdx, "output", e.target.value)} className="rounded bg-white/5 border border-white/10 p-2 text-xs text-white resize-none" />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* GRID FIELDS */}
+                              {activeBlock.type === "grid" && (
+                                <div className="grid gap-3">
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Grid Header Title</label>
+                                    <input type="text" value={activeBlock.title || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "title", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                  </div>
+                                  <div className="border border-white/5 p-3 rounded-lg flex flex-col gap-2">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-[9px] text-gray-400 font-bold uppercase">Grid Cards Collection</span>
+                                      <button type="button" onClick={() => addBlockArrayItem(selectedBlockIdx, "cards", { title: "New card", description: "Card details.", badge: "HOT", link: "" })} className="text-[9px] text-pink-400 hover:text-white font-bold">+ ADD CARD</button>
+                                    </div>
+                                    <div className="grid sm:grid-cols-2 gap-3 mt-1">
+                                      {(activeBlock.cards || []).map((cardObj: any, cardIdx: number) => (
+                                        <div key={cardIdx} className="p-3 bg-black border border-white/10 rounded flex flex-col gap-1.5 relative">
+                                          <button type="button" onClick={() => removeBlockArrayItem(selectedBlockIdx, "cards", cardIdx)} className="absolute top-2 right-2 text-gray-500 hover:text-red-400 text-xs">✕</button>
+                                          <input type="text" value={cardObj.title || ""} placeholder="Card Title" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "cards", cardIdx, "title", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                          <input type="text" value={cardObj.badge || ""} placeholder="Badge" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "cards", cardIdx, "badge", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                          <input type="text" value={cardObj.link || ""} placeholder="Link Path" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "cards", cardIdx, "link", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                          <textarea value={cardObj.description || ""} placeholder="Description..." rows={2} onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "cards", cardIdx, "description", e.target.value)} className="rounded bg-white/5 border border-white/10 p-2 text-xs text-white resize-none" />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* STATS FIELDS */}
+                              {activeBlock.type === "stats" && (
+                                <div className="grid gap-3">
+                                  <div className="border border-white/5 p-3 rounded-lg flex flex-col gap-2">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-[9px] text-gray-400 font-bold uppercase">Statistics Grid</span>
+                                      <button type="button" onClick={() => addBlockArrayItem(selectedBlockIdx, "stats", { value: "50+", label: "Features", subtext: "Configurable variables" })} className="text-[9px] text-pink-400 hover:text-white font-bold">+ ADD STAT</button>
+                                    </div>
+                                    <div className="grid sm:grid-cols-2 gap-3 mt-1">
+                                      {(activeBlock.stats || []).map((statObj: any, statIdx: number) => (
+                                        <div key={statIdx} className="p-3 bg-black border border-white/10 rounded flex flex-col gap-1.5 relative">
+                                          <button type="button" onClick={() => removeBlockArrayItem(selectedBlockIdx, "stats", statIdx)} className="absolute top-2 right-2 text-gray-500 hover:text-red-400 text-xs">✕</button>
+                                          <input type="text" value={statObj.value || ""} placeholder="Value (e.g. 100M+)" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "stats", statIdx, "value", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white font-bold" />
+                                          <input type="text" value={statObj.label || ""} placeholder="Label" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "stats", statIdx, "label", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                          <input type="text" value={statObj.subtext || ""} placeholder="Subtext" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "stats", statIdx, "subtext", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* ROADMAP FIELDS */}
+                              {activeBlock.type === "roadmap" && (
+                                <div className="grid gap-3">
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Timeline Header Title</label>
+                                    <input type="text" value={activeBlock.title || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "title", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                  </div>
+                                  <div className="border border-white/5 p-3 rounded-lg flex flex-col gap-2">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-[9px] text-gray-400 font-bold uppercase">Timeline Milestones</span>
+                                      <button type="button" onClick={() => addBlockArrayItem(selectedBlockIdx, "roadmapItems", { title: "Milestone phase", desc: "Phase targets.", status: "planned" })} className="text-[9px] text-pink-400 hover:text-white font-bold">+ ADD MILESTONE</button>
+                                    </div>
+                                    <div className="flex flex-col gap-3 mt-1">
+                                      {(activeBlock.roadmapItems || []).map((roadObj: any, roadIdx: number) => (
+                                        <div key={roadIdx} className="p-3 bg-black border border-white/10 rounded flex flex-col gap-2 relative">
+                                          <button type="button" onClick={() => removeBlockArrayItem(selectedBlockIdx, "roadmapItems", roadIdx)} className="absolute top-2 right-2 text-gray-500 hover:text-red-400 text-xs">✕</button>
+                                          <div className="grid grid-cols-2 gap-2">
+                                            <input type="text" value={roadObj.title || ""} placeholder="Milestone Title" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "roadmapItems", roadIdx, "title", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                            <select value={roadObj.status || "planned"} onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "roadmapItems", roadIdx, "status", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1 text-[11px] text-white">
+                                              <option value="completed">Completed</option>
+                                              <option value="active">Active</option>
+                                              <option value="planned">Planned</option>
+                                            </select>
+                                          </div>
+                                          <textarea value={roadObj.desc || ""} placeholder="Description specifications..." rows={2} onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "roadmapItems", roadIdx, "desc", e.target.value)} className="rounded bg-white/5 border border-white/10 p-2 text-xs text-white resize-none" />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* FEATURES FIELDS */}
+                              {activeBlock.type === "features" && (
+                                <div className="grid gap-3">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Badge Text</label>
+                                      <input type="text" value={activeBlock.badge || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "badge", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Main Header Title</label>
+                                      <input type="text" value={activeBlock.title || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "title", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Description Paragraph</label>
+                                    <textarea value={activeBlock.description || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "description", e.target.value)} rows={3} className="rounded bg-black border border-white/10 p-2.5 text-xs text-white resize-none" />
+                                  </div>
+                                  <div className="border border-white/5 p-3 rounded-lg flex flex-col gap-2">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-[9px] text-gray-400 font-bold uppercase">Feature List Bullet Points</span>
+                                      <button type="button" onClick={() => addBlockArrayItem(selectedBlockIdx, "featuresList", { title: "Feature spec", description: "Bullet description details." })} className="text-[9px] text-pink-400 hover:text-white font-bold">+ ADD FEATURE BULLET</button>
+                                    </div>
+                                    <div className="flex flex-col gap-3 mt-1">
+                                      {(activeBlock.featuresList || []).map((featObj: any, featIdx: number) => (
+                                        <div key={featIdx} className="p-3 bg-black border border-white/10 rounded flex flex-col gap-2 relative">
+                                          <button type="button" onClick={() => removeBlockArrayItem(selectedBlockIdx, "featuresList", featIdx)} className="absolute top-2 right-2 text-gray-500 hover:text-red-400 text-xs">✕</button>
+                                          <input type="text" value={featObj.title || ""} placeholder="Bullet Header" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "featuresList", featIdx, "title", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                          <textarea value={featObj.description || ""} placeholder="Bullet description details..." rows={2} onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "featuresList", featIdx, "description", e.target.value)} className="rounded bg-white/5 border border-white/10 p-2 text-xs text-white resize-none" />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* COMPARISON FIELDS */}
+                              {activeBlock.type === "comparison" && (
+                                <div className="grid gap-3">
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Table / Matrix Main Title</label>
+                                    <input type="text" value={activeBlock.title || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "title", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                  </div>
+                                  <div className="border border-white/5 p-3 rounded-lg flex flex-col gap-2">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-[9px] text-gray-400 font-bold uppercase">Matrix Comparison Tiers</span>
+                                      <button type="button" onClick={() => addBlockArrayItem(selectedBlockIdx, "comparisonTiers", { name: "Pro Tier", specs: [{ label: "Bandwidth", value: "1 Gbps" }], featured: false, ctaText: "Upgrade", ctaLink: "" })} className="text-[9px] text-pink-400 hover:text-white font-bold">+ ADD COMPARISON TIER</button>
+                                    </div>
+                                    <div className="flex flex-col gap-4 mt-1">
+                                      {(activeBlock.comparisonTiers || []).map((tierObj: any, tierIdx: number) => (
+                                        <div key={tierIdx} className="p-3 bg-black border border-white/10 rounded flex flex-col gap-2 relative">
+                                          <button type="button" onClick={() => removeBlockArrayItem(selectedBlockIdx, "comparisonTiers", tierIdx)} className="absolute top-2 right-2 text-gray-500 hover:text-red-400 text-xs">✕</button>
+                                          <div className="grid grid-cols-3 gap-2">
+                                            <input type="text" value={tierObj.name || ""} placeholder="Tier Name" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "comparisonTiers", tierIdx, "name", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                            <input type="text" value={tierObj.ctaText || ""} placeholder="CTA Button Text" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "comparisonTiers", tierIdx, "ctaText", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                            <input type="text" value={tierObj.ctaLink || ""} placeholder="CTA Button Link" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "comparisonTiers", tierIdx, "ctaLink", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white" />
+                                          </div>
+                                          <div className="flex items-center gap-2 mt-1">
+                                            <input type="checkbox" id={`featured-${tierIdx}`} checked={tierObj.featured || false} onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "comparisonTiers", tierIdx, "featured", e.target.checked)} className="accent-pink-500" />
+                                            <label htmlFor={`featured-${tierIdx}`} className="text-[10px] text-gray-300 cursor-pointer">Highlight/Featured Tier</label>
+                                          </div>
+                                          <div className="border border-white/5 p-2 rounded flex flex-col gap-2">
+                                            <div className="flex justify-between items-center">
+                                              <span className="text-[8px] text-gray-500 uppercase font-bold">Specs list (Rows)</span>
+                                              <button type="button" onClick={() => {
+                                                const list = [...(tierObj.specs || [])];
+                                                list.push({ label: "Spec Label", value: "Spec Value" });
+                                                updateBlockArrayItem(selectedBlockIdx, "comparisonTiers", tierIdx, "specs", list);
+                                              }} className="text-[8px] text-pink-400 font-bold">+ ADD SPEC ROW</button>
+                                            </div>
+                                            {(tierObj.specs || []).map((spec: any, sIdx: number) => (
+                                              <div key={sIdx} className="flex gap-2 relative">
+                                                <input type="text" value={spec.label || ""} placeholder="Label" onChange={(e) => {
+                                                  const list = [...tierObj.specs];
+                                                  list[sIdx] = { ...list[sIdx], label: e.target.value };
+                                                  updateBlockArrayItem(selectedBlockIdx, "comparisonTiers", tierIdx, "specs", list);
+                                                }} className="rounded bg-white/5 border border-white/10 px-2 py-0.5 text-[11px] text-white flex-1" />
+                                                <input type="text" value={spec.value || ""} placeholder="Value" onChange={(e) => {
+                                                  const list = [...tierObj.specs];
+                                                  list[sIdx] = { ...list[sIdx], value: e.target.value };
+                                                  updateBlockArrayItem(selectedBlockIdx, "comparisonTiers", tierIdx, "specs", list);
+                                                }} className="rounded bg-white/5 border border-white/10 px-2 py-0.5 text-[11px] text-white flex-1" />
+                                                <button type="button" onClick={() => {
+                                                  const list = (tierObj.specs || []).filter((_: any, idx: number) => idx !== sIdx);
+                                                  updateBlockArrayItem(selectedBlockIdx, "comparisonTiers", tierIdx, "specs", list);
+                                                }} className="text-gray-500 hover:text-red-400 text-xs px-1">✕</button>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* CONTACT FORM FIELDS */}
+                              {activeBlock.type === "contact-form" && (
+                                <div className="grid gap-3">
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Form Container Title</label>
+                                    <input type="text" value={activeBlock.formTitle || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "formTitle", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Description Subtext</label>
+                                    <textarea value={activeBlock.description || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "description", e.target.value)} rows={3} className="rounded bg-black border border-white/10 p-2.5 text-xs text-white resize-none" />
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* FAQ FIELDS */}
+                              {activeBlock.type === "faq" && (
+                                <div className="grid gap-3">
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">FAQ Header Title</label>
+                                    <input type="text" value={activeBlock.title || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "title", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                  </div>
+                                  <div className="border border-white/5 p-3 rounded-lg flex flex-col gap-2">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-[9px] text-gray-400 font-bold uppercase">Accordion Items Collection</span>
+                                      <button type="button" onClick={() => addBlockArrayItem(selectedBlockIdx, "faqItems", { question: "New FAQ Question?", answer: "FAQ detailed answer." })} className="text-[9px] text-pink-400 hover:text-white font-bold">+ ADD FAQ ITEM</button>
+                                    </div>
+                                    <div className="flex flex-col gap-3 mt-1">
+                                      {(activeBlock.faqItems || []).map((faqObj: any, faqIdx: number) => (
+                                        <div key={faqIdx} className="p-3 bg-black border border-white/10 rounded flex flex-col gap-2 relative">
+                                          <button type="button" onClick={() => removeBlockArrayItem(selectedBlockIdx, "faqItems", faqIdx)} className="absolute top-2 right-2 text-gray-500 hover:text-red-400 text-xs">✕</button>
+                                          <input type="text" value={faqObj.question || ""} placeholder="Question" onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "faqItems", faqIdx, "question", e.target.value)} className="rounded bg-white/5 border border-white/10 px-2 py-1 text-xs text-white font-semibold" />
+                                          <textarea value={faqObj.answer || ""} placeholder="Accordion answer explanation..." rows={3} onChange={(e) => updateBlockArrayItem(selectedBlockIdx, "faqItems", faqIdx, "answer", e.target.value)} className="rounded bg-white/5 border border-white/10 p-2 text-xs text-white resize-none" />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* RICH TEXT FIELDS */}
+                              {activeBlock.type === "rich-text" && (
+                                <div className="grid gap-3">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Section Title</label>
+                                      <input type="text" value={activeBlock.title || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "title", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Section Subtitle</label>
+                                      <input type="text" value={activeBlock.subtitle || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "subtitle", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Main Body text (supports white space breaks)</label>
+                                    <textarea value={activeBlock.bodyText || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "bodyText", e.target.value)} rows={6} className="rounded bg-black border border-white/10 p-2.5 text-xs text-white font-mono leading-relaxed" />
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* VIDEO HERO FIELDS */}
+                              {activeBlock.type === "video-hero" && (
+                                <div className="grid gap-3">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Badge tag</label>
+                                      <input type="text" value={activeBlock.badge || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "badge", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Manifesto Title</label>
+                                      <input type="text" value={activeBlock.title || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "title", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Description details</label>
+                                    <textarea value={activeBlock.description || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "description", e.target.value)} rows={3} className="rounded bg-black border border-white/10 p-2.5 text-xs text-white resize-none" />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()
+                      ) : (
+                        <div className="py-24 text-center text-xs text-gray-500 font-mono border border-dashed border-white/10 rounded-lg">
+                          No block selected. Choose a block on the left panel to begin editing its fields.
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
