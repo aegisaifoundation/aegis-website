@@ -189,12 +189,13 @@ export default function AdminUsersDirectory() {
     }
 
     const nextStatus = currentStatus === "active" ? "disabled" : "active";
+    const collectionName = activeTab === "admins" ? "admins" : "users";
 
     try {
-      const userRef = doc(db, "admins", uid);
+      const userRef = doc(db, collectionName, uid);
       await updateDoc(userRef, { status: nextStatus });
       alert(`User ${email} is now ${nextStatus}`);
-      await logActivity("TOGGLE_STATUS", `Toggled user status of ${email} to ${nextStatus}`);
+      await logActivity("TOGGLE_STATUS", `Toggled user status of ${email} to ${nextStatus} in ${collectionName}`);
       await addNotification("USER_STATUS_CHANGE", `User ${email} status changed to ${nextStatus}`);
     } catch (err: any) {
       alert("Failed to update status: " + err.message);
@@ -519,7 +520,7 @@ export default function AdminUsersDirectory() {
                         <td className="py-4 px-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             {/* Toggle status */}
-                            {!isSelf && u.role !== "super_admin" && activeTab === "admins" && (
+                            {!isSelf && u.role !== "super_admin" && (
                               <button
                                 onClick={() => handleToggleStatus(u.uid, u.email, u.status)}
                                 className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
