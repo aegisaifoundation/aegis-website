@@ -201,7 +201,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       {/* Main Panel */}
       <section className="flex-1 flex flex-col min-w-0 bg-[#111111] h-full overflow-y-auto">
         {/* Top Bar */}
-        <header className="flex justify-end items-center px-8 py-4 border-b border-white/[0.05]">
+        <header className={`flex justify-end items-center px-8 py-4 ${isDashboardHome ? "" : "border-b border-white/[0.05]"}`}>
           <div className="flex items-center gap-3">
             {/* Bell */}
             <button
@@ -268,49 +268,53 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         {/* Content Area */}
         {isDashboardHome ? (
           /* Centered Dashboard Home */
-          <div className="flex-1 flex flex-col items-center justify-center gap-8 px-4 py-12">
-            {/* Logo + Name */}
-            <div className="flex flex-col items-center gap-3">
-              <img src="/assets/logo3.png" alt="AEGIS" className="h-12 w-12 object-contain opacity-90" />
-              <h1 className="text-3xl font-bold text-white tracking-tight">Operator</h1>
-              <p className="text-sm text-white/40">{profile.email}</p>
+          <div className="flex-1 flex flex-col items-center justify-between px-4 pt-12 pb-8 h-full">
+            {/* Main Upper Content Block */}
+            <div className="flex flex-col items-center gap-8 w-full max-w-xl mt-4">
+              {/* Logo + Name */}
+              <div className="flex flex-col items-center gap-3">
+                <img src="/assets/logo3.png" alt="AEGIS" className="h-14 w-14 object-contain opacity-90" />
+                <h1 className="text-3xl font-bold text-white tracking-tight">Operator</h1>
+                <p className="text-sm text-white/40">{profile.email}</p>
+              </div>
+
+              {/* Search Bar */}
+              <div className="w-full max-w-md">
+                <label className="flex items-center gap-3 bg-[#1a1a1a] border border-white/[0.08] rounded-xl px-4 py-3 focus-within:border-white/20 transition-colors cursor-pointer">
+                  <Search className="h-4 w-4 text-white/25 shrink-0" />
+                  <input
+                    placeholder="Search AEGIS"
+                    className="bg-transparent text-sm text-white/70 placeholder:text-white/25 outline-none flex-1 cursor-pointer"
+                    onClick={() => setCommandOpen(true)}
+                    onFocus={() => setCommandOpen(true)}
+                    readOnly
+                  />
+                </label>
+              </div>
+
+              {/* Quick Nav Pills */}
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {quickNavItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      className="flex items-center gap-2.5 px-4 py-2.5 bg-[#1c1c1c] hover:bg-[#252525] border border-white/[0.07] rounded-xl text-sm font-medium text-white/60 hover:text-white transition-all"
+                    >
+                      <Icon className="h-4 w-4 text-white/30" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Search Bar */}
-            <div className="w-full max-w-md">
-              <label className="flex items-center gap-3 bg-[#1a1a1a] border border-white/[0.08] rounded-xl px-4 py-3 focus-within:border-white/20 transition-colors">
-                <Search className="h-4 w-4 text-white/25 shrink-0" />
-                <input
-                  placeholder="Search AEGIS"
-                  className="bg-transparent text-sm text-white/70 placeholder:text-white/25 outline-none flex-1"
-                  onFocus={() => setCommandOpen(true)}
-                  readOnly
-                />
-              </label>
-            </div>
-
-            {/* Quick Nav Pills */}
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {quickNavItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    className="flex items-center gap-2.5 px-4 py-2.5 bg-[#1c1c1c] hover:bg-[#252525] border border-white/[0.07] rounded-xl text-sm font-medium text-white/60 hover:text-white transition-all"
-                  >
-                    <Icon className="h-4 w-4 text-white/30" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* Privacy Note */}
-            <div className="flex items-center gap-2 text-white/25 text-xs">
-              <Shield className="h-3.5 w-3.5 shrink-0" />
+            {/* Privacy Note Pinned to Bottom */}
+            <div className="flex items-center gap-2 text-white/30 text-xs mt-auto pt-10">
+              <Shield className="h-3.5 w-3.5 shrink-0 text-white/40" />
               <span>Your AEGIS data and settings are private and secure.</span>
-              <button className="text-white/40 hover:text-white/60 underline transition-colors cursor-pointer">Learn more</button>
+              <button onClick={() => router.push("/dashboard/settings")} className="text-white/50 hover:text-white font-medium underline transition-colors cursor-pointer">Learn more</button>
             </div>
           </div>
         ) : (
