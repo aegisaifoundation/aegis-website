@@ -64,13 +64,7 @@ export async function POST(request: Request) {
                             <td style="padding: 24px;">
                               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="text-align: center;">
                                 <tr>
-                                  <td align="center" style="padding-bottom: 4px; font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; text-align: center;">Email Address</td>
-                                </tr>
-                                <tr>
-                                  <td align="center" style="padding-bottom: 16px; font-family: monospace; font-size: 15px; color: #ffffff; font-weight: 500; text-align: center;">${emailAddress}</td>
-                                </tr>
-                                <tr>
-                                  <td align="center" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; padding-bottom: 4px; font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; text-align: center;">Username</td>
+                                  <td align="center" style="padding-bottom: 4px; font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; text-align: center;">Username</td>
                                 </tr>
                                 <tr>
                                   <td align="center" style="padding-bottom: 16px; font-family: monospace; font-size: 18px; color: #ffffff; font-weight: bold; text-align: center;">${userLoginName}</td>
