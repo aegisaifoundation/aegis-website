@@ -71,6 +71,21 @@ export default function ProductUXHub() {
 
   const handleAddBlock = (type: string) => {
     const defaultBlock: any = { type };
+    
+    // Add default design parameters
+    defaultBlock.styles = {
+      width: "content",
+      height: "auto",
+      backgroundColor: "transparent",
+      textColor: "",
+      paddingTop: 24,
+      paddingBottom: 24,
+      paddingLeft: 0,
+      paddingRight: 0,
+      borderRadius: 12,
+      textAlign: "left"
+    };
+
     if (type === "hero") {
       defaultBlock.title = "New Hero Section";
       defaultBlock.description = "Detailed subtext goes here.";
@@ -112,6 +127,21 @@ export default function ProductUXHub() {
       defaultBlock.title = "Cinematic Manifesto Video";
       defaultBlock.description = "Watch the full visual projection.";
       defaultBlock.badge = "FILMED PROJECTION";
+    } else if (type === "custom-code") {
+      defaultBlock.title = "Custom Code Element";
+      defaultBlock.htmlCode = "<div class='glowing-text'>Custom Cyber Component</div>";
+      defaultBlock.cssCode = ".glowing-text { font-family: monospace; color: #7DD3FC; text-shadow: 0 0 8px rgba(125,211,252,0.6); }";
+      defaultBlock.jsCode = "console.log('Custom Code Block mounted!');";
+      defaultBlock.height = "200px";
+    } else if (type === "media") {
+      defaultBlock.mediaType = "image";
+      defaultBlock.mediaUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe";
+      defaultBlock.caption = "AEGIS Neural Core Topology Mapping";
+      defaultBlock.autoplay = false;
+      defaultBlock.controls = true;
+      defaultBlock.loop = false;
+      defaultBlock.muted = false;
+      defaultBlock.aspectRatio = "video";
     }
     setBlocks(prev => [...prev, defaultBlock]);
     setSelectedBlockIdx(blocks.length);
@@ -601,6 +631,8 @@ export default function ProductUXHub() {
                           <option value="faq">FAQ Accordion</option>
                           <option value="rich-text">Rich Text & Snippets</option>
                           <option value="video-hero">Cinematic Media</option>
+                          <option value="custom-code">Live Custom Code Compiler</option>
+                          <option value="media">Photo, Video, Audio Assets</option>
                         </select>
                       </div>
 
@@ -965,6 +997,239 @@ export default function ProductUXHub() {
                                   </div>
                                 </div>
                               )}
+
+                              {/* CUSTOM CODE COMPILER FIELDS */}
+                              {activeBlock.type === "custom-code" && (
+                                <div className="grid gap-3">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Compiler Block Title</label>
+                                      <input type="text" value={activeBlock.title || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "title", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Iframe Height</label>
+                                      <input type="text" value={activeBlock.height || "300px"} placeholder="e.g. 300px or 40vh" onChange={(e) => updateBlockField(selectedBlockIdx, "height", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">HTML Template Structure</label>
+                                    <textarea value={activeBlock.htmlCode || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "htmlCode", e.target.value)} rows={5} className="rounded bg-black border border-white/10 p-2.5 text-xs text-white font-mono leading-relaxed" />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">CSS Style Sheet</label>
+                                    <textarea value={activeBlock.cssCode || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "cssCode", e.target.value)} rows={4} className="rounded bg-black border border-white/10 p-2.5 text-xs text-white font-mono leading-relaxed" />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">JavaScript Directives</label>
+                                    <textarea value={activeBlock.jsCode || ""} onChange={(e) => updateBlockField(selectedBlockIdx, "jsCode", e.target.value)} rows={4} className="rounded bg-black border border-white/10 p-2.5 text-xs text-white font-mono leading-relaxed" />
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* MEDIA ASSET FIELDS */}
+                              {activeBlock.type === "media" && (
+                                <div className="grid gap-3">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Media Type</label>
+                                      <select value={activeBlock.mediaType || "image"} onChange={(e) => updateBlockField(selectedBlockIdx, "mediaType", e.target.value)} className="rounded bg-[#030712] border border-white/10 px-2 py-1.5 text-xs text-white">
+                                        <option value="image">Photo / Image</option>
+                                        <option value="video">Streaming Video</option>
+                                        <option value="audio">Streaming Audio</option>
+                                      </select>
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                      <label className="text-[9px] text-gray-400 font-bold uppercase">Aspect Ratio Profile</label>
+                                      <select value={activeBlock.aspectRatio || "auto"} onChange={(e) => updateBlockField(selectedBlockIdx, "aspectRatio", e.target.value)} className="rounded bg-[#030712] border border-white/10 px-2 py-1.5 text-xs text-white">
+                                        <option value="auto">Auto / Source ratio</option>
+                                        <option value="video">Standard Video (16:9)</option>
+                                        <option value="square">Square Frame (1:1)</option>
+                                        <option value="wide">Cinematic Wide (21:9)</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Media File Endpoint URL</label>
+                                    <input type="text" value={activeBlock.mediaUrl || ""} placeholder="https://domain.com/asset.jpg" onChange={(e) => updateBlockField(selectedBlockIdx, "mediaUrl", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Text Caption</label>
+                                    <input type="text" value={activeBlock.caption || ""} placeholder="Enter brief optional text description..." onChange={(e) => updateBlockField(selectedBlockIdx, "caption", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                  </div>
+                                  
+                                  <div className="border border-white/5 p-3 rounded-lg grid grid-cols-2 gap-3 mt-1">
+                                    <div className="flex items-center gap-2">
+                                      <input type="checkbox" id="media-autoplay" checked={activeBlock.autoplay || false} onChange={(e) => updateBlockField(selectedBlockIdx, "autoplay", e.target.checked)} className="accent-pink-500" />
+                                      <label htmlFor="media-autoplay" className="text-[10px] text-gray-300 cursor-pointer">Autoplay Loop</label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <input type="checkbox" id="media-controls" checked={activeBlock.controls !== false} onChange={(e) => updateBlockField(selectedBlockIdx, "controls", e.target.checked)} className="accent-pink-500" />
+                                      <label htmlFor="media-controls" className="text-[10px] text-gray-300 cursor-pointer">Display Controls</label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <input type="checkbox" id="media-loop" checked={activeBlock.loop || false} onChange={(e) => updateBlockField(selectedBlockIdx, "loop", e.target.checked)} className="accent-pink-500" />
+                                      <label htmlFor="media-loop" className="text-[10px] text-gray-300 cursor-pointer">Infinite Loop</label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <input type="checkbox" id="media-muted" checked={activeBlock.muted || false} onChange={(e) => updateBlockField(selectedBlockIdx, "muted", e.target.checked)} className="accent-pink-500" />
+                                      <label htmlFor="media-muted" className="text-[10px] text-gray-300 cursor-pointer">Muted Sound</label>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* COLLAPSIBLE DESIGN & LAYOUT SETTINGS PANEL FOR ALL BLOCKS */}
+                              <div className="border border-white/5 rounded-lg bg-[#030712]/50 p-4 mt-6 text-left">
+                                <div className="flex justify-between items-center border-b border-white/5 pb-2 mb-3">
+                                  <span className="text-[10px] text-[#7DD3FC] font-bold uppercase tracking-wider">Design & Layout Parameters</span>
+                                  <span className="text-[8px] text-gray-500 font-mono">Styles overrides</span>
+                                </div>
+                                
+                                <div className="grid sm:grid-cols-2 gap-4">
+                                  {/* Width Customizer */}
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Block Width</label>
+                                    <select 
+                                      value={activeBlock.styles?.width || "content"} 
+                                      onChange={(e) => {
+                                        const styles = { ...(activeBlock.styles || {}), width: e.target.value };
+                                        updateBlockField(selectedBlockIdx, "styles", styles);
+                                      }}
+                                      className="rounded bg-black border border-white/10 px-2 py-1 text-xs text-white"
+                                    >
+                                      <option value="content">Content Width (Max 1152px)</option>
+                                      <option value="full">Full Page Width (100%)</option>
+                                      <option value="50%">Half Page Width (50%)</option>
+                                      <option value="800px">Fixed Width (800px)</option>
+                                      <option value="600px">Fixed Width (600px)</option>
+                                    </select>
+                                  </div>
+
+                                  {/* Height Customizer */}
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Block Height</label>
+                                    <select 
+                                      value={activeBlock.styles?.height || "auto"} 
+                                      onChange={(e) => {
+                                        const styles = { ...(activeBlock.styles || {}), height: e.target.value };
+                                        updateBlockField(selectedBlockIdx, "styles", styles);
+                                      }}
+                                      className="rounded bg-black border border-white/10 px-2 py-1 text-xs text-white"
+                                    >
+                                      <option value="auto">Auto Height</option>
+                                      <option value="300px">Fixed 300px</option>
+                                      <option value="500px">Fixed 500px</option>
+                                      <option value="50vh">Viewport Half (50vh)</option>
+                                      <option value="80vh">Viewport Large (80vh)</option>
+                                    </select>
+                                  </div>
+
+                                  {/* Background Color Customizer */}
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Background Color</label>
+                                    <div className="flex gap-2 items-center">
+                                      <input 
+                                        type="color" 
+                                        value={activeBlock.styles?.backgroundColor && activeBlock.styles.backgroundColor.startsWith("#") ? activeBlock.styles.backgroundColor : "#000000"} 
+                                        onChange={(e) => {
+                                          const styles = { ...(activeBlock.styles || {}), backgroundColor: e.target.value };
+                                          updateBlockField(selectedBlockIdx, "styles", styles);
+                                        }} 
+                                        className="w-8 h-8 rounded border border-white/10 bg-transparent cursor-pointer" 
+                                      />
+                                      <input 
+                                        type="text" 
+                                        value={activeBlock.styles?.backgroundColor || "transparent"} 
+                                        placeholder="e.g. transparent or #090d16"
+                                        onChange={(e) => {
+                                          const styles = { ...(activeBlock.styles || {}), backgroundColor: e.target.value };
+                                          updateBlockField(selectedBlockIdx, "styles", styles);
+                                        }} 
+                                        className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white flex-1" 
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Text Color Customizer */}
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Text Color override</label>
+                                    <div className="flex gap-2 items-center">
+                                      <input 
+                                        type="color" 
+                                        value={activeBlock.styles?.textColor && activeBlock.styles.textColor.startsWith("#") ? activeBlock.styles.textColor : "#ffffff"} 
+                                        onChange={(e) => {
+                                          const styles = { ...(activeBlock.styles || {}), textColor: e.target.value };
+                                          updateBlockField(selectedBlockIdx, "styles", styles);
+                                        }} 
+                                        className="w-8 h-8 rounded border border-white/10 bg-transparent cursor-pointer" 
+                                      />
+                                      <input 
+                                        type="text" 
+                                        value={activeBlock.styles?.textColor || ""} 
+                                        placeholder="e.g. #7DD3FC"
+                                        onChange={(e) => {
+                                          const styles = { ...(activeBlock.styles || {}), textColor: e.target.value };
+                                          updateBlockField(selectedBlockIdx, "styles", styles);
+                                        }} 
+                                        className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white flex-1" 
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Padding Sliders */}
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Vertical Spacing / Padding ({activeBlock.styles?.paddingTop ?? 24}px)</label>
+                                    <input 
+                                      type="range" 
+                                      min="0" 
+                                      max="200" 
+                                      step="8"
+                                      value={activeBlock.styles?.paddingTop ?? 24} 
+                                      onChange={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        const styles = { ...(activeBlock.styles || {}), paddingTop: val, paddingBottom: val };
+                                        updateBlockField(selectedBlockIdx, "styles", styles);
+                                      }}
+                                      className="w-full accent-pink-500" 
+                                    />
+                                  </div>
+
+                                  {/* Rounding Border Radius */}
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Rounding Radius ({activeBlock.styles?.borderRadius ?? 12}px)</label>
+                                    <input 
+                                      type="range" 
+                                      min="0" 
+                                      max="50" 
+                                      step="4"
+                                      value={activeBlock.styles?.borderRadius ?? 12} 
+                                      onChange={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        const styles = { ...(activeBlock.styles || {}), borderRadius: val };
+                                        updateBlockField(selectedBlockIdx, "styles", styles);
+                                      }}
+                                      className="w-full accent-pink-500" 
+                                    />
+                                  </div>
+
+                                  {/* Text Alignment */}
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Text Alignment</label>
+                                    <select 
+                                      value={activeBlock.styles?.textAlign || "left"} 
+                                      onChange={(e) => {
+                                        const styles = { ...(activeBlock.styles || {}), textAlign: e.target.value };
+                                        updateBlockField(selectedBlockIdx, "styles", styles);
+                                      }}
+                                      className="rounded bg-black border border-white/10 px-2 py-1 text-xs text-white"
+                                    >
+                                      <option value="left">Left Align</option>
+                                      <option value="center">Center Align</option>
+                                      <option value="right">Right Align</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           );
                         })()

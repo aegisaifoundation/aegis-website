@@ -15,7 +15,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { notFound } from "next/navigation";
 
 interface BlockConfig {
-  type: "hero" | "terminal" | "grid" | "stats" | "roadmap" | "features" | "comparison" | "contact-form" | "faq" | "rich-text" | "video-hero";
+  type: "hero" | "terminal" | "grid" | "stats" | "roadmap" | "features" | "comparison" | "contact-form" | "faq" | "rich-text" | "video-hero" | "custom-code" | "media";
   title?: string;
   subtitle?: string;
   description?: string;
@@ -37,10 +37,36 @@ interface BlockConfig {
   comparisonTiers?: { name: string; specs: { label: string; value: string }[]; featured?: boolean; ctaText?: string; ctaLink?: string }[];
   faqItems?: { question: string; answer: string }[];
   
-  // Media / Form
+  // Media / Form / Custom Code
   mediaUrl?: string;
+  mediaType?: "image" | "video" | "audio";
+  caption?: string;
+  autoplay?: boolean;
+  controls?: boolean;
+  loop?: boolean;
+  muted?: boolean;
+  aspectRatio?: string;
+  htmlCode?: string;
+  cssCode?: string;
+  jsCode?: string;
+  height?: string;
   formTitle?: string;
   formEnabled?: boolean;
+  
+  // Block design parameters
+  styles?: {
+    width?: "full" | "content" | string;
+    height?: string;
+    backgroundColor?: string;
+    textColor?: string;
+    paddingTop?: number;
+    paddingBottom?: number;
+    paddingLeft?: number;
+    paddingRight?: number;
+    borderRadius?: number;
+    textAlign?: "left" | "center" | "right";
+    customCss?: string;
+  };
 }
 
 interface PageConfig {
@@ -58,6 +84,34 @@ interface PageConfig {
   formTitle?: string;
   blocks?: BlockConfig[];
 }
+
+const getBlockStyle = (styles: any) => {
+  if (!styles) return {};
+  const styleObj: React.CSSProperties = {};
+  
+  if (styles.width) {
+    if (styles.width === "full") styleObj.width = "100%";
+    else if (styles.width === "content") {
+      styleObj.maxWidth = "1152px";
+      styleObj.width = "100%";
+      styleObj.marginLeft = "auto";
+      styleObj.marginRight = "auto";
+    } else styleObj.width = styles.width;
+  }
+  if (styles.height && styles.height !== "auto") styleObj.height = styles.height;
+  if (styles.backgroundColor) styleObj.backgroundColor = styles.backgroundColor;
+  if (styles.textColor) styleObj.color = styles.textColor;
+  
+  if (styles.paddingTop !== undefined) styleObj.paddingTop = `${styles.paddingTop}px`;
+  if (styles.paddingBottom !== undefined) styleObj.paddingBottom = `${styles.paddingBottom}px`;
+  if (styles.paddingLeft !== undefined) styleObj.paddingLeft = `${styles.paddingLeft}px`;
+  if (styles.paddingRight !== undefined) styleObj.paddingRight = `${styles.paddingRight}px`;
+  
+  if (styles.borderRadius !== undefined) styleObj.borderRadius = `${styles.borderRadius}px`;
+  if (styles.textAlign) styleObj.textAlign = styles.textAlign as any;
+  
+  return styleObj;
+};
 
 export default function DynamicCustomPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
@@ -313,453 +367,532 @@ export default function DynamicCustomPage({ params }: { params: Promise<{ slug: 
 
         {/* 4. Modular Block Builder Engine */}
         {page.template === "modular" && (
-          <div className="flex flex-col gap-24 w-full mt-4">
+          <div className="flex flex-col gap-12 w-full mt-4">
             {page.blocks && page.blocks.map((block, idx) => {
-              switch (block.type) {
-                
-                // 1. Hero Block
-                case "hero":
-                  return (
-                    <section key={idx} className="relative py-12 flex flex-col items-center text-center gap-6 max-w-4xl mx-auto w-full">
-                      {block.badge && (
-                        <span className="text-[10px] font-bold text-[#7DD3FC] px-3 py-1 rounded-full border border-[#7DD3FC]/20 bg-[#7DD3FC]/5 uppercase tracking-widest animate-pulse">
-                          {block.badge}
-                        </span>
-                      )}
-                      <h1 className="font-heading font-extrabold text-4xl sm:text-5xl md:text-6xl text-white tracking-tight leading-none bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">
-                        {block.title}
-                      </h1>
-                      {block.description && (
-                        <p className="text-sm md:text-base text-gray-400 max-w-2xl font-light leading-relaxed">
-                          {block.description}
-                        </p>
-                      )}
-                      <div className="flex flex-wrap gap-4 justify-center mt-4">
-                        {block.primaryBtnText && block.primaryBtnLink && (
-                          <Link 
-                            href={block.primaryBtnLink}
-                            className="bg-[#4D7CFE] hover:bg-[#3b66d9] text-white px-6 py-3 rounded-lg text-xs font-bold transition-all shadow-[0_0_15px_rgba(77,124,254,0.3)]"
-                          >
-                            {block.primaryBtnText}
-                          </Link>
-                        )}
-                        {block.secondaryBtnText && block.secondaryBtnLink && (
-                          <Link 
-                            href={block.secondaryBtnLink}
-                            className="border border-white/10 hover:border-white/20 hover:bg-white/5 text-white px-6 py-3 rounded-lg text-xs font-bold transition-all"
-                          >
-                            {block.secondaryBtnText}
-                          </Link>
-                        )}
-                      </div>
-                    </section>
-                  );
-
-                // 2. Terminal Console Block
-                case "terminal":
-                  const currentCmd = activeCommands[idx] || "";
-                  const matchingCmdObj = block.commands?.find(c => c.cmd === currentCmd);
-                  const consoleOutput = matchingCmdObj ? matchingCmdObj.output : "Click a command below to verify parameters.";
-
-                  return (
-                    <section key={idx} className="glass-card max-w-3xl mx-auto w-full border border-white/10 bg-[#030712]/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
-                      {/* Window header bar */}
-                      <div className="bg-white/[0.03] px-4 py-3 flex items-center justify-between border-b border-white/5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-                        </div>
-                        <span className="text-[10px] font-mono text-gray-500 flex items-center gap-1">
-                          <TerminalIcon className="w-3.5 h-3.5" /> {block.title || "Secure CLI Console"}
-                        </span>
-                        <span className="w-8" />
-                      </div>
-
-                      {/* Display panel */}
-                      <div className="p-5 min-h-[160px] font-mono text-xs text-green-400 bg-black flex flex-col gap-2 select-text whitespace-pre-line leading-relaxed">
-                        <div className="text-gray-500">// AEGIS Secure Enclave Console Node</div>
-                        <div>$ {currentCmd || "aegis --help"}</div>
-                        <div className="text-gray-300 mt-1">{consoleOutput}</div>
-                      </div>
-
-                      {/* Control commands list */}
-                      <div className="p-4 bg-white/[0.01] border-t border-white/5 flex flex-wrap gap-2 items-center">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase mr-1">Directives:</span>
-                        {block.commands && block.commands.map((cmdObj, cIdx) => (
-                          <button
-                            key={cIdx}
-                            onClick={() => setActiveCommands(prev => ({ ...prev, [idx]: cmdObj.cmd }))}
-                            className={`px-3 py-1.5 rounded bg-white/5 border text-[10px] font-mono transition-all cursor-pointer ${
-                              currentCmd === cmdObj.cmd ? "border-green-500/50 text-green-400" : "border-white/10 text-gray-400 hover:text-white"
-                            }`}
-                          >
-                            {cmdObj.cmd}
-                          </button>
-                        ))}
-                      </div>
-                    </section>
-                  );
-
-                // 3. Showcase Grid Block
-                case "grid":
-                  return (
-                    <section key={idx} className="flex flex-col gap-6 w-full">
-                      {block.title && (
-                        <h2 className="font-heading font-extrabold text-xl md:text-2xl text-white tracking-tight border-b border-white/5 pb-2">
-                          {block.title}
-                        </h2>
-                      )}
-                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {block.cards && block.cards.map((card, cIdx) => (
-                          <div 
-                            key={cIdx} 
-                            className="glass-card p-6 rounded-xl border border-white/5 bg-white/[0.01] flex flex-col justify-between gap-6 hover:border-white/10 transition-all hover:bg-white/[0.02] group"
-                          >
-                            <div className="flex flex-col gap-3">
-                              <div className="flex justify-between items-center">
-                                <div className="p-3 rounded-lg border border-white/10 bg-white/5 text-[#7DD3FC]">
-                                  <Cpu className="w-5 h-5" />
-                                </div>
-                                {card.badge && (
-                                  <span className="text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-gray-400 bg-white/5 uppercase tracking-wider">
-                                    {card.badge}
-                                  </span>
-                                )}
-                              </div>
-                              <h3 className="font-bold text-white text-sm font-heading mt-1 group-hover:text-[#7DD3FC] transition-colors">
-                                {card.title}
-                              </h3>
-                              <p className="text-xs text-gray-400 leading-relaxed font-light">
-                                {card.description}
-                              </p>
-                            </div>
-
-                            {card.link && (
-                              <Link 
-                                href={card.link}
-                                className="text-[9px] font-bold text-[#4D7CFE] hover:text-[#7DD3FC] flex items-center gap-1.5 uppercase tracking-wider self-start transition-colors"
-                              >
-                                Learn More <ArrowRight className="w-3 h-3" />
-                              </Link>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  );
-
-                // 4. Statistics Block
-                case "stats":
-                  return (
-                    <section key={idx} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-                      {block.stats && block.stats.map((stat, sIdx) => (
-                        <div key={sIdx} className="glass-card p-5 border border-white/5 bg-white/[0.01] rounded-xl text-center flex flex-col gap-1.5">
-                          <span className="font-heading font-extrabold text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-[#7DD3FC]">
-                            {stat.value}
-                          </span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-300">
-                            {stat.label}
-                          </span>
-                          {stat.subtext && (
-                            <span className="text-[9px] text-gray-500 font-light">
-                              {stat.subtext}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </section>
-                  );
-
-                // 5. Roadmap Timeline Block
-                case "roadmap":
-                  return (
-                    <section key={idx} className="flex flex-col gap-8 w-full max-w-4xl mx-auto">
-                      {block.title && (
-                        <h2 className="font-heading font-extrabold text-xl md:text-2xl text-white tracking-tight border-b border-white/5 pb-2">
-                          {block.title}
-                        </h2>
-                      )}
-                      <div className="relative pl-6 border-l border-white/10 flex flex-col gap-8">
-                        {block.roadmapItems && block.roadmapItems.map((item, rIdx) => {
-                          const isCompleted = item.status === "completed";
-                          const isActive = item.status === "active";
-                          
-                          return (
-                            <div key={rIdx} className="relative flex flex-col md:flex-row gap-4 items-start">
-                              {/* Glowing timeline node */}
-                              <span className={`absolute -left-[30px] top-1.5 w-4 h-4 rounded-full border-2 bg-black transition-all ${
-                                isCompleted ? "border-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" :
-                                isActive ? "border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse" :
-                                "border-white/20"
-                              }`} />
-
-                              <div className="flex-1 flex flex-col gap-1.5">
-                                <div className="flex items-center gap-2">
-                                  <h3 className="font-heading font-bold text-sm text-white">
-                                    {item.title}
-                                  </h3>
-                                  <span className={`text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
-                                    isCompleted ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                                    isActive ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
-                                    "bg-white/5 text-gray-400 border-white/10"
-                                  }`}>
-                                    {item.status}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-gray-400 leading-relaxed font-light">
-                                  {item.desc}
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </section>
-                  );
-
-                // 6. Showcase Features (Split Layout) Block
-                case "features":
-                  return (
-                    <section key={idx} className="grid lg:grid-cols-2 gap-10 items-center w-full">
-                      <div className="flex flex-col gap-5">
+              const renderedBlock = (() => {
+                switch (block.type) {
+                  
+                  // 1. Hero Block
+                  case "hero":
+                    return (
+                      <div className="relative py-12 flex flex-col items-center text-center gap-6 max-w-4xl mx-auto w-full">
                         {block.badge && (
-                          <span className="text-[9px] font-bold uppercase text-[#7DD3FC] tracking-widest">{block.badge}</span>
-                        )}
-                        <h2 className="font-heading font-extrabold text-2xl md:text-3xl text-white tracking-tight leading-tight">
-                          {block.title}
-                        </h2>
-                        {block.description && (
-                          <p className="text-xs text-gray-400 leading-relaxed font-light">
-                            {block.description}
-                          </p>
-                        )}
-                        {block.featuresList && (
-                          <div className="flex flex-col gap-3 mt-2">
-                            {block.featuresList.map((f, fIdx) => (
-                              <div key={fIdx} className="flex gap-2 items-start">
-                                <div className="p-1 rounded bg-[#7DD3FC]/10 text-[#7DD3FC] mt-0.5">
-                                  <Check className="w-3 h-3" />
-                                </div>
-                                <div>
-                                  <h4 className="text-xs font-bold text-white">{f.title}</h4>
-                                  <p className="text-[11px] text-gray-500 font-light mt-0.5 leading-relaxed">{f.description}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Glowing Cyber Visual container */}
-                      <div className="relative glass-card border border-white/10 bg-[#030712]/50 p-8 rounded-2xl h-64 overflow-hidden flex items-center justify-center">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-blue-500/10 rounded-full filter blur-2xl animate-pulse" />
-                        <div className="relative border border-white/10 rounded-xl p-4 bg-black/60 flex flex-col gap-2 items-center text-center max-w-[200px]">
-                          <Cpu className="w-8 h-8 text-[#7DD3FC] animate-spin" style={{ animationDuration: '6s' }} />
-                          <span className="text-[10px] font-mono text-gray-400">Microkernel System</span>
-                          <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Operational</span>
-                        </div>
-                      </div>
-                    </section>
-                  );
-
-                // 7. Comparison Block
-                case "comparison":
-                  return (
-                    <section key={idx} className="flex flex-col gap-8 w-full">
-                      {block.title && (
-                        <h2 className="font-heading font-extrabold text-xl md:text-2xl text-white tracking-tight border-b border-white/5 pb-2">
-                          {block.title}
-                        </h2>
-                      )}
-                      <div className="grid md:grid-cols-3 gap-6">
-                        {block.comparisonTiers && block.comparisonTiers.map((tier, tIdx) => (
-                          <div 
-                            key={tIdx} 
-                            className={`glass-card p-6 rounded-2xl border flex flex-col justify-between gap-6 transition-all ${
-                              tier.featured 
-                                ? "border-blue-500 bg-blue-950/[0.05] shadow-[0_0_20px_rgba(59,130,246,0.15)] scale-105" 
-                                : "border-white/5 bg-white/[0.01]"
-                            }`}
-                          >
-                            <div className="flex flex-col gap-4">
-                              <h3 className="font-heading font-bold text-base text-white">
-                                {tier.name}
-                              </h3>
-                              <div className="border-t border-white/5 pt-4 flex flex-col gap-2.5">
-                                {tier.specs && tier.specs.map((spec, sIdx) => (
-                                  <div key={sIdx} className="flex justify-between items-center text-xs">
-                                    <span className="text-gray-500 font-light">{spec.label}</span>
-                                    <span className="text-gray-300 font-mono font-medium">{spec.value}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-
-                            {tier.ctaText && tier.ctaLink && (
-                              <Link 
-                                href={tier.ctaLink}
-                                className={`text-center py-2.5 rounded-lg text-xs font-bold transition-all ${
-                                  tier.featured 
-                                    ? "bg-[#4D7CFE] hover:bg-[#3b66d9] text-white" 
-                                    : "border border-white/10 hover:border-white/20 hover:bg-white/5 text-white"
-                                }`}
-                              >
-                                {tier.ctaText}
-                              </Link>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  );
-
-                // 8. Lead/Query Capture Form Block
-                case "contact-form":
-                  const isSubmitted = formSubmissions[idx];
-
-                  return (
-                    <section key={idx} className="glass-card max-w-lg mx-auto w-full p-6 md:p-8 rounded-2xl border border-white/5 bg-[#030712]/40 flex flex-col gap-4">
-                      <h2 className="font-heading font-bold text-lg text-white">
-                        {block.formTitle || "Initiate Contact Protocol"}
-                      </h2>
-                      {block.description && (
-                        <p className="text-xs text-gray-400 leading-relaxed font-light mb-1">
-                          {block.description}
-                        </p>
-                      )}
-                      
-                      {isSubmitted ? (
-                        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center flex flex-col gap-2 animate-fade-in">
-                          <span className="text-xs font-bold text-emerald-400">Payload Dispatched!</span>
-                          <p className="text-[10px] text-gray-500 leading-normal">Operational registers updated. The system agent will handle parameters shortly.</p>
-                        </div>
-                      ) : (
-                        <form onSubmit={(e) => handleModularFormSubmit(e, idx)} className="flex flex-col gap-4">
-                          <input
-                            value={modFormName}
-                            onChange={(e) => setModFormName(e.target.value)}
-                            placeholder="Name"
-                            className="rounded-lg bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-[#4D7CFE] text-xs text-white"
-                            required
-                          />
-                          <input
-                            type="email"
-                            value={modFormEmail}
-                            onChange={(e) => setModFormEmail(e.target.value)}
-                            placeholder="Email"
-                            className="rounded-lg bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-[#4D7CFE] text-xs text-white"
-                            required
-                          />
-                          <textarea
-                            value={modFormMsg}
-                            onChange={(e) => setModFormMsg(e.target.value)}
-                            placeholder="Message Specifications..."
-                            rows={4}
-                            className="rounded-lg bg-white/5 border border-white/10 p-4 outline-none focus:border-[#4D7CFE] text-xs text-white leading-relaxed resize-none"
-                            required
-                          />
-                          <button className="rounded-lg bg-[#4D7CFE] hover:bg-[#3b66d9] py-3 text-xs font-bold transition-all shadow-[0_0_15px_rgba(77,124,254,0.3)] cursor-pointer flex items-center justify-center gap-1.5">
-                            <Send className="w-3.5 h-3.5" /> SUBMIT SPECIFICATION
-                          </button>
-                        </form>
-                      )}
-                    </section>
-                  );
-
-                // 9. FAQ Accordion Block
-                case "faq":
-                  return (
-                    <section key={idx} className="flex flex-col gap-6 w-full max-w-3xl mx-auto">
-                      {block.title && (
-                        <h2 className="font-heading font-extrabold text-xl md:text-2xl text-white tracking-tight border-b border-white/5 pb-2">
-                          {block.title}
-                        </h2>
-                      )}
-                      <div className="flex flex-col gap-3">
-                        {block.faqItems && block.faqItems.map((faq, fIdx) => {
-                          const faqKey = `${idx}-${fIdx}`;
-                          const isOpen = openFaqs[faqKey];
-
-                          return (
-                            <div key={fIdx} className="border border-white/5 bg-white/[0.01] rounded-xl overflow-hidden">
-                              <button
-                                onClick={() => toggleFaq(faqKey)}
-                                className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 text-xs font-semibold text-white hover:text-[#7DD3FC] transition-colors cursor-pointer"
-                              >
-                                <span>{faq.question}</span>
-                                {isOpen ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
-                              </button>
-                              
-                              {isOpen && (
-                                <div className="px-5 pb-4 text-xs text-gray-400 font-light leading-relaxed border-t border-white/5 pt-3 bg-white/[0.005] animate-fade-in">
-                                  {faq.answer}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </section>
-                  );
-
-                // 10. Rich Text Block
-                case "rich-text":
-                  return (
-                    <section key={idx} className="glass-card p-6 md:p-8 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4 max-w-4xl mx-auto w-full">
-                      {block.title && (
-                        <h2 className="font-heading font-extrabold text-lg text-white border-b border-white/5 pb-2">
-                          {block.title}
-                        </h2>
-                      )}
-                      {block.subtitle && (
-                        <h3 className="text-xs font-bold text-[#7DD3FC] uppercase tracking-wider">
-                          {block.subtitle}
-                        </h3>
-                      )}
-                      {block.paragraphs && block.paragraphs.map((para, pIdx) => (
-                        <p key={pIdx} className="text-xs sm:text-sm text-gray-300 leading-relaxed font-light">
-                          {para}
-                        </p>
-                      ))}
-                      {block.bodyText && (
-                        <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-light whitespace-pre-wrap">
-                          {block.bodyText}
-                        </p>
-                      )}
-                    </section>
-                  );
-
-                // 11. Cinematic Media Hero Block
-                case "video-hero":
-                  return (
-                    <section key={idx} className="relative w-full rounded-2xl overflow-hidden border border-white/10 bg-[#030712] aspect-video max-w-4xl mx-auto flex items-center justify-center">
-                      {/* Fake video placeholder */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
-                      <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-10 z-20 gap-2">
-                        {block.badge && (
-                          <span className="text-[8px] font-bold text-blue-400 uppercase tracking-widest self-start px-2 py-0.5 border border-blue-500/20 bg-blue-500/10 rounded">
+                          <span className="text-[10px] font-bold text-[#7DD3FC] px-3 py-1 rounded-full border border-[#7DD3FC]/20 bg-[#7DD3FC]/5 uppercase tracking-widest animate-pulse">
                             {block.badge}
                           </span>
                         )}
-                        <h2 className="font-heading font-extrabold text-xl md:text-3xl text-white tracking-tight">
+                        <h1 className="font-heading font-extrabold text-4xl sm:text-5xl md:text-6xl text-white tracking-tight leading-none bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">
                           {block.title}
-                        </h2>
+                        </h1>
                         {block.description && (
-                          <p className="text-[11px] md:text-xs text-gray-400 font-light max-w-lg leading-relaxed">
+                          <p className="text-sm md:text-base text-gray-400 max-w-2xl font-light leading-relaxed">
                             {block.description}
                           </p>
                         )}
+                        <div className="flex flex-wrap gap-4 justify-center mt-4">
+                          {block.primaryBtnText && block.primaryBtnLink && (
+                            <Link 
+                              href={block.primaryBtnLink}
+                              className="bg-[#4D7CFE] hover:bg-[#3b66d9] text-white px-6 py-3 rounded-lg text-xs font-bold transition-all shadow-[0_0_15px_rgba(77,124,254,0.3)]"
+                            >
+                              {block.primaryBtnText}
+                            </Link>
+                          )}
+                          {block.secondaryBtnText && block.secondaryBtnLink && (
+                            <Link 
+                              href={block.secondaryBtnLink}
+                              className="border border-white/10 hover:border-white/20 hover:bg-white/5 text-white px-6 py-3 rounded-lg text-xs font-bold transition-all"
+                            >
+                              {block.secondaryBtnText}
+                            </Link>
+                          )}
+                        </div>
                       </div>
-                      <div className="relative z-20 p-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white cursor-pointer shadow-lg transition-transform hover:scale-105">
-                        <Video className="w-8 h-8 text-[#7DD3FC]" />
-                      </div>
-                    </section>
-                  );
+                    );
 
-                default:
-                  return null;
-              }
+                  // 2. Terminal Console Block
+                  case "terminal":
+                    const currentCmd = activeCommands[idx] || "";
+                    const matchingCmdObj = block.commands?.find(c => c.cmd === currentCmd);
+                    const consoleOutput = matchingCmdObj ? matchingCmdObj.output : "Click a command below to verify parameters.";
+
+                    return (
+                      <div className="glass-card max-w-3xl mx-auto w-full border border-white/10 bg-[#030712]/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+                        <div className="bg-white/[0.03] px-4 py-3 flex items-center justify-between border-b border-white/5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+                          </div>
+                          <span className="text-[10px] font-mono text-gray-500 flex items-center gap-1">
+                            <TerminalIcon className="w-3.5 h-3.5" /> {block.title || "Secure CLI Console"}
+                          </span>
+                          <span className="w-8" />
+                        </div>
+                        <div className="p-5 min-h-[160px] font-mono text-xs text-green-400 bg-black flex flex-col gap-2 select-text whitespace-pre-line leading-relaxed text-left">
+                          <div className="text-gray-500">// AEGIS Secure Enclave Console Node</div>
+                          <div>$ {currentCmd || "aegis --help"}</div>
+                          <div className="text-gray-300 mt-1">{consoleOutput}</div>
+                        </div>
+                        <div className="p-4 bg-white/[0.01] border-t border-white/5 flex flex-wrap gap-2 items-center">
+                          <span className="text-[10px] font-bold text-gray-500 uppercase mr-1">Directives:</span>
+                          {block.commands && block.commands.map((cmdObj, cIdx) => (
+                            <button
+                              key={cIdx}
+                              onClick={() => setActiveCommands(prev => ({ ...prev, [idx]: cmdObj.cmd }))}
+                              className={`px-3 py-1.5 rounded bg-white/5 border text-[10px] font-mono transition-all cursor-pointer ${
+                                currentCmd === cmdObj.cmd ? "border-green-500/50 text-green-400" : "border-white/10 text-gray-400 hover:text-white"
+                              }`}
+                            >
+                              {cmdObj.cmd}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+
+                  // 3. Showcase Grid Block
+                  case "grid":
+                    return (
+                      <div className="flex flex-col gap-6 w-full text-left">
+                        {block.title && (
+                          <h2 className="font-heading font-extrabold text-xl md:text-2xl text-white tracking-tight border-b border-white/5 pb-2">
+                            {block.title}
+                          </h2>
+                        )}
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {block.cards && block.cards.map((card, cIdx) => (
+                            <div 
+                              key={cIdx} 
+                              className="glass-card p-6 rounded-xl border border-white/5 bg-white/[0.01] flex flex-col justify-between gap-6 hover:border-white/10 transition-all hover:bg-white/[0.02] group"
+                            >
+                              <div className="flex flex-col gap-3">
+                                <div className="flex justify-between items-center">
+                                  <div className="p-3 rounded-lg border border-white/10 bg-white/5 text-[#7DD3FC]">
+                                    <Cpu className="w-5 h-5" />
+                                  </div>
+                                  {card.badge && (
+                                    <span className="text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-gray-400 bg-white/5 uppercase tracking-wider">
+                                      {card.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <h3 className="font-bold text-white text-sm font-heading mt-1 group-hover:text-[#7DD3FC] transition-colors">
+                                  {card.title}
+                                </h3>
+                                <p className="text-xs text-gray-400 leading-relaxed font-light">
+                                  {card.description}
+                                </p>
+                              </div>
+                              {card.link && (
+                                <Link 
+                                  href={card.link}
+                                  className="text-[9px] font-bold text-[#4D7CFE] hover:text-[#7DD3FC] flex items-center gap-1.5 uppercase tracking-wider self-start transition-colors"
+                                >
+                                  Learn More <ArrowRight className="w-3 h-3" />
+                                </Link>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+
+                  // 4. Statistics Block
+                  case "stats":
+                    return (
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+                        {block.stats && block.stats.map((stat, sIdx) => (
+                          <div key={sIdx} className="glass-card p-5 border border-white/5 bg-white/[0.01] rounded-xl text-center flex flex-col gap-1.5">
+                            <span className="font-heading font-extrabold text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-[#7DD3FC]">
+                              {stat.value}
+                            </span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-300">
+                              {stat.label}
+                            </span>
+                            {stat.subtext && (
+                              <span className="text-[9px] text-gray-500 font-light">
+                                {stat.subtext}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    );
+
+                  // 5. Roadmap Timeline Block
+                  case "roadmap":
+                    return (
+                      <div className="flex flex-col gap-8 w-full max-w-4xl mx-auto text-left">
+                        {block.title && (
+                          <h2 className="font-heading font-extrabold text-xl md:text-2xl text-white tracking-tight border-b border-white/5 pb-2">
+                            {block.title}
+                          </h2>
+                        )}
+                        <div className="relative pl-6 border-l border-white/10 flex flex-col gap-8">
+                          {block.roadmapItems && block.roadmapItems.map((item, rIdx) => {
+                            const isCompleted = item.status === "completed";
+                            const isActive = item.status === "active";
+                            
+                            return (
+                              <div key={rIdx} className="relative flex flex-col md:flex-row gap-4 items-start">
+                                <span className={`absolute -left-[30px] top-1.5 w-4 h-4 rounded-full border-2 bg-black transition-all ${
+                                  isCompleted ? "border-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" :
+                                  isActive ? "border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse" :
+                                  "border-white/20"
+                                }`} />
+                                <div className="flex-1 flex flex-col gap-1.5">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-heading font-bold text-sm text-white">
+                                      {item.title}
+                                    </h3>
+                                    <span className={`text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                                      isCompleted ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+                                      isActive ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+                                      "bg-white/5 text-gray-400 border-white/10"
+                                    }`}>
+                                      {item.status}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-400 leading-relaxed font-light">
+                                    {item.desc}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+
+                  // 6. Showcase Features (Split Layout) Block
+                  case "features":
+                    return (
+                      <div className="grid lg:grid-cols-2 gap-10 items-center w-full text-left">
+                        <div className="flex flex-col gap-5">
+                          {block.badge && (
+                            <span className="text-[9px] font-bold uppercase text-[#7DD3FC] tracking-widest">{block.badge}</span>
+                          )}
+                          <h2 className="font-heading font-extrabold text-2xl md:text-3xl text-white tracking-tight leading-tight">
+                            {block.title}
+                          </h2>
+                          {block.description && (
+                            <p className="text-xs text-gray-400 leading-relaxed font-light">
+                              {block.description}
+                            </p>
+                          )}
+                          {block.featuresList && (
+                            <div className="flex flex-col gap-3 mt-2">
+                              {block.featuresList.map((f, fIdx) => (
+                                <div key={fIdx} className="flex gap-2 items-start">
+                                  <div className="p-1 rounded bg-[#7DD3FC]/10 text-[#7DD3FC] mt-0.5">
+                                    <Check className="w-3 h-3" />
+                                  </div>
+                                  <div>
+                                    <h4 className="text-xs font-bold text-white">{f.title}</h4>
+                                    <p className="text-[11px] text-gray-500 font-light mt-0.5 leading-relaxed">{f.description}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="relative glass-card border border-white/10 bg-[#030712]/50 p-8 rounded-2xl h-64 overflow-hidden flex items-center justify-center">
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-blue-500/10 rounded-full filter blur-2xl animate-pulse" />
+                          <div className="relative border border-white/10 rounded-xl p-4 bg-black/60 flex flex-col gap-2 items-center text-center max-w-[200px]">
+                            <Cpu className="w-8 h-8 text-[#7DD3FC] animate-spin" style={{ animationDuration: '6s' }} />
+                            <span className="text-[10px] font-mono text-gray-400">Microkernel System</span>
+                            <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Operational</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+
+                  // 7. Comparison Block
+                  case "comparison":
+                    return (
+                      <div className="flex flex-col gap-8 w-full text-left">
+                        {block.title && (
+                          <h2 className="font-heading font-extrabold text-xl md:text-2xl text-white tracking-tight border-b border-white/5 pb-2">
+                            {block.title}
+                          </h2>
+                        )}
+                        <div className="grid md:grid-cols-3 gap-6">
+                          {block.comparisonTiers && block.comparisonTiers.map((tier, tIdx) => (
+                            <div 
+                              key={tIdx} 
+                              className={`glass-card p-6 rounded-2xl border flex flex-col justify-between gap-6 transition-all ${
+                                tier.featured 
+                                  ? "border-blue-500 bg-blue-950/[0.05] shadow-[0_0_20px_rgba(59,130,246,0.15)] scale-105" 
+                                  : "border-white/5 bg-white/[0.01]"
+                              }`}
+                            >
+                              <div className="flex flex-col gap-4">
+                                <h3 className="font-heading font-bold text-base text-white">
+                                  {tier.name}
+                                </h3>
+                                <div className="border-t border-white/5 pt-4 flex flex-col gap-2.5">
+                                  {tier.specs && tier.specs.map((spec, sIdx) => (
+                                    <div key={sIdx} className="flex justify-between items-center text-xs">
+                                      <span className="text-gray-500 font-light">{spec.label}</span>
+                                      <span className="text-gray-300 font-mono font-medium">{spec.value}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              {tier.ctaText && tier.ctaLink && (
+                                <Link 
+                                  href={tier.ctaLink}
+                                  className={`text-center py-2.5 rounded-lg text-xs font-bold transition-all ${
+                                    tier.featured 
+                                      ? "bg-[#4D7CFE] hover:bg-[#3b66d9] text-white" 
+                                      : "border border-white/10 hover:border-white/20 hover:bg-white/5 text-white"
+                                  }`}
+                                >
+                                  {tier.ctaText}
+                                </Link>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+
+                  // 8. Lead/Query Capture Form Block
+                  case "contact-form":
+                    const isSubmitted = formSubmissions[idx];
+                    return (
+                      <div className="glass-card max-w-lg mx-auto w-full p-6 md:p-8 rounded-2xl border border-white/5 bg-[#030712]/40 flex flex-col gap-4">
+                        <h2 className="font-heading font-bold text-lg text-white">
+                          {block.formTitle || "Initiate Contact Protocol"}
+                        </h2>
+                        {block.description && (
+                          <p className="text-xs text-gray-400 leading-relaxed font-light mb-1">
+                            {block.description}
+                          </p>
+                        )}
+                        {isSubmitted ? (
+                          <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center flex flex-col gap-2 animate-fade-in">
+                            <span className="text-xs font-bold text-emerald-400">Payload Dispatched!</span>
+                            <p className="text-[10px] text-gray-500 leading-normal">Operational registers updated. The system agent will handle parameters shortly.</p>
+                          </div>
+                        ) : (
+                          <form onSubmit={(e) => handleModularFormSubmit(e, idx)} className="flex flex-col gap-4">
+                            <input
+                              value={modFormName}
+                              onChange={(e) => setModFormName(e.target.value)}
+                              placeholder="Name"
+                              className="rounded-lg bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-[#4D7CFE] text-xs text-white"
+                              required
+                            />
+                            <input
+                              type="email"
+                              value={modFormEmail}
+                              onChange={(e) => setModFormEmail(e.target.value)}
+                              placeholder="Email"
+                              className="rounded-lg bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-[#4D7CFE] text-xs text-white"
+                              required
+                            />
+                            <textarea
+                              value={modFormMsg}
+                              onChange={(e) => setModFormMsg(e.target.value)}
+                              placeholder="Message Specifications..."
+                              rows={4}
+                              className="rounded-lg bg-white/5 border border-white/10 p-4 outline-none focus:border-[#4D7CFE] text-xs text-white leading-relaxed resize-none"
+                              required
+                            />
+                            <button className="rounded-lg bg-[#4D7CFE] hover:bg-[#3b66d9] py-3 text-xs font-bold transition-all shadow-[0_0_15px_rgba(77,124,254,0.3)] cursor-pointer flex items-center justify-center gap-1.5">
+                              <Send className="w-3.5 h-3.5" /> SUBMIT SPECIFICATION
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    );
+
+                  // 9. FAQ Accordion Block
+                  case "faq":
+                    return (
+                      <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto text-left">
+                        {block.title && (
+                          <h2 className="font-heading font-extrabold text-xl md:text-2xl text-white tracking-tight border-b border-white/5 pb-2">
+                            {block.title}
+                          </h2>
+                        )}
+                        <div className="flex flex-col gap-3">
+                          {block.faqItems && block.faqItems.map((faq, fIdx) => {
+                            const faqKey = `${idx}-${fIdx}`;
+                            const isOpen = openFaqs[faqKey];
+
+                            return (
+                              <div key={fIdx} className="border border-white/5 bg-white/[0.01] rounded-xl overflow-hidden">
+                                <button
+                                  onClick={() => toggleFaq(faqKey)}
+                                  className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 text-xs font-semibold text-white hover:text-[#7DD3FC] transition-colors cursor-pointer"
+                                >
+                                  <span>{faq.question}</span>
+                                  {isOpen ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                                </button>
+                                {isOpen && (
+                                  <div className="px-5 pb-4 text-xs text-gray-400 font-light leading-relaxed border-t border-white/5 pt-3 bg-white/[0.005] animate-fade-in">
+                                    {faq.answer}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+
+                  // 10. Rich Text Block
+                  case "rich-text":
+                    return (
+                      <div className="glass-card p-6 md:p-8 rounded-2xl border border-white/5 bg-white/[0.01] flex flex-col gap-4 max-w-4xl mx-auto w-full text-left">
+                        {block.title && (
+                          <h2 className="font-heading font-extrabold text-lg text-white border-b border-white/5 pb-2">
+                            {block.title}
+                          </h2>
+                        )}
+                        {block.subtitle && (
+                          <h3 className="text-xs font-bold text-[#7DD3FC] uppercase tracking-wider">
+                            {block.subtitle}
+                          </h3>
+                        )}
+                        {block.paragraphs && block.paragraphs.map((para, pIdx) => (
+                          <p key={pIdx} className="text-xs sm:text-sm text-gray-300 leading-relaxed font-light">
+                            {para}
+                          </p>
+                        ))}
+                        {block.bodyText && (
+                          <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-light whitespace-pre-wrap">
+                            {block.bodyText}
+                          </p>
+                        )}
+                      </div>
+                    );
+
+                  // 11. Cinematic Media Hero Block
+                  case "video-hero":
+                    return (
+                      <div className="relative w-full rounded-2xl overflow-hidden border border-white/10 bg-[#030712] aspect-video max-w-4xl mx-auto flex items-center justify-center">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
+                        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-10 z-20 gap-2 text-left">
+                          {block.badge && (
+                            <span className="text-[8px] font-bold text-blue-400 uppercase tracking-widest self-start px-2 py-0.5 border border-blue-500/20 bg-blue-500/10 rounded">
+                              {block.badge}
+                            </span>
+                          )}
+                          <h2 className="font-heading font-extrabold text-xl md:text-3xl text-white tracking-tight">
+                            {block.title}
+                          </h2>
+                          {block.description && (
+                            <p className="text-[11px] md:text-xs text-gray-400 font-light max-w-lg leading-relaxed">
+                              {block.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="relative z-20 p-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white cursor-pointer shadow-lg transition-transform hover:scale-105">
+                          <Video className="w-8 h-8 text-[#7DD3FC]" />
+                        </div>
+                      </div>
+                    );
+
+                  // 12. Custom Live Code Block
+                  case "custom-code":
+                    const combinedSrcDoc = `
+                      <!DOCTYPE html>
+                      <html>
+                        <head>
+                          <meta charset="utf-8">
+                          <style>
+                            body {
+                              margin: 0;
+                              padding: 0;
+                              background-color: transparent;
+                              color: white;
+                              font-family: sans-serif;
+                            }
+                            ${block.cssCode || ""}
+                          </style>
+                        </head>
+                        <body>
+                          ${block.htmlCode || ""}
+                          <script>
+                            try {
+                              ${block.jsCode || ""}
+                            } catch (err) {
+                              console.error("Iframe JS Error:", err);
+                              document.body.innerHTML += '<div style="color:#ef4444;font-family:monospace;font-size:11px;margin-top:10px;padding:8px;border:1px solid rgba(239,68,68,0.2);background-color:rgba(127,29,29,0.2);rounded-lg">Script Error: ' + err.message + '</div>';
+                            }
+                          </script>
+                        </body>
+                      </html>
+                    `;
+                    return (
+                      <iframe
+                        srcDoc={combinedSrcDoc}
+                        title={block.title || "Custom Code Block"}
+                        sandbox="allow-scripts"
+                        className="w-full border border-white/5 bg-transparent rounded-lg"
+                        style={{ height: block.height || "300px" }}
+                      />
+                    );
+
+                  // 13. Advanced Media Block
+                  case "media":
+                    const aspectClass = 
+                      block.aspectRatio === "video" ? "aspect-video" :
+                      block.aspectRatio === "square" ? "aspect-square" :
+                      block.aspectRatio === "wide" ? "aspect-[21/9]" : 
+                      "";
+
+                    return (
+                      <div className="flex flex-col gap-3 items-center w-full">
+                        {block.mediaType === "image" && block.mediaUrl && (
+                          <img 
+                            src={block.mediaUrl} 
+                            alt={block.caption || "Media Image"} 
+                            className={`w-full max-w-full rounded-xl object-cover border border-white/5 ${aspectClass}`}
+                          />
+                        )}
+                        {block.mediaType === "video" && block.mediaUrl && (
+                          <video 
+                            src={block.mediaUrl}
+                            autoPlay={block.autoplay}
+                            controls={block.controls !== false}
+                            loop={block.loop}
+                            muted={block.muted}
+                            className={`w-full max-w-full rounded-xl border border-white/5 ${aspectClass}`}
+                          />
+                        )}
+                        {block.mediaType === "audio" && block.mediaUrl && (
+                          <audio 
+                            src={block.mediaUrl}
+                            controls={block.controls !== false}
+                            autoPlay={block.autoplay}
+                            loop={block.loop}
+                            muted={block.muted}
+                            className="w-full max-w-xl mx-auto rounded-lg"
+                          />
+                        )}
+                        {block.caption && (
+                          <span className="text-[10px] text-gray-500 font-light tracking-wide text-center">
+                            {block.caption}
+                          </span>
+                        )}
+                      </div>
+                    );
+
+                  default:
+                    return null;
+                }
+              })();
+
+              return (
+                <div key={idx} style={getBlockStyle(block.styles)} className="w-full relative transition-all">
+                  {renderedBlock}
+                </div>
+              );
             })}
           </div>
         )}
@@ -769,4 +902,5 @@ export default function DynamicCustomPage({ params }: { params: Promise<{ slug: 
     </div>
   );
 }
+
 
