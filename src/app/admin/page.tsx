@@ -114,6 +114,23 @@ export default function AdminDashboard() {
       // 3. Log activity
       await logActivity("APPROVE_APPLICATION", `Approved node operator application for ${req.email}. Generated User ID: ${generatedUserId}`);
 
+      // Dispatch secure credential email
+      try {
+        await fetch("/api/send-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: req.email,
+            userName: req.name,
+            generatedPassword: generatedPassword,
+          }),
+        });
+      } catch (emailErr) {
+        console.error("Failed to dispatch password email:", emailErr);
+      }
+
       // 4. Show modal
       setCredentialsModal({
         show: true,

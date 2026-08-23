@@ -354,6 +354,23 @@ export default function AdminApprovalsBuilder() {
 
       await logActivity("APPROVE_APPLICATION", `Approved operator application for ${req.email} (Auth account registered)`);
       
+      // Dispatch secure credential email
+      try {
+        await fetch("/api/send-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: req.email,
+            userName: req.name,
+            generatedPassword: generatedPassword,
+          }),
+        });
+      } catch (emailErr) {
+        console.error("Failed to dispatch password email:", emailErr);
+      }
+
       setCredentialsModal({
         show: true,
         userId: generatedUserId,

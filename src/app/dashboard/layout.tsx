@@ -106,11 +106,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       <aside className="w-64 bg-[#0B0F19] text-white shrink-0 flex flex-col justify-between py-6 border-r border-white/5 select-none z-20 h-full overflow-y-auto">
         <div className="flex flex-col gap-7">
           <Link href="/" className="flex items-center gap-3 px-6">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <circle cx="12" cy="11" r="4.5" strokeWidth="1.5" />
-              <circle cx="12" cy="11" r="1.8" fill="currentColor" />
-            </svg>
+            <img src="/assets/logo.png" alt="AEGIS Logo" className="w-6 h-6 object-contain" />
             <span className="font-heading text-lg font-extrabold tracking-wider text-white">AEGIS</span>
           </Link>
 
