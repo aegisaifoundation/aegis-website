@@ -1,559 +1,587 @@
 "use client";
 
 import { useState } from "react";
-import { useDashboard } from "../DashboardContext";
 import {
-  Box, CloudDownload, ShieldCheck, Search, Cpu, Database, Layers, Activity,
-  Terminal, X, ChevronDown, Check, Copy, Plus, Star, ExternalLink, ArrowRight
+  Search, Bookmark, Star, ChevronRight, CheckCircle2, Shield, Wrench, ChevronDown,
+  LayoutGrid, List, Lock, CheckCircle, HelpCircle, Layers, Cpu, Box, Share2,
+  Database, Globe, Terminal, Code2, Bot, Sliders, Activity, Sparkles, BookOpen, Key
 } from "lucide-react";
 
-function ArrowUpCircle(props: React.SVGProps<SVGSVGElement>) {
+export default function MarketplacePage() {
+  const [activeTab, setActiveTab] = useState<"discover" | "categories" | "wishlist" | "installed" | "updates">("discover");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+
   return (
-    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.3" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="16 12 12 8 8 12" />
-      <line x1="12" y1="16" x2="12" y2="8" />
-    </svg>
+    <div className="flex flex-col gap-5 text-white font-body px-1">
+      {/* Sub-Navigation Tabs & Search Bar Row */}
+      <div className="flex items-center justify-between gap-4 border-b border-white/[0.08] pb-3">
+        <div className="flex gap-8 text-xs font-semibold text-white/40">
+          {[
+            { id: "discover", label: "Discover" },
+            { id: "categories", label: "Categories" },
+            { id: "wishlist", label: "Wishlist" },
+            { id: "installed", label: "Installed" },
+            { id: "updates", label: "Updates" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`pb-3 -mb-3 border-b-2 transition-colors cursor-pointer ${
+                activeTab === tab.id
+                  ? "border-white text-white font-bold"
+                  : "border-transparent hover:text-white/70"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Bar */}
+        <div className="flex items-center gap-3 bg-[#161616] border border-white/[0.08] rounded-xl px-3 py-1.5 w-full max-w-xs focus-within:border-white/20 transition-colors">
+          <Search className="w-3.5 h-3.5 text-white/30 shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search packages, models, agents..."
+            className="w-full bg-transparent text-xs text-white placeholder:text-white/30 outline-none"
+          />
+          <span className="text-[9px] text-white/20 font-mono px-1 py-0.2 rounded border border-white/10">/</span>
+        </div>
+      </div>
+
+      {/* Main Tab Content */}
+      {activeTab === "discover" ? (
+        <DiscoverView />
+      ) : activeTab === "categories" ? (
+        <CategoriesView selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
+      ) : (
+        <div className="py-20 text-center text-xs text-white/30">
+          No items found in {activeTab}.
+        </div>
+      )}
+    </div>
   );
 }
 
-export default function MarketplacePage() {
-  const { openWorkflow } = useDashboard();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("All Categories");
-  const [statusFilter, setStatusFilter] = useState("All Status");
-  const [sortOrder, setSortOrder] = useState("Sort by: Popular");
-  const [activeTab, setActiveTab] = useState<"all" | "installed" | "updates">("all");
-  const [selectedPackageId, setSelectedPackageId] = useState("AEGIS Inference Engine");
-  const [isDetailsOpen, setIsDetailsOpen] = useState(true);
-  const [detailTab, setDetailTab] = useState<"overview" | "versions" | "changelog" | "dependencies">("overview");
-
-  const [localStatuses, setLocalStatuses] = useState<Record<string, "Installed" | "Available" | "Update Available">>({});
-
-  const packagesData = [
-    {
-      id: "AEGIS Inference Engine",
-      name: "AEGIS Inference Engine",
-      subtitle: "High-performance inference engine optimized for distributed AI workloads.",
-      category: "Inference",
-      version: "2.4.1",
-      date: "May 10, 2025",
-      status: "Installed" as const,
-      compatibility: "v2.0.0+",
-      downloads: "12.4K",
-      description: "High-performance inference engine optimized for distributed AI workloads across the AEGIS network. Supports multiple model formats and GPU acceleration.",
-      publisher: "AEGIS Foundation",
-      license: "Apache-2.0",
-      size: "152.4 MB",
-      securityStatus: "Verified",
-      platforms: ["Linux", "Windows", "macOS"],
-      cpu: "2 cores",
-      ram: "4 GB",
-      gpu: "NVIDIA CUDA 11.0+",
-      storage: "500 MB",
-      icon: Cpu
-    },
-    {
-      id: "Vector Database",
-      name: "Vector Database",
-      subtitle: "Scalable vector database for embeddings and similarity search.",
-      category: "Data",
-      version: "1.6.0",
-      date: "May 8, 2025",
-      status: "Installed" as const,
-      compatibility: "v1.5.0+",
-      downloads: "8.7K",
-      description: "Scalable vector database for high-dimensional embeddings and real-time similarity search. Built for sub-millisecond retrieval query speeds.",
-      publisher: "AEGIS Foundation",
-      license: "Apache-2.0",
-      size: "94.1 MB",
-      securityStatus: "Verified",
-      platforms: ["Linux", "macOS"],
-      cpu: "4 cores",
-      ram: "8 GB",
-      gpu: "None",
-      storage: "10 GB",
-      icon: Database
-    },
-    {
-      id: "LLM Runtime",
-      name: "LLM Runtime",
-      subtitle: "Optimized runtime for large language models with GPU acceleration.",
-      category: "Runtime",
-      version: "3.2.0",
-      date: "May 11, 2025",
-      status: "Update Available" as const,
-      compatibility: "v2.8.0+",
-      downloads: "6.3K",
-      description: "An optimized runtime for executing large language models locally or distributed. Features model quantization and aggressive hardware offloading.",
-      publisher: "AEGIS Foundation",
-      license: "MIT",
-      size: "210.8 MB",
-      securityStatus: "Verified",
-      platforms: ["Linux", "Windows", "macOS"],
-      cpu: "4 cores",
-      ram: "16 GB",
-      gpu: "NVIDIA CUDA 11.8+",
-      storage: "20 GB",
-      icon: Layers
-    },
-    {
-      id: "Monitoring Agent",
-      name: "Monitoring Agent",
-      subtitle: "Collects metrics and system data from AEGIS nodes.",
-      category: "Monitoring",
-      version: "1.3.2",
-      date: "May 6, 2025",
-      status: "Installed" as const,
-      compatibility: "v1.3.0+",
-      downloads: "4.1K",
-      description: "Lightweight daemon agent that gathers system statistics, GPU utilization, memory loads, and temperatures for reporting to the AEGIS Grid.",
-      publisher: "AEGIS Foundation",
-      license: "Apache-2.0",
-      size: "24.5 MB",
-      securityStatus: "Verified",
-      platforms: ["Linux", "Windows", "macOS"],
-      cpu: "1 core",
-      ram: "512 MB",
-      gpu: "None",
-      storage: "50 MB",
-      icon: Activity
-    },
-    {
-      id: "Security Scanner",
-      name: "Security Scanner",
-      subtitle: "Vulnerability scanning for containers and AI models.",
-      category: "Security",
-      version: "1.1.0",
-      date: "May 5, 2025",
-      status: "Available" as const,
-      compatibility: "v1.0.0+",
-      downloads: "3.2K",
-      description: "Scans container environments, runtime layers, and deep learning model weights for safety vulnerabilities, prompt injection exploits, and backdoor malware.",
-      publisher: "AEGIS Foundation",
-      license: "Proprietary",
-      size: "180.2 MB",
-      securityStatus: "Verified",
-      platforms: ["Linux", "Windows"],
-      cpu: "2 cores",
-      ram: "4 GB",
-      gpu: "None",
-      storage: "1 GB",
-      icon: ShieldCheck
-    },
-    {
-      id: "Model Storage",
-      name: "Model Storage",
-      subtitle: "Distributed storage for models and datasets.",
-      category: "Storage",
-      version: "2.0.3",
-      date: "May 7, 2025",
-      status: "Installed" as const,
-      compatibility: "v1.9.0+",
-      downloads: "2.8K",
-      description: "P2P-backed distributed storage client for sharing model weights and large datasets across nodes with cryptographic integrity checks.",
-      publisher: "AEGIS Foundation",
-      license: "Apache-2.0",
-      size: "88.4 MB",
-      securityStatus: "Verified",
-      platforms: ["Linux", "Windows", "macOS"],
-      cpu: "2 cores",
-      ram: "2 GB",
-      gpu: "None",
-      storage: "50 GB",
-      icon: Box
-    },
-    {
-      id: "Python SDK",
-      name: "Python SDK",
-      subtitle: "Python SDK to interact with AEGIS network and APIs.",
-      category: "Developer Tools",
-      version: "1.4.1",
-      date: "May 3, 2025",
-      status: "Installed" as const,
-      compatibility: "v1.2.0+",
-      downloads: "2.2K",
-      description: "Complete Python developer toolkit containing APIs, bindings, utility libraries, and helper classes to build decentralized client applications on AEGIS.",
-      publisher: "AEGIS Foundation",
-      license: "MIT",
-      size: "12.5 MB",
-      securityStatus: "Verified",
-      platforms: ["Linux", "Windows", "macOS"],
-      cpu: "1 core",
-      ram: "1 GB",
-      gpu: "None",
-      storage: "100 MB",
-      icon: Terminal
-    },
-    {
-      id: "Data Preprocessor",
-      name: "Data Preprocessor",
-      subtitle: "Data cleaning and preprocessing toolkit for ML pipelines.",
-      category: "Data Processing",
-      version: "1.0.2",
-      date: "May 2, 2025",
-      status: "Available" as const,
-      compatibility: "v1.0.0+",
-      downloads: "1.9K",
-      description: "Fast dataset preprocessing utility that cleans, structures, normalizes, and tokenizes raw inputs for training and batch inference pipelines.",
-      publisher: "AEGIS Foundation",
-      license: "Apache-2.0",
-      size: "64.7 MB",
-      securityStatus: "Verified",
-      platforms: ["Linux", "Windows", "macOS"],
-      cpu: "2 cores",
-      ram: "4 GB",
-      gpu: "None",
-      storage: "200 MB",
-      icon: Activity
-    }
-  ];
-
-  const packages = packagesData.map(pkg => ({
-    ...pkg,
-    status: localStatuses[pkg.id] || pkg.status
-  }));
-
-  const selectedPackage = packages.find(p => p.id === selectedPackageId) || packages[0];
-
-  const handleAction = (packageId: string, nextStatus: "Installed" | "Available" | "Update Available") => {
-    setLocalStatuses(prev => ({ ...prev, [packageId]: nextStatus }));
-  };
-
-  const totalPackagesCount = 86;
-  const installedPackagesCount = packages.filter(p => p.status === "Installed").length + 15;
-  const updatesAvailableCount = packages.filter(p => p.status === "Update Available").length + 2;
-  const verifiedPackagesCount = 82;
-
-  const filteredPackages = packages.filter(pkg => {
-    const matchesSearch = pkg.name.toLowerCase().includes(searchQuery.toLowerCase()) || pkg.subtitle.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === "All Categories" || pkg.category === categoryFilter;
-    const matchesStatus = statusFilter === "All Status" || pkg.status === statusFilter;
-    
-    if (activeTab === "installed" && pkg.status !== "Installed") return false;
-    if (activeTab === "updates" && pkg.status !== "Update Available") return false;
-
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
-
+{/* DISCOVER TAB COMPONENT */}
+function DiscoverView() {
   return (
-    <div className="flex flex-col gap-6 w-full text-slate-800">
-      
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {[
-          { label: "Total Packages", value: totalPackagesCount.toString(), sub: "Across all categories", icon: Box, color: "text-[#4D7CFE] bg-blue-50 border border-blue-100" },
-          { label: "Installed Packages", value: installedPackagesCount.toString(), sub: "On your nodes", icon: CloudDownload, color: "text-emerald-600 bg-emerald-50 border border-emerald-100" },
-          { label: "Updates Available", value: updatesAvailableCount.toString(), sub: "Require your attention", icon: ArrowUpCircle, color: "text-amber-600 bg-amber-50 border border-amber-100", dot: "bg-amber-500" },
-          { label: "Verified Packages", value: verifiedPackagesCount.toString(), sub: "Security verified", icon: ShieldCheck, color: "text-blue-500 bg-blue-50/50 border border-blue-100" }
-        ].map((stat, i) => {
-          const StatIcon = stat.icon;
-          return (
-            <div key={i} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-              <div className={`p-3 rounded-xl shrink-0 ${stat.color} flex items-center justify-center relative`}>
-                {stat.dot && <span className={`absolute top-1 right-1 w-2.5 h-2.5 rounded-full ${stat.dot}`} />}
-                <StatIcon className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">{stat.label}</p>
-                <h4 className="text-xl font-extrabold text-slate-900 mt-1.5 leading-none">{stat.value}</h4>
-                <p className="text-[9px] text-slate-400 font-semibold mt-1">{stat.sub}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+    <div className="grid grid-cols-12 gap-6 items-start">
+      {/* Left / Main Section (9 Cols on xl) */}
+      <div className="col-span-12 xl:col-span-9 flex flex-col gap-6">
+        {/* Featured Hero Banner with marketplacebg1.png Background */}
+        <div
+          className="relative rounded-2xl border border-white/[0.08] p-7 overflow-hidden flex items-center justify-between min-h-[230px] bg-cover bg-center shadow-2xl"
+          style={{ backgroundImage: "url('/assets/marketplacebg1.png')" }}
+        >
+          {/* Subtle dark gradient overlay for crystal clear text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent z-0" />
 
-      {/* Main content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        
-        {/* Left Column - Packages list & filters */}
-        <div className={`bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col gap-4 ${isDetailsOpen ? "lg:col-span-2" : "lg:col-span-3"}`}>
-          
-          {/* Table headers */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search packages..." 
-                className="w-full pl-9 pr-4 py-2 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#4D7CFE] transition-colors"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <select 
-                value={categoryFilter}
-                onChange={e => setCategoryFilter(e.target.value)}
-                className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 outline-none cursor-pointer"
-              >
-                <option>All Categories</option>
-                <option>Inference</option>
-                <option>Data</option>
-                <option>Runtime</option>
-                <option>Monitoring</option>
-                <option>Security</option>
-                <option>Storage</option>
-                <option>Developer Tools</option>
-                <option>Data Processing</option>
-              </select>
-              <select 
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 outline-none cursor-pointer"
-              >
-                <option>All Status</option>
-                <option>Installed</option>
-                <option>Available</option>
-                <option>Update Available</option>
-              </select>
-              <select 
-                value={sortOrder}
-                onChange={e => setSortOrder(e.target.value)}
-                className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 outline-none cursor-pointer"
-              >
-                <option>Sort by: Popular</option>
-                <option>Sort by: Downloads</option>
-                <option>Sort by: Rating</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Sub tabs */}
-          <div className="flex border-b border-slate-100 gap-6 mt-1 text-xs font-extrabold uppercase tracking-wider text-slate-400 font-sans">
-            {[
-              { id: "all" as const, label: "All Packages" },
-              { id: "installed" as const, label: `Installed (${installedPackagesCount})` },
-              { id: "updates" as const, label: `Updates (${updatesAvailableCount})` }
-            ].map(tab => (
-              <button 
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`pb-2.5 border-b-2 transition-all cursor-pointer ${
-                  activeTab === tab.id 
-                    ? "border-[#4D7CFE] text-slate-900 font-black" 
-                    : "border-transparent hover:text-slate-600"
-                }`}
-              >
-                {tab.label}
+          {/* Left Text Content */}
+          <div className="flex flex-col items-start max-w-md z-10">
+            <span className="text-[9px] font-bold tracking-widest text-white/40 uppercase">
+              FEATURED
+            </span>
+            <h2 className="text-2xl font-bold text-white tracking-tight mt-1">
+              Federated Learning Engine
+            </h2>
+            <p className="text-xs text-white/60 leading-relaxed mt-2 font-normal">
+              Distributed training infrastructure for secure, privacy-preserving machine learning.
+            </p>
+            <div className="flex items-center gap-3 mt-5">
+              <button className="px-4 py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-white/90 transition-all cursor-pointer shadow-sm">
+                View Details
               </button>
-            ))}
+              <button className="flex items-center gap-1.5 px-4 py-2 bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/10 text-white font-medium text-xs rounded-xl transition-all cursor-pointer">
+                <Bookmark className="w-3.5 h-3.5" />
+                <span>Add to Wishlist</span>
+              </button>
+            </div>
           </div>
 
-          {/* Packages Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider text-[9px] pb-2 font-sans">
-                  <th className="pb-2.5">Package</th>
-                  <th className="pb-2.5">Category</th>
-                  <th className="pb-2.5">Version</th>
-                  <th className="pb-2.5">Status</th>
-                  <th className="pb-2.5">Compatibility</th>
-                  <th className="pb-2.5">Downloads</th>
-                  <th className="pb-2.5 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                {filteredPackages.map((pkg) => {
-                  const isSelected = pkg.id === selectedPackageId;
-                  const PkgIcon = pkg.icon;
-                  return (
-                    <tr 
-                      key={pkg.id} 
-                      onClick={() => {
-                        setSelectedPackageId(pkg.id);
-                        setIsDetailsOpen(true);
-                      }}
-                      className={`hover:bg-slate-50/50 cursor-pointer transition-all ${isSelected ? "bg-slate-50 border-l-4 border-[#4D7CFE]" : ""}`}
-                    >
-                      <td className="py-3.5 pr-2 font-semibold text-slate-900">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-slate-600">
-                            <PkgIcon className="h-4.5 w-4.5" />
-                          </div>
-                          <div>
-                            <div>{pkg.name}</div>
-                            <div className="text-[10px] text-slate-400 font-medium mt-0.5">{pkg.subtitle}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 pr-2 text-slate-500 font-semibold">{pkg.category}</td>
-                      <td className="py-3.5 pr-2 font-mono">{pkg.version}</td>
-                      <td className="py-3.5 pr-2">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider ${
-                          pkg.status === "Installed" 
-                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                            : pkg.status === "Update Available"
-                            ? "bg-amber-50 text-amber-600 border border-amber-100"
-                            : "bg-slate-50 text-slate-500 border border-slate-100"
-                        }`}>
-                          {pkg.status}
-                        </span>
-                      </td>
-                      <td className="py-3.5 pr-2 text-slate-500 font-semibold">{pkg.compatibility}</td>
-                      <td className="py-3.5 pr-2 text-slate-900 font-bold font-mono">{pkg.downloads}</td>
-                      <td className="py-3.5 text-center" onClick={e => e.stopPropagation()}>
-                        {pkg.status === "Installed" ? (
-                          <button 
-                            onClick={() => handleAction(pkg.id, "Available")}
-                            className="rounded-xl border border-red-200 hover:bg-red-50 px-3 py-1.5 text-[10px] font-extrabold text-red-500 transition-colors cursor-pointer"
-                          >
-                            Uninstall
-                          </button>
-                        ) : pkg.status === "Update Available" ? (
-                          <button 
-                            onClick={() => handleAction(pkg.id, "Installed")}
-                            className="rounded-xl bg-amber-500 hover:bg-amber-600 px-3 py-1.5 text-[10px] font-extrabold text-white transition-colors cursor-pointer"
-                          >
-                            Update
-                          </button>
-                        ) : (
-                          <button 
-                            onClick={() => handleAction(pkg.id, "Installed")}
-                            className="rounded-xl bg-[#4D7CFE] hover:bg-[#3b66d9] px-3 py-1.5 text-[10px] font-extrabold text-white transition-colors cursor-pointer"
-                          >
-                            Install
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          {/* Right 3D Cube Graphic Illustration */}
+          <div className="hidden md:flex items-center justify-center relative w-64 h-44 z-0">
+            <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full" />
+            <div className="grid grid-cols-3 gap-2 transform -rotate-12 scale-90 opacity-90">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-12 h-12 rounded-xl border border-white/10 flex items-center justify-center transition-all ${
+                    i === 4
+                      ? "bg-gradient-to-tr from-blue-500 to-indigo-500 shadow-[0_0_20px_rgba(59,130,246,0.6)] border-white/40"
+                      : "bg-white/[0.03] backdrop-blur-sm"
+                  }`}
+                >
+                  {i === 4 && <Sparkles className="w-5 h-5 text-white" />}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Slider Dots */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+            <span className="w-4 h-1 rounded-full bg-white" />
+            <span className="w-1.5 h-1 rounded-full bg-white/20" />
+            <span className="w-1.5 h-1 rounded-full bg-white/20" />
+            <span className="w-1.5 h-1 rounded-full bg-white/20" />
           </div>
         </div>
 
-        {/* Right Column - Specs Drawer */}
-        {isDetailsOpen && (
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col gap-5 lg:col-span-1 min-h-[500px]">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-heading font-extrabold text-slate-900 text-sm uppercase tracking-wider">{selectedPackage.name}</h3>
-                <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Package specifications and installation guides</p>
+        {/* Popular on AEGIS */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white tracking-wide">Popular on AEGIS</h3>
+            <button className="text-xs text-white/40 hover:text-white font-medium transition-colors cursor-pointer">
+              View all
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5 relative">
+            {[
+              { name: "@aegis/federated-learning", author: "AEGIS Foundation", rating: "4.8", installs: "2.4K", icon: Share2 },
+              { name: "@aegis/knowledge-sync", author: "AEGIS Foundation", rating: "4.7", installs: "1.8K", icon: Box },
+              { name: "@aegis/secure-aggregator", author: "AEGIS Foundation", rating: "4.9", installs: "1.2K", icon: Shield, green: true },
+              { name: "@aegis/runtime", author: "AEGIS Foundation", rating: "4.6", installs: "3.2K", icon: Cpu },
+              { name: "@aegis/vector-store", author: "AEGIS Foundation", rating: "4.7", installs: "945", icon: Database },
+            ].map((item, idx) => {
+              const ItemIcon = item.icon;
+              return (
+                <div
+                  key={idx}
+                  className="bg-[#141414] border border-white/[0.07] hover:border-white/20 p-3.5 rounded-2xl flex flex-col justify-between transition-all group cursor-pointer"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className={`p-2.5 rounded-xl border border-white/10 ${item.green ? "bg-emerald-500/10 text-emerald-400" : "bg-white/[0.04] text-white/70"}`}>
+                      <ItemIcon className="w-5 h-5" />
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <h4 className="text-xs font-bold text-white truncate">{item.name}</h4>
+                    <p className="text-[10px] text-white/40 mt-0.5">{item.author}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-white/40 mt-4 pt-2 border-t border-white/[0.04]">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      <span className="text-white font-semibold text-[10px]">{item.rating}</span>
+                      <span className="text-[9px] text-white/30 ml-1">{item.installs} installs</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px] mt-2 font-medium">
+                    <span className="text-white/60">Free</span>
+                    <Bookmark className="w-3.5 h-3.5 text-white/30 group-hover:text-white/70 transition-colors" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* New & Updated */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white tracking-wide">New & Updated</h3>
+            <button className="text-xs text-white/40 hover:text-white font-medium transition-colors cursor-pointer">
+              View all
+            </button>
+          </div>
+
+          <div className="flex flex-col bg-[#141414] border border-white/[0.07] rounded-2xl overflow-hidden divide-y divide-white/[0.05]">
+            {[
+              { name: "@deepmind/graph-reasoner", desc: "Graph-based reasoning engine", ver: "v1.0.0", time: "2 days ago", icon: Share2, purple: true },
+              { name: "@aegis/lora-trainer", desc: "LoRA fine-tuning toolkit", ver: "v0.9.1", time: "3 days ago", icon: Sliders, green: true },
+              { name: "@aegis/network-kernel", desc: "High-performance network layer", ver: "v2.1.0", time: "5 days ago", icon: Cpu, amber: true },
+              { name: "@aegis/monitoring-suite", desc: "Monitoring and observability", ver: "v1.3.2", time: "6 days ago", icon: Activity },
+            ].map((item, idx) => {
+              const ItemIcon = item.icon;
+              return (
+                <div key={idx} className="flex items-center justify-between p-3.5 hover:bg-white/[0.02] transition-colors cursor-pointer">
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className={`p-2.5 rounded-xl border border-white/10 ${
+                      item.purple ? "bg-purple-500/10 text-purple-400" :
+                      item.green ? "bg-emerald-500/10 text-emerald-400" :
+                      item.amber ? "bg-amber-500/10 text-amber-400" :
+                      "bg-white/[0.04] text-white/70"
+                    }`}>
+                      <ItemIcon className="w-4.5 h-4.5" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold text-white truncate">{item.name}</span>
+                      <span className="text-[10px] text-white/40 truncate">{item.desc}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-8 text-xs text-white/40 font-mono shrink-0">
+                    <span className="text-[11px]">{item.ver}</span>
+                    <span className="text-[11px] font-sans text-white/30">{item.time}</span>
+                    <span className="text-[11px] font-sans text-white/60">Free</span>
+                    <Bookmark className="w-3.5 h-3.5 text-white/30 hover:text-white cursor-pointer" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Bottom Assurance Features */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-2xl bg-[#141414] border border-white/[0.07] text-xs">
+          <div className="flex items-center gap-3">
+            <Shield className="w-5 h-5 text-white/40 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-bold text-white text-[11px]">Verified & Secure</span>
+              <span className="text-[9px] text-white/30">All packages are verified and scanned</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Wrench className="w-5 h-5 text-white/40 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-bold text-white text-[11px]">Cryptographically Signed</span>
+              <span className="text-[9px] text-white/30">Integrity and authenticity guaranteed</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Lock className="w-5 h-5 text-white/40 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-bold text-white text-[11px]">Compatibility Tested</span>
+              <span className="text-[9px] text-white/30">Tested across AEGIS runtime environments</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <HelpCircle className="w-5 h-5 text-white/40 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-bold text-white text-[11px]">Developer Support</span>
+              <span className="text-[9px] text-white/30">Community and official support available</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Sidebar (3 Cols on xl) */}
+      <div className="col-span-12 xl:col-span-3 flex flex-col gap-6">
+        {/* Categories List Widget */}
+        <div className="bg-[#141414] border border-white/[0.07] p-4 rounded-2xl flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-white">Categories</h3>
+            <button className="text-[10px] text-white/40 hover:text-white transition-colors cursor-pointer">
+              View all
+            </button>
+          </div>
+          <div className="flex flex-col text-xs font-medium text-white/60 divide-y divide-white/[0.03]">
+            {[
+              { label: "AI Agents", count: "128", icon: Bot },
+              { label: "Models", count: "246", icon: Share2 },
+              { label: "Packages", count: "186", icon: Box },
+              { label: "Tools", count: "142", icon: Wrench },
+              { label: "Datasets", count: "93", icon: Database },
+              { label: "Compute", count: "67", icon: Cpu },
+              { label: "Security", count: "54", icon: Shield },
+              { label: "Infrastructure", count: "76", icon: Layers },
+              { label: "Developer", count: "111", icon: Code2 },
+            ].map((cat, idx) => {
+              const CatIcon = cat.icon;
+              return (
+                <div key={idx} className="flex items-center justify-between py-2 hover:text-white cursor-pointer transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <CatIcon className="w-3.5 h-3.5 text-white/30" />
+                    <span>{cat.label}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-[11px] text-white/40 font-mono">
+                    <span>{cat.count}</span>
+                    <ChevronRight className="w-3 h-3 text-white/20" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Popular Authors Widget */}
+        <div className="bg-[#141414] border border-white/[0.07] p-4 rounded-2xl flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-white">Popular Authors</h3>
+            <button className="text-[10px] text-white/40 hover:text-white transition-colors cursor-pointer">
+              View all
+            </button>
+          </div>
+          <div className="flex flex-col text-xs font-medium text-white/70 gap-2.5">
+            {[
+              { name: "AEGIS Foundation", count: "24 packages", icon: "A" },
+              { name: "DeepMind", count: "18 packages", icon: "🌀" },
+              { name: "OpenMined", count: "11 packages", icon: "🟢" },
+              { name: "Meta AI", count: "9 packages", icon: "♾️" },
+              { name: "Hugging Face", count: "7 packages", icon: "🤗" },
+            ].map((author, idx) => (
+              <div key={idx} className="flex items-center justify-between hover:text-white cursor-pointer transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-white/10 text-[10px] flex items-center justify-center font-bold">{author.icon}</span>
+                  <span className="text-xs font-semibold text-white">{author.name}</span>
+                  <CheckCircle2 className="w-3 h-3 text-white/40" />
+                </div>
+                <span className="text-[10px] text-white/30 font-sans">{author.count}</span>
               </div>
-              <button 
-                onClick={() => setIsDetailsOpen(false)}
-                className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-              >
-                <X className="h-4.5 w-4.5" />
+            ))}
+          </div>
+        </div>
+
+        {/* Top Rated Widget */}
+        <div className="bg-[#141414] border border-white/[0.07] p-4 rounded-2xl flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-white">Top Rated</h3>
+            <button className="text-[10px] text-white/40 hover:text-white transition-colors cursor-pointer">
+              View all
+            </button>
+          </div>
+          <div className="flex flex-col text-xs font-medium text-white/70 gap-2.5">
+            {[
+              { name: "@aegis/secure-aggregator", rating: "4.9", icon: Shield },
+              { name: "@aegis/federated-learning", rating: "4.8", icon: Share2 },
+              { name: "@aegis/knowledge-sync", rating: "4.7", icon: Box },
+              { name: "@aegis/runtime", rating: "4.6", icon: Cpu },
+              { name: "@deepmind/graph-reasoner", rating: "4.6", icon: Share2 },
+            ].map((item, idx) => {
+              const ItemIcon = item.icon;
+              return (
+                <div key={idx} className="flex items-center justify-between hover:text-white cursor-pointer transition-colors">
+                  <div className="flex items-center gap-2 truncate">
+                    <ItemIcon className="w-3.5 h-3.5 text-white/30 shrink-0" />
+                    <span className="text-[11px] font-semibold text-white truncate">{item.name}</span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <span className="text-[10px] font-bold text-white">{item.rating}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+{/* CATEGORIES TAB COMPONENT (IMAGE 2 MATCHING) */}
+function CategoriesView({
+  selectedCategory,
+  setSelectedCategory
+}: {
+  selectedCategory: string;
+  setSelectedCategory: (c: string) => void;
+}) {
+  return (
+    <div className="grid grid-cols-12 gap-6 items-start">
+      {/* Left Sidebar Menu */}
+      <div className="col-span-12 lg:col-span-3 bg-[#141414] border border-white/[0.07] p-4 rounded-2xl flex flex-col gap-4 font-sans text-xs">
+        <div className="flex items-center justify-between text-white font-bold pb-2 border-b border-white/[0.06]">
+          <span>All Categories</span>
+          <span className="text-[11px] text-white/40 font-mono">1,234</span>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {/* Group 1 */}
+          <div className="flex flex-col gap-1.5">
+            {[
+              { label: "AI & Intelligence", count: "386", icon: Share2 },
+              { label: "Agents", count: "128", icon: Bot },
+              { label: "Foundation Models", count: "98", icon: Box },
+              { label: "Training & Fine-tuning", count: "74", icon: Sliders },
+              { label: "Inference", count: "65", icon: Cpu },
+              { label: "Federated Learning", count: "48", icon: Share2 },
+              { label: "Knowledge Systems", count: "56", icon: Database },
+            ].map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <button
+                  key={cat.label}
+                  onClick={() => setSelectedCategory(cat.label)}
+                  className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer ${
+                    selectedCategory === cat.label
+                      ? "bg-white/10 text-white font-semibold"
+                      : "text-white/50 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className="w-3.5 h-3.5 text-white/30" />
+                    <span>{cat.label}</span>
+                  </div>
+                  <span className="text-[10px] text-white/30 font-mono">{cat.count}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Group 2 */}
+          <div className="flex flex-col gap-1.5 border-t border-white/[0.06] pt-3">
+            {[
+              { label: "Infrastructure", count: "312", icon: Layers },
+              { label: "Compute", count: "67", icon: Cpu },
+              { label: "Storage", count: "50", icon: Database },
+              { label: "Networking", count: "42", icon: Globe },
+              { label: "Monitoring", count: "44", icon: Activity },
+              { label: "Security", count: "54", icon: Shield },
+            ].map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <button
+                  key={cat.label}
+                  onClick={() => setSelectedCategory(cat.label)}
+                  className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer ${
+                    selectedCategory === cat.label
+                      ? "bg-white/10 text-white font-semibold"
+                      : "text-white/50 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className="w-3.5 h-3.5 text-white/30" />
+                    <span>{cat.label}</span>
+                  </div>
+                  <span className="text-[10px] text-white/30 font-mono">{cat.count}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Group 3 */}
+          <div className="flex flex-col gap-1.5 border-t border-white/[0.06] pt-3">
+            {[
+              { label: "Developer", count: "244", icon: Code2 },
+              { label: "SDKs & Libraries", count: "82", icon: Terminal },
+              { label: "APIs", count: "59", icon: Key },
+              { label: "CLI Tools", count: "41", icon: Terminal },
+              { label: "Runtime Extensions", count: "62", icon: Layers },
+            ].map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <button
+                  key={cat.label}
+                  onClick={() => setSelectedCategory(cat.label)}
+                  className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer ${
+                    selectedCategory === cat.label
+                      ? "bg-white/10 text-white font-semibold"
+                      : "text-white/50 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className="w-3.5 h-3.5 text-white/30" />
+                    <span>{cat.label}</span>
+                  </div>
+                  <span className="text-[10px] text-white/30 font-mono">{cat.count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Right Grid Content */}
+      <div className="col-span-12 lg:col-span-9 flex flex-col gap-5">
+        {/* Header & Controls */}
+        <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+          <h2 className="text-base font-bold text-white">Browse Categories</h2>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-xs text-white/60">
+              <span className="text-[11px] text-white/40">Sort by</span>
+              <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#161616] border border-white/[0.08] rounded-xl text-xs text-white font-semibold">
+                <span>Popular</span>
+                <ChevronDown className="w-3.5 h-3.5 text-white/40" />
               </button>
             </div>
 
-            {/* Sub-tabs */}
-            <div className="flex border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-sans">
-              {(["overview", "versions", "changelog", "dependencies"] as const).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setDetailTab(tab)}
-                  className={`flex-1 text-center pb-2.5 border-b-2 transition-colors cursor-pointer ${
-                    detailTab === tab 
-                      ? "border-[#4D7CFE] text-slate-900" 
-                      : "border-transparent hover:text-slate-600"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+            <div className="flex items-center gap-1 bg-[#161616] p-1 border border-white/[0.08] rounded-xl">
+              <button className="p-1 bg-white/10 rounded-lg text-white">
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button className="p-1 text-white/40 hover:text-white">
+                <List className="w-4 h-4" />
+              </button>
             </div>
-
-            {detailTab === "overview" && (
-              <div className="flex flex-col gap-5">
-                {/* Description */}
-                <div className="flex flex-col gap-2.5">
-                  <span className="text-slate-400 font-semibold text-[10px] uppercase tracking-wider">Description</span>
-                  <p className="text-slate-700 font-medium leading-relaxed text-[11px] bg-slate-50 p-3 rounded-xl border border-slate-100">{selectedPackage.description}</p>
-                </div>
-
-                {/* Specs */}
-                <div className="flex flex-col gap-3 font-semibold text-xs text-slate-700">
-                  <h4 className="font-heading font-extrabold text-slate-900 text-[10px] uppercase tracking-widest border-b border-slate-100 pb-1.5 mt-2">Specifications</h4>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-400 font-medium">Publisher</span>
-                    <span className="text-slate-900 font-bold">{selectedPackage.publisher}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
-                    <span className="text-slate-400 font-medium">License</span>
-                    <span className="text-slate-900 font-bold">{selectedPackage.license}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
-                    <span className="text-slate-400 font-medium">Package Size</span>
-                    <span className="text-slate-900 font-mono font-bold">{selectedPackage.size}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
-                    <span className="text-slate-400 font-medium">Security Scan</span>
-                    <span className="text-emerald-600 font-extrabold flex items-center gap-1">
-                      <ShieldCheck className="h-4 w-4" /> {selectedPackage.securityStatus}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Hardware Requirements */}
-                <div className="flex flex-col gap-3 font-semibold text-xs text-slate-700">
-                  <h4 className="font-heading font-extrabold text-slate-900 text-[10px] uppercase tracking-widest border-b border-slate-100 pb-1.5 mt-2">Requirements</h4>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-400 font-medium">CPU Cores</span>
-                    <span className="text-slate-900 font-bold">{selectedPackage.cpu}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
-                    <span className="text-slate-400 font-medium">System RAM</span>
-                    <span className="text-slate-900 font-bold">{selectedPackage.ram}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
-                    <span className="text-slate-400 font-medium">GPU Compute</span>
-                    <span className="text-slate-900 font-bold text-right max-w-[130px]">{selectedPackage.gpu}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
-                    <span className="text-slate-400 font-medium">Disk Space</span>
-                    <span className="text-slate-900 font-bold">{selectedPackage.storage}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {detailTab === "versions" && (
-              <div className="flex flex-col gap-3 font-semibold text-xs text-slate-700">
-                {[
-                  { ver: `v${selectedPackage.version} (Latest)`, date: selectedPackage.date, active: true },
-                  { ver: "v2.3.9", date: "Apr 28, 2025" },
-                  { ver: "v2.3.5", date: "Apr 15, 2025" }
-                ].map((v, i) => (
-                  <div key={i} className="flex justify-between items-center border-b border-slate-50 pb-2">
-                    <span className={`font-mono ${v.active ? "text-slate-900 font-bold" : "text-slate-500"}`}>{v.ver}</span>
-                    <span className="text-slate-400 font-mono">{v.date}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {detailTab === "changelog" && (
-              <div className="flex flex-col gap-3 font-semibold text-xs text-slate-700 leading-relaxed font-sans">
-                <p className="font-bold text-slate-900 font-sans">v{selectedPackage.version} Release Notes:</p>
-                <ul className="list-disc pl-4 space-y-1.5 text-[11px] text-slate-500 font-sans">
-                  <li>Improved multi-threaded performance.</li>
-                  <li>Added security verification checksum triggers.</li>
-                  <li>Fixed local memory overflow leaks on Node clusters.</li>
-                </ul>
-              </div>
-            )}
-
-            {detailTab === "dependencies" && (
-              <div className="flex flex-col gap-3 font-semibold text-xs text-slate-700">
-                {[
-                  { name: "aegis-core-runtime", ver: ">=v1.2.0", optional: false },
-                  { name: "cuda-drivers", ver: ">=v11.8", optional: true }
-                ].map((d, i) => (
-                  <div key={i} className="flex justify-between items-center border-b border-slate-50 pb-2">
-                    <span className="text-slate-900 font-bold font-mono">{d.name}</span>
-                    <span className="text-slate-500 text-[10px] font-mono">{d.ver} {d.optional && "(Optional)"}</span>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
-        )}
+        </div>
+
+        {/* 12 Category Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { title: "AI & Intelligence", desc: "Models, agents and intelligence systems for AEGIS.", count: "386 packages", icon: Share2, purple: true },
+            { title: "Agents", desc: "Autonomous agents and multi-agent systems.", count: "128 packages", icon: Bot, green: true },
+            { title: "Foundation Models", desc: "Pre-trained models for a wide range of capabilities.", count: "98 packages", icon: Box, blue: true },
+            { title: "Training & Fine-tuning", desc: "Tools and frameworks for training and fine-tuning models.", count: "74 packages", icon: Sliders, amber: true },
+            { title: "Inference", desc: "Inference engines and optimization tools.", count: "65 packages", icon: Cpu, teal: true },
+            { title: "Federated Learning", desc: "Distributed training and federated learning tools.", count: "48 packages", icon: Share2, purple: true },
+            { title: "Knowledge Systems", desc: "Knowledge graphs, RAG systems and retrieval tools.", count: "56 packages", icon: Database, orange: true },
+            { title: "Infrastructure", desc: "Core infrastructure components for AEGIS networks.", count: "312 packages", icon: Layers, blue: true },
+            { title: "Developer", desc: "SDKs, libraries and developer tools for building on AEGIS.", count: "244 packages", icon: Code2, green: true },
+            { title: "Security", desc: "Security, privacy and trust components.", count: "54 packages", icon: Shield, purple: true },
+            { title: "Data", desc: "Datasets, embeddings and data management tools.", count: "158 packages", icon: Database, amber: true },
+            { title: "Tools & Utilities", desc: "Productivity tools and utilities for developers and operators.", count: "81 packages", icon: Wrench, teal: true },
+          ].map((cat, idx) => {
+            const Icon = cat.icon;
+            return (
+              <div
+                key={idx}
+                className="bg-[#141414] border border-white/[0.07] hover:border-white/20 p-4 rounded-2xl flex flex-col justify-between min-h-[160px] transition-all cursor-pointer group"
+              >
+                <div>
+                  <div className={`p-2.5 rounded-xl border border-white/10 w-fit ${
+                    cat.purple ? "bg-purple-500/10 text-purple-400" :
+                    cat.green ? "bg-emerald-500/10 text-emerald-400" :
+                    cat.blue ? "bg-blue-500/10 text-blue-400" :
+                    cat.amber ? "bg-amber-500/10 text-amber-400" :
+                    cat.teal ? "bg-teal-500/10 text-teal-400" :
+                    cat.orange ? "bg-orange-500/10 text-orange-400" :
+                    "bg-white/[0.04] text-white/70"
+                  }`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-xs font-bold text-white mt-3 group-hover:text-white/90">{cat.title}</h3>
+                  <p className="text-[10px] text-white/40 leading-relaxed mt-1">{cat.desc}</p>
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] text-white/30 mt-4 pt-2 border-t border-white/[0.04]">
+                  <span>{cat.count}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white transition-colors" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bottom Assurance Banner */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-2xl bg-[#141414] border border-white/[0.07] text-xs mt-4">
+          <div className="flex items-center gap-3">
+            <Shield className="w-5 h-5 text-white/40 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-bold text-white text-[11px]">Verified & Secure</span>
+              <span className="text-[9px] text-white/30">All packages are verified and scanned</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Wrench className="w-5 h-5 text-white/40 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-bold text-white text-[11px]">Cryptographically Signed</span>
+              <span className="text-[9px] text-white/30">Integrity and authenticity guaranteed</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-white/40 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-bold text-white text-[11px]">Quality Assured</span>
+              <span className="text-[9px] text-white/30">Tested for compatibility and reliability</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Sparkles className="w-5 h-5 text-white/40 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-bold text-white text-[11px]">Built for AEGIS</span>
+              <span className="text-[9px] text-white/30">Designed for distributed intelligence</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

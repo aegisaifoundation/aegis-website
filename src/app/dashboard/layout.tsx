@@ -201,7 +201,24 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       {/* Main Panel */}
       <section className="flex-1 flex flex-col min-w-0 bg-[#111111] h-full overflow-y-auto">
         {/* Top Bar */}
-        <header className={`flex justify-end items-center px-8 py-4 ${isDashboardHome ? "" : "border-b border-white/[0.05]"}`}>
+        <header className={`flex justify-between items-center px-8 py-4 ${isDashboardHome ? "" : "border-b border-white/[0.05]"}`}>
+          {!isDashboardHome ? (
+            <div>
+              <h1 className="font-heading font-extrabold text-xl md:text-2xl text-white tracking-tight capitalize">
+                {activeView === "dashboard" ? "Overview" : activeView.replace(/-/g, " ")}
+              </h1>
+              <p className="text-xs text-white/40 mt-0.5 font-medium font-sans">
+                {activeView === "settings" && "Manage your operator settings and application security parameters."}
+                {activeView === "my-nodes" && "View and manage your AI compute nodes."}
+                {activeView === "requests" && "Track, monitor and manage requests across the AEGIS network."}
+                {activeView === "marketplace" && "Discover and install intelligence, tools and packages for your AEGIS network."}
+                {activeView === "downloads" && "Search components, compare versions, inspect requirements, and request secure access."}
+                {activeView === "usage" && "Monitor and analyze your resource consumption across all nodes."}
+                {activeView === "billing" && "Compare plans, billing settings, GST tax invoices, and account subscriptions."}
+              </p>
+            </div>
+          ) : <div />}
+
           <div className="flex items-center gap-3">
             {/* Bell */}
             <button
@@ -321,7 +338,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           /* Sub-page layout */
           <div className={`flex-1 ${activeView === "support" ? "" : "p-10"}`}>
             {/* Sub-page header */}
-            {activeView !== "support" && (
+            {activeView !== "support" && activeView !== "my-nodes" && activeView !== "requests" && activeView !== "marketplace" && (
               <div className="mb-8">
                 <h1 className="font-heading font-extrabold text-2xl text-white tracking-tight capitalize">
                   {activeView.replace(/-/g, " ")}

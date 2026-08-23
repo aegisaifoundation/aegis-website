@@ -3,421 +3,309 @@
 import { useState } from "react";
 import { useDashboard } from "../DashboardContext";
 import {
-  Cpu, Database, Monitor, Link2, BriefcaseBusiness, Box, Settings, Search,
-  MoreHorizontal, X, ChevronDown, Check, Copy, Plus, Star, ShieldCheck
+  Search, ChevronDown, Plus, Trash2, MapPin, Shield, Sliders
 } from "lucide-react";
+
+interface NodeItem {
+  id: string;
+  name: string;
+  location: string;
+  region: string;
+  status: "online" | "busy" | "offline";
+  enabled: boolean;
+  lastSeen: string;
+}
 
 export default function MyNodesPage() {
   const { userNodes } = useDashboard();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
-  const [regionFilter, setRegionFilter] = useState("All Regions");
-  const [selectedNodeId, setSelectedNodeId] = useState("node_7f2a8c01");
-  const [isDetailOpen, setIsDetailOpen] = useState(true);
-  const [detailTab, setDetailTab] = useState<"overview" | "performance" | "details" | "history">("overview");
-  const [copied, setCopied] = useState(false);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
 
-  const mockDetailsNodes = [
+  // Initial nodes matching screenshot
+  const initialNodes: NodeItem[] = [
     {
-      id: "node_7f2a8c01",
+      id: "aegs_01ny7f2k3",
       name: "AEGIS-NODE-01",
-      country: "New York, USA",
-      region: "us-east",
-      ipAddress: "203.0.113.42",
-      status: "online" as const,
-      latency: 16,
-      uptime: "99.7%",
-      capabilities: "NVIDIA RTX 4090",
-      vram: "24 GB",
-      cpu: "Intel i9-13900K",
-      ram: "64 GB",
-      storage: "2 TB NVMe SSD",
-      os: "Ubuntu 22.04 LTS",
-      registeredOn: "12 Jan 2025, 10:24 AM",
-      lastSeen: "1 min ago",
-      computeHrs: "3.21 hrs",
-      flag: "🇺🇸"
+      location: "New York, USA",
+      region: "us-east-1",
+      status: "online",
+      enabled: true,
+      lastSeen: "2m ago",
     },
     {
-      id: "node_a91b3d42",
+      id: "aegs_02fr4d9k1",
       name: "AEGIS-NODE-02",
-      country: "Frankfurt, DE",
-      region: "eu-central",
-      ipAddress: "198.51.100.85",
-      status: "online" as const,
-      latency: 18,
-      uptime: "99.9%",
-      capabilities: "NVIDIA A6000",
-      vram: "48 GB",
-      cpu: "Intel i9-13900K",
-      ram: "64 GB",
-      storage: "2 TB NVMe SSD",
-      os: "Ubuntu 22.04 LTS",
-      registeredOn: "14 Jan 2025, 02:15 PM",
-      lastSeen: "2 min ago",
-      computeHrs: "2.81 hrs",
-      flag: "🇩🇪"
+      location: "Frankfurt, DE",
+      region: "eu-central-1",
+      status: "online",
+      enabled: true,
+      lastSeen: "1m ago",
     },
     {
-      id: "node_c39d7e11",
+      id: "aegs_03sg2h8m7",
       name: "AEGIS-NODE-03",
-      country: "Singapore, SG",
-      region: "ap-southeast",
-      ipAddress: "203.0.113.12",
-      status: "offline" as const,
-      latency: 0,
-      uptime: "-",
-      capabilities: "NVIDIA RTX 3090",
-      vram: "24 GB",
-      cpu: "Intel i9-13900K",
-      ram: "64 GB",
-      storage: "2 TB NVMe SSD",
-      os: "Ubuntu 22.04 LTS",
-      registeredOn: "15 Jan 2025, 09:45 AM",
-      lastSeen: "3 hours ago",
-      computeHrs: "1.40 hrs",
-      flag: "🇸🇬"
-    }
+      location: "Singapore, SG",
+      region: "ap-southeast-1",
+      status: "busy",
+      enabled: true,
+      lastSeen: "3m ago",
+    },
+    {
+      id: "aegs_04lon9p2q",
+      name: "AEGIS-NODE-04",
+      location: "London, UK",
+      region: "eu-west-2",
+      status: "offline",
+      enabled: false,
+      lastSeen: "1h ago",
+    },
   ];
 
-  const dbDetailedNodes = userNodes.map((n, i) => {
-    const exists = mockDetailsNodes.some(m => m.id === n.id);
-    if (exists) return null;
-    return {
-      id: n.id,
-      name: n.name,
-      country: n.country,
-      region: n.country.toLowerCase().includes("us") || n.country.toLowerCase().includes("york") ? "us-east" : "ap-southeast",
-      ipAddress: `203.0.113.${100 + i}`,
-      status: (n.status || "online") as "online" | "offline",
-      latency: n.latency || 25,
-      uptime: "99.9%",
-      capabilities: n.capabilities || "NVIDIA RTX 4090",
-      vram: n.capabilities.toLowerCase().includes("4090") ? "24 GB" : "48 GB",
-      cpu: "Intel i9-13900K",
-      ram: "64 GB",
-      storage: "2 TB NVMe SSD",
-      os: "Ubuntu 22.04 LTS",
-      registeredOn: n.lastHeartbeat ? new Date(n.lastHeartbeat).toLocaleString() : "Just Now",
-      lastSeen: "Active",
-      computeHrs: "1.20 hrs",
-      flag: n.country.toLowerCase().includes("germany") || n.country.toLowerCase().includes("de") ? "🇩🇪" : (n.country.toLowerCase().includes("singapore") || n.country.toLowerCase().includes("sg") ? "🇸🇬" : "🇺🇸")
-    };
-  }).filter(Boolean) as typeof mockDetailsNodes;
+  const [nodes, setNodes] = useState<NodeItem[]>(initialNodes);
 
-  const allDetailedNodes = [...mockDetailsNodes, ...dbDetailedNodes];
-  const selectedNode = allDetailedNodes.find(n => n.id === selectedNodeId) || allDetailedNodes[0];
+  // Include any newly registered user nodes from database
+  const activeNodes = [
+    ...nodes,
+    ...userNodes
+      .filter((n) => !nodes.some((existing) => existing.name === n.name))
+      .map((n, idx) => ({
+        id: n.id || `aegs_0${idx + 5}custom`,
+        name: n.name,
+        location: n.country || "United States",
+        region: "us-east-1",
+        status: (n.status || "online") as "online" | "busy" | "offline",
+        enabled: true,
+        lastSeen: "Just now",
+      })),
+  ];
+
+  const handleToggleEnable = (id: string) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === id ? { ...node, enabled: !node.enabled } : node
+      )
+    );
+  };
+
+  const handleDeleteNode = (id: string) => {
+    if (confirm("Are you sure you want to delete this node?")) {
+      setNodes((prev) => prev.filter((node) => node.id !== id));
+    }
+  };
+
+  const filteredNodes = activeNodes.filter((node) => {
+    const matchesSearch =
+      node.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      node.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      node.id.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "All Status" ||
+      (statusFilter === "Online" && node.status === "online") ||
+      (statusFilter === "Busy" && node.status === "busy") ||
+      (statusFilter === "Offline" && node.status === "offline");
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start text-slate-800">
-      {/* Left Column (Nodes list & filters) */}
-      <div className={`bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col gap-4 ${isDetailOpen ? "lg:col-span-3" : "lg:col-span-4"}`}>
-        
-        {/* Table filters */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-            <input 
-              type="text" 
+    <div className="flex flex-col justify-between min-h-[calc(100vh-140px)] text-white font-body px-2">
+      <div className="flex flex-col gap-8">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+              My Nodes
+            </h1>
+            <p className="text-xs md:text-sm text-white/40 mt-1 font-normal">
+              View and manage your AI compute nodes.
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              // Trigger command palette or modal
+              const kEvt = new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true });
+              window.dispatchEvent(kEvt);
+            }}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-white text-black font-semibold text-xs rounded-xl hover:bg-white/90 transition-all cursor-pointer shadow-sm"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>Create Node</span>
+          </button>
+        </div>
+
+        {/* Search & Filter Controls */}
+        <div className="flex items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+          <div className="flex items-center gap-3 flex-1 max-w-md">
+            <Search className="w-4 h-4 text-white/40 shrink-0" />
+            <input
+              type="text"
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search nodes..." 
-              className="w-full pl-9 pr-4 py-2 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#4D7CFE] transition-colors"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search nodes..."
+              className="w-full bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <select 
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-              className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 outline-none cursor-pointer"
+
+          {/* Status Filter Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsStatusDropdownOpen((prev) => !prev)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-[#161616] hover:bg-[#202020] border border-white/[0.08] rounded-xl text-xs font-medium text-white/80 transition-all cursor-pointer"
             >
-              <option>All Status</option>
-              <option>Online</option>
-              <option>Offline</option>
-            </select>
-            <select 
-              value={regionFilter}
-              onChange={e => setRegionFilter(e.target.value)}
-              className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 outline-none cursor-pointer"
-            >
-              <option>All Regions</option>
-              <option>us-east</option>
-              <option>eu-central</option>
-              <option>ap-southeast</option>
-            </select>
+              <span>{statusFilter}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-white/40 transition-transform ${isStatusDropdownOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isStatusDropdownOpen && (
+              <div className="absolute right-0 top-[calc(100%+6px)] w-36 bg-[#161616] border border-white/[0.08] rounded-xl shadow-xl z-30 py-1 font-sans">
+                {["All Status", "Online", "Busy", "Offline"].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => {
+                      setStatusFilter(status);
+                      setIsStatusDropdownOpen(false);
+                    }}
+                    className={`flex items-center w-full px-3 py-2 text-xs text-left transition-colors cursor-pointer ${
+                      statusFilter === status
+                        ? "text-white font-semibold bg-white/10"
+                        : "text-white/60 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Nodes Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider text-[9px] pb-2 font-sans">
-                <th className="pb-2.5">Node</th>
-                <th className="pb-2.5">Location</th>
-                <th className="pb-2.5">Status</th>
-                <th className="pb-2.5">Latency</th>
-                <th className="pb-2.5">Uptime</th>
-                <th className="pb-2.5">Hardware</th>
-                <th className="pb-2.5">Last Seen</th>
-                <th className="pb-2.5 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {allDetailedNodes
-                .filter(node => {
-                  const matchesSearch = node.name.toLowerCase().includes(searchQuery.toLowerCase()) || node.country.toLowerCase().includes(searchQuery.toLowerCase());
-                  const matchesStatus = statusFilter === "All Status" || (statusFilter === "Online" && node.status === "online") || (statusFilter === "Offline" && node.status === "offline");
-                  const matchesRegion = regionFilter === "All Regions" || node.region === regionFilter;
-                  return matchesSearch && matchesStatus && matchesRegion;
-                })
-                .map((node) => {
-                  const isSelected = node.id === selectedNodeId;
-                  return (
-                    <tr 
-                      key={node.id} 
-                      onClick={() => {
-                        setSelectedNodeId(node.id);
-                        setIsDetailOpen(true);
-                      }}
-                      className={`hover:bg-slate-50/50 cursor-pointer transition-all ${isSelected ? "bg-slate-50 border-l-4 border-[#4D7CFE]" : ""}`}
+        {/* Nodes List */}
+        <div className="flex flex-col">
+          {filteredNodes.length === 0 ? (
+            <div className="py-16 text-center text-xs text-white/30">
+              No compute nodes found matching your criteria.
+            </div>
+          ) : (
+            filteredNodes.map((node) => (
+              <div
+                key={node.id}
+                className="flex items-center justify-between py-5 border-b border-white/[0.06] hover:bg-white/[0.01] transition-colors px-2 rounded-lg"
+              >
+                {/* Name & ID */}
+                <div className="flex items-center gap-4 min-w-[220px]">
+                  <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white/60 shrink-0">
+                    <Sliders className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-white tracking-wide">
+                      {node.name}
+                    </span>
+                    <span className="text-xs text-white/40 font-mono mt-0.5">
+                      ID: {node.id}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Location & Region */}
+                <div className="flex flex-col min-w-[180px]">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
+                    <MapPin className="w-3.5 h-3.5 text-white/40 shrink-0" />
+                    <span>{node.location}</span>
+                  </div>
+                  <span className="text-xs text-white/40 font-mono mt-0.5 pl-5">
+                    {node.region}
+                  </span>
+                </div>
+
+                {/* Status Badge */}
+                <div className="min-w-[120px]">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        node.status === "online"
+                          ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                          : node.status === "busy"
+                          ? "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]"
+                          : "bg-slate-500"
+                      }`}
+                    />
+                    <span
+                      className={`text-xs font-medium capitalize ${
+                        node.status === "online"
+                          ? "text-emerald-400"
+                          : node.status === "busy"
+                          ? "text-amber-400"
+                          : "text-white/40"
+                      }`}
                     >
-                      <td className="py-3.5 font-semibold text-slate-900 pr-2">
-                        <div>{node.name}</div>
-                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">{node.id}</div>
-                      </td>
-                      <td className="py-3.5 text-slate-500 pr-2">
-                        <div className="flex items-center gap-1.5 font-sans">
-                          <span>{node.flag}</span>
-                          <span>{node.country}</span>
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-semibold mt-0.5">{node.region}</div>
-                      </td>
-                      <td className="py-3.5 pr-2">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
-                          node.status === "online" 
-                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                            : "bg-slate-50 text-slate-500 border border-slate-100"
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${node.status === "online" ? "bg-emerald-500" : "bg-slate-400"}`} />
-                          {node.status === "online" ? "Online" : "Offline"}
-                        </span>
-                      </td>
-                      <td className="py-3.5 font-mono text-[#4D7CFE] pr-2">
-                        {node.status === "online" ? `${node.latency} ms` : "-"}
-                      </td>
-                      <td className="py-3.5 font-semibold text-slate-600 pr-2 font-mono">
-                        {node.uptime}
-                      </td>
-                      <td className="py-3.5 text-slate-700 pr-2">
-                        <div>{node.capabilities}</div>
-                        <div className="text-[10px] text-slate-400 font-semibold mt-0.5">{node.vram} VRAM</div>
-                      </td>
-                      <td className="py-3.5 text-slate-400 pr-2">
-                        {node.lastSeen}
-                      </td>
-                      <td className="py-3.5 text-center" onClick={e => e.stopPropagation()}>
-                        <button className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 cursor-pointer">
-                          <MoreHorizontal className="h-4.5 w-4.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </div>
+                      {node.status === "online"
+                        ? "Online"
+                        : node.status === "busy"
+                        ? "Busy"
+                        : "Offline"}
+                    </span>
+                  </div>
+                </div>
 
-        <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-t border-slate-100 pt-4 mt-2 font-sans">
-          <span>Showing 1 to {allDetailedNodes.length} of {allDetailedNodes.length} nodes</span>
-          <div className="flex items-center gap-1">
-            <button className="p-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-slate-400">&lt;</button>
-            <button className="px-3 py-1.5 border border-[#4D7CFE] bg-blue-50 text-[#4D7CFE] rounded-lg">1</button>
-            <button className="p-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-slate-400">&gt;</button>
-          </div>
+                {/* Enable/Disable Toggle */}
+                <div className="flex flex-col items-center min-w-[100px]">
+                  <button
+                    onClick={() => handleToggleEnable(node.id)}
+                    className={`relative w-9 h-5 rounded-full transition-colors cursor-pointer p-0.5 ${
+                      node.enabled ? "bg-emerald-500" : "bg-white/20"
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                        node.enabled ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                  <span className="text-[10px] text-white/40 font-medium mt-1">
+                    {node.enabled ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
+
+                {/* Last Seen */}
+                <div className="flex flex-col items-end min-w-[120px]">
+                  <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider">
+                    Last seen
+                  </span>
+                  <span className="text-xs font-bold text-white mt-0.5 font-mono">
+                    {node.lastSeen}
+                  </span>
+                </div>
+
+                {/* Delete Button */}
+                <div className="pl-4">
+                  <button
+                    onClick={() => handleDeleteNode(node.id)}
+                    className="p-2 text-red-500/70 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                    title="Delete Node"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Right Column (Node Details Panel) */}
-      {isDetailOpen && (
-        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col gap-5 lg:col-span-1 min-h-[500px]">
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-heading font-extrabold text-slate-900 text-sm uppercase tracking-wider">{selectedNode.name}</h3>
-                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
-                  selectedNode.status === "online" 
-                    ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                    : "bg-slate-50 text-slate-500 border border-slate-100"
-                }`}>
-                  {selectedNode.status}
-                </span>
-              </div>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Connected local cluster details</p>
-            </div>
-            <button 
-              onClick={() => setIsDetailOpen(false)}
-              className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-            >
-              <X className="h-4.5 w-4.5" />
-            </button>
-          </div>
-
-          {/* Sub-Tabs */}
-          <div className="flex border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-sans">
-            {(["overview", "performance", "details", "history"] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setDetailTab(tab)}
-                className={`flex-1 text-center pb-2.5 border-b-2 transition-colors cursor-pointer ${
-                  detailTab === tab 
-                    ? "border-[#4D7CFE] text-slate-900" 
-                    : "border-transparent hover:text-slate-600"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          {detailTab === "overview" && (
-            <div className="flex flex-col gap-5">
-              {/* Node Properties key-value List */}
-              <div className="flex flex-col gap-3 font-semibold text-xs text-slate-700">
-                {[
-                  { label: "Node ID", value: selectedNode.id, copy: true },
-                  { label: "Location", value: selectedNode.country },
-                  { label: "IP Address", value: selectedNode.ipAddress },
-                  { label: "Region", value: selectedNode.region },
-                  { label: "Registered On", value: selectedNode.registeredOn },
-                  { label: "Client Version", value: "v1.2.3" },
-                  { label: "Last Seen", value: selectedNode.lastSeen },
-                  { label: "Status", value: selectedNode.status === "online" ? "Online" : "Offline", badge: true }
-                ].map((prop, i) => (
-                  <div key={i} className="flex justify-between items-center border-b border-slate-100 pb-2">
-                    <span className="text-slate-400 font-medium">{prop.label}</span>
-                    {prop.copy ? (
-                      <span className="font-mono text-slate-600 flex items-center gap-1.5">
-                        {prop.value.slice(0, 15)}...
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(prop.value);
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
-                          }}
-                          className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 cursor-pointer"
-                        >
-                          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-                        </button>
-                      </span>
-                    ) : prop.badge ? (
-                      <span className={`text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded ${
-                        selectedNode.status === "online" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-slate-50 text-slate-500 border border-slate-100"
-                      }`}>
-                        {prop.value}
-                      </span>
-                    ) : (
-                      <span className="text-slate-900 font-bold font-mono text-right">{prop.value}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Hardware Specifications */}
-              <div className="flex flex-col gap-3 font-semibold text-xs text-slate-700">
-                <h4 className="font-heading font-extrabold text-slate-900 text-[10px] uppercase tracking-widest border-b border-slate-100 pb-1.5 mt-2">Hardware</h4>
-                
-                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                  <span className="text-slate-400 font-medium">GPU</span>
-                  <span className="text-slate-900 font-bold text-right">{selectedNode.capabilities}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                  <span className="text-slate-400 font-medium">VRAM</span>
-                  <span className="text-slate-900 font-mono font-bold">{selectedNode.vram}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                  <span className="text-slate-400 font-medium">CPU</span>
-                  <span className="text-slate-900 font-bold text-right">{selectedNode.cpu}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                  <span className="text-slate-400 font-medium">RAM</span>
-                  <span className="text-slate-900 font-mono font-bold">{selectedNode.ram}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                  <span className="text-slate-400 font-medium">Storage</span>
-                  <span className="text-slate-900 font-bold">{selectedNode.storage}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400 font-medium font-sans">OS</span>
-                  <span className="text-slate-900 font-bold">{selectedNode.os}</span>
-                </div>
-              </div>
-
-              <button className="w-full text-center rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors py-3 text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5 cursor-pointer mt-2">
-                <Settings className="h-4 w-4 text-slate-400" /> Manage Node <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-              </button>
-            </div>
-          )}
-
-          {detailTab === "performance" && (
-            <div className="flex flex-col gap-4 font-semibold text-xs text-slate-700">
-              <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl flex flex-col gap-1 text-center">
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest font-sans">Network Latency</span>
-                <span className="text-2xl font-extrabold text-[#4D7CFE] mt-1 font-mono">{selectedNode.status === "online" ? `${selectedNode.latency} ms` : "-"}</span>
-                <span className="text-[8px] text-emerald-600 font-bold uppercase tracking-wider mt-0.5">Excellent Response</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-slate-100 pb-2 mt-2">
-                <span className="text-slate-400 font-medium">Core Temp</span>
-                <span className="text-slate-900 font-mono font-bold">{selectedNode.status === "online" ? "68°C" : "-"}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                <span className="text-slate-400 font-medium">Fan Speed</span>
-                <span className="text-slate-900 font-mono font-bold">{selectedNode.status === "online" ? "45%" : "-"}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400 font-medium">Compute Active</span>
-                <span className="text-slate-900 font-mono font-bold">{selectedNode.computeHrs}</span>
-              </div>
-            </div>
-          )}
-
-          {detailTab === "details" && (
-            <div className="flex flex-col gap-3 font-semibold text-xs text-slate-700">
-              <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                <span className="text-slate-400 font-medium">Uptime Guarantee</span>
-                <span className="text-slate-900 font-bold">99.9%</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                <span className="text-slate-400 font-medium">GPU Generation</span>
-                <span className="text-slate-900 font-bold">Ada Lovelace</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400 font-medium">Driver Version</span>
-                <span className="text-slate-900 font-mono font-bold">CUDA 12.1</span>
-              </div>
-            </div>
-          )}
-
-          {detailTab === "history" && (
-            <div className="flex flex-col gap-3.5 font-semibold text-xs text-slate-700">
-              {[
-                { title: "Heartbeat check successful", time: "1 min ago", status: "success" },
-                { title: "Inference task completed", time: "12 mins ago", status: "task" },
-                { title: "Inference task completed", time: "24 mins ago", status: "task" },
-                { title: "Node initialized successfully", time: "2 days ago", status: "sys" }
-              ].map((h, i) => (
-                <div key={i} className="flex justify-between items-start gap-2">
-                  <div className="flex gap-2">
-                    <span className={`w-2 h-2 rounded-full mt-1.5 ${h.status === "success" ? "bg-emerald-500" : h.status === "task" ? "bg-blue-500" : "bg-slate-400"}`} />
-                    <span className="text-slate-700 font-medium leading-relaxed">{h.title}</span>
-                  </div>
-                  <span className="text-[9px] text-slate-400 font-semibold font-mono shrink-0 mt-0.5">{h.time}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Bottom Privacy Banner */}
+      <div className="flex items-center justify-center gap-2 text-white/30 text-xs py-6 mt-12">
+        <Shield className="w-3.5 h-3.5 shrink-0 text-white/40" />
+        <span>Your AEGIS data and settings are private and secure.</span>
+        <a
+          href="/dashboard/settings"
+          className="text-white/50 hover:text-white font-medium underline transition-colors cursor-pointer"
+        >
+          Learn more
+        </a>
+      </div>
     </div>
   );
 }
