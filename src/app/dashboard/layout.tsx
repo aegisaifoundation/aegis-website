@@ -106,7 +106,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       <aside className="w-64 bg-[#0B0F19] text-white shrink-0 flex flex-col justify-between py-6 border-r border-white/5 select-none z-20 h-full overflow-y-auto">
         <div className="flex flex-col gap-7">
           <Link href="/" className="flex items-center gap-3 px-6">
-            <img src="/assets/logo.png" alt="AEGIS Logo" className="w-6 h-6 object-contain" />
+            <img src="/assets/logo.png" alt="AEGIS Logo" className="w-9 h-9 object-contain" />
             <span className="font-heading text-lg font-extrabold tracking-wider text-white">AEGIS</span>
           </Link>
 
