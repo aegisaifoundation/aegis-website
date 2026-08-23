@@ -273,7 +273,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col items-center gap-8 w-full max-w-xl mt-4">
               {/* Logo + Name */}
               <div className="flex flex-col items-center gap-3">
-                <img src="/assets/logo1.png" alt="AEGIS" className="h-14 w-14 object-contain opacity-90" />
+                <img src="/assets/logo1.png" alt="AEGIS" className="h-24 w-24 object-contain opacity-95" />
                 <h1 className="text-3xl font-bold text-white tracking-tight">Operator</h1>
                 <p className="text-sm text-white/40">{profile.email}</p>
               </div>
