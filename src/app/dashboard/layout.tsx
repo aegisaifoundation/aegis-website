@@ -154,7 +154,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         {/* Logo */}
         <div className="flex flex-col gap-6">
           <Link href="/" className="flex items-center gap-2.5 px-5">
-            <img src="/assets/logo3.png" alt="AEGIS" className="h-6 object-contain" />
+            <img src="/assets/logo1.png" alt="AEGIS" className="h-6 object-contain" />
             <span className="font-heading text-base font-bold tracking-widest text-white">AEGIS</span>
           </Link>
 
@@ -273,7 +273,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col items-center gap-8 w-full max-w-xl mt-4">
               {/* Logo + Name */}
               <div className="flex flex-col items-center gap-3">
-                <img src="/assets/logo3.png" alt="AEGIS" className="h-14 w-14 object-contain opacity-90" />
+                <img src="/assets/logo1.png" alt="AEGIS" className="h-14 w-14 object-contain opacity-90" />
                 <h1 className="text-3xl font-bold text-white tracking-tight">Operator</h1>
                 <p className="text-sm text-white/40">{profile.email}</p>
               </div>
