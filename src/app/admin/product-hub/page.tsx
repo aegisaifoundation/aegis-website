@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Edit, Eye, Plus, Trash2, ArrowRight, Grid, FileText, CheckCircle, HelpCircle, Layers, PlusCircle, ToggleLeft, ToggleRight, Settings } from "lucide-react";
-import { db, auth } from "@/config/firebase";
+import { db, auth, storage } from "@/config/firebase";
 import { collection, onSnapshot, doc, setDoc, deleteDoc, query, orderBy, updateDoc } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { getOrCreateUserProfile, UserProfile } from "@/config/userRoles";
 import { logActivity, addNotification } from "@/config/activityLogger";
 import Link from "next/link";
@@ -68,6 +69,44 @@ export default function ProductUXHub() {
   // Modular Block Builder states
   const [blocks, setBlocks] = useState<any[]>([]);
   const [selectedBlockIdx, setSelectedBlockIdx] = useState<number | null>(null);
+
+  // File Upload states & function
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleFileUpload = (file: File) => {
+    if (!file) return;
+    if (selectedBlockIdx === null) return;
+    
+    setUploadingFile(true);
+    setUploadProgress(0);
+    setUploadError(null);
+
+    const fileRef = ref(storage, `media/${Date.now()}_${file.name}`);
+    const uploadTask = uploadBytesResumable(fileRef, file);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        setUploadProgress(progress);
+      },
+      (error) => {
+        console.error("Upload error:", error);
+        setUploadError(error.message);
+        setUploadingFile(false);
+        setUploadProgress(null);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          updateBlockField(selectedBlockIdx, "mediaUrl", downloadURL);
+          setUploadingFile(false);
+          setUploadProgress(null);
+        });
+      }
+    );
+  };
 
   const handleAddBlock = (type: string) => {
     const defaultBlock: any = { type };
@@ -1048,9 +1087,54 @@ export default function ProductUXHub() {
                                       </select>
                                     </div>
                                   </div>
-                                  <div className="flex flex-col gap-1">
-                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Media File Endpoint URL</label>
-                                    <input type="text" value={activeBlock.mediaUrl || ""} placeholder="https://domain.com/asset.jpg" onChange={(e) => updateBlockField(selectedBlockIdx, "mediaUrl", e.target.value)} className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" />
+                                  <div className="flex flex-col gap-1.5">
+                                    <label className="text-[9px] text-gray-400 font-bold uppercase">Media Asset Source</label>
+                                    <div className="grid grid-cols-1 gap-2">
+                                      {/* File Upload Zone */}
+                                      <div className="border border-dashed border-white/10 rounded-xl p-4 bg-white/[0.01] hover:bg-white/[0.02] hover:border-pink-500/30 transition-all flex flex-col items-center justify-center text-center gap-2 relative">
+                                        {uploadingFile ? (
+                                          <div className="flex flex-col items-center gap-2 w-full">
+                                            <span className="text-[10px] font-mono text-pink-400 animate-pulse">UPLOADING PARAMETERS... {uploadProgress}%</span>
+                                            <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden max-w-xs border border-white/5">
+                                              <div className="bg-pink-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <label className="cursor-pointer flex flex-col items-center gap-1.5 w-full h-full justify-center">
+                                            <PlusCircle className="w-5 h-5 text-pink-400 animate-bounce" />
+                                            <span className="text-[10px] text-gray-300 font-medium">Click to select or drag file here</span>
+                                            <span className="text-[8px] text-gray-500">Supports image, video, audio up to 50MB</span>
+                                            <input 
+                                              type="file" 
+                                              accept="image/*,video/*,audio/*"
+                                              onChange={(e) => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                  handleFileUpload(e.target.files[0]);
+                                                }
+                                              }}
+                                              className="hidden" 
+                                            />
+                                          </label>
+                                        )}
+                                        {uploadError && (
+                                          <span className="text-[8px] font-mono text-red-400 bg-red-950/20 px-2 py-0.5 rounded border border-red-500/20 mt-1">
+                                            Error: {uploadError}
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {/* Or Paste URL Input */}
+                                      <div className="flex flex-col gap-1">
+                                        <span className="text-[8px] text-gray-500 font-mono text-center uppercase tracking-widest my-1">- OR ENTER LINK ADDRESS -</span>
+                                        <input 
+                                          type="text" 
+                                          value={activeBlock.mediaUrl || ""} 
+                                          placeholder="https://domain.com/asset.jpg" 
+                                          onChange={(e) => updateBlockField(selectedBlockIdx, "mediaUrl", e.target.value)} 
+                                          className="rounded bg-black border border-white/10 px-2 py-1.5 text-xs text-white" 
+                                        />
+                                      </div>
+                                    </div>
                                   </div>
                                   <div className="flex flex-col gap-1">
                                     <label className="text-[9px] text-gray-400 font-bold uppercase">Text Caption</label>
