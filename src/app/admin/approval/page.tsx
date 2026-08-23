@@ -363,8 +363,8 @@ export default function AdminApprovalsBuilder() {
           },
           body: JSON.stringify({
             email: req.email,
-            userName: req.name,
-            generatedPassword: generatedPassword,
+            username: generatedUserId,
+            password: generatedPassword,
           }),
         });
       } catch (emailErr) {
@@ -781,30 +781,92 @@ export default function AdminApprovalsBuilder() {
 
       {/* Credentials Modal (reused from admin/page.tsx dashboard) */}
       {credentialsModal && credentialsModal.show && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fade-in">
-          <div className="glass-card max-w-md w-full p-8 border border-white/10 bg-[#030712] flex flex-col gap-5 text-center">
-            <Check className="w-12 h-12 text-emerald-400 bg-emerald-500/10 p-2.5 rounded-full border border-emerald-500/20 mx-auto" />
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fade-in font-body">
+          <div className="glass-card max-w-md w-full p-8 border border-white/5 bg-[#030712] flex flex-col gap-6 text-center rounded-3xl shadow-2xl">
+            <img src="/assets/logo3.png" alt="AEGIS AI FOUNDATION" className="h-12 object-contain mx-auto" />
             
-            <div>
-              <h3 className="font-heading font-extrabold text-lg text-white">Operator Authorized</h3>
-              <p className="text-xs text-gray-400 mt-2">
-                A secure login profile has been successfully generated for the operator:
-              </p>
+            <div className="flex flex-col gap-2">
+              <div className="text-slate-200 text-xs font-semibold tracking-tight text-center">
+                This is an automated operational transmission from AEGIS AI Foundation.
+              </div>
+              <div className="text-slate-400 text-[11px] leading-relaxed text-center font-normal">
+                Welcome to Aegis AI Foundation.<br/>
+                Your official email account has been created.<br/>
+                You can use the credentials below to access your account.
+              </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col gap-2.5 text-left font-mono text-xs text-gray-300 select-all">
-              <div>Email: <strong className="text-white">{credentialsModal.email}</strong></div>
-              <div>User ID: <strong className="text-white">{credentialsModal.userId}</strong></div>
-              <div>Password: <strong className="text-white">{credentialsModal.password}</strong></div>
+            {/* Inner Credentials Card */}
+            <div className="bg-[#080b13] border border-white/[0.05] p-5 rounded-2xl flex flex-col text-center">
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Email Address</span>
+                <span className="text-white text-sm font-semibold tracking-wide truncate">{credentialsModal.email}</span>
+              </div>
+
+              <div className="border-t border-white/[0.04] my-4" />
+
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Username</span>
+                <div className="flex items-center justify-between pl-6 gap-3">
+                  <span className="text-white text-base font-bold tracking-wide font-mono flex-1 text-center truncate">{credentialsModal.userId}</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(credentialsModal.userId);
+                      alert("Username copied!");
+                    }}
+                    className="text-[10px] text-slate-400 hover:text-white border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer font-bold font-sans transition-colors"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-t border-white/[0.04] my-4" />
+
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Password</span>
+                <div className="flex items-center justify-between pl-6 gap-3">
+                  <span className="text-emerald-400 text-base font-bold tracking-wide font-mono flex-1 text-center truncate">{credentialsModal.password}</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(credentialsModal.password);
+                      alert("Password copied!");
+                    }}
+                    className="text-[10px] text-slate-400 hover:text-white border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer font-bold font-sans transition-colors"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <p className="text-[10px] text-orange-400 font-semibold leading-normal">
-              WARNING: Copy these details. The password is cryptographically hashed and cannot be retrieved again.
-            </p>
+            {/* Security Recommendation */}
+            <div className="flex items-center gap-3.5 p-4 bg-[#080b13] border border-white/[0.04] rounded-xl text-left">
+              <div className="p-2 bg-white/[0.02] border border-white/[0.08] rounded-lg text-sky-400">
+                <ShieldAlert className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-white">Security Recommendation</div>
+                <div className="text-[10px] text-slate-400 mt-0.5 leading-normal font-sans">
+                  For your security, we recommend changing your password after your first login.
+                </div>
+              </div>
+            </div>
+
+            {/* Need Help Footer */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="p-2 bg-white/[0.02] border border-white/[0.08] rounded-full text-sky-400 w-8 h-8 flex items-center justify-center text-sm">
+                ✉️
+              </div>
+              <div className="text-[10px] text-slate-500 font-semibold font-sans">
+                Need help? Contact us at<br/>
+                <a href="mailto:aegis.ai.foundation@gmail.com" className="text-sky-400 hover:underline">aegis.ai.foundation@gmail.com</a>
+              </div>
+            </div>
 
             <button
               onClick={() => setCredentialsModal(null)}
-              className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 py-2.5 text-xs font-bold text-white transition-all cursor-pointer mt-2"
+              className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white transition-all cursor-pointer mt-2"
             >
               Close parameters
             </button>

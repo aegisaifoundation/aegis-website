@@ -3,9 +3,13 @@ import nodemailer from "nodemailer";
 
 export async function POST(request: Request) {
   try {
-    const { email, generatedPassword, userName } = await request.json();
+    const { email, username, password, generatedPassword, userName } = await request.json();
 
-    if (!email || !generatedPassword) {
+    const emailAddress = email;
+    const userLoginName = username || userName || "Operator";
+    const userPassword = password || generatedPassword;
+
+    if (!emailAddress || !userPassword) {
       return NextResponse.json({ error: "Missing required parameters" }, { status: 400 });
     }
 
@@ -20,8 +24,8 @@ export async function POST(request: Request) {
 
     const mailOptions = {
       from: `"AEGIS AI Foundation" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: "AEGIS Secure Portal - Node Operator Credentials",
+      to: emailAddress,
+      subject: "AEGIS Account Provisioned",
       html: `
         <!DOCTYPE html>
         <html>
@@ -29,71 +33,95 @@ export async function POST(request: Request) {
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
           </head>
-          <body style="margin: 0; padding: 0; background-color: #030712; font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased;">
+          <body style="margin: 0; padding: 0; background-color: #030712; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed; background-color: #030712;">
               <tr>
                 <td align="center" style="padding: 40px 10px;">
-                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; border: 1px solid rgba(255,255,255,0.05); background-color: #090d16; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; border: 1px solid rgba(255,255,255,0.05); background-color: #090d16; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
                     
                     <!-- Header Banner -->
                     <tr>
-                      <td align="center" style="padding: 35px 40px 25px 40px; border-bottom: 1px solid rgba(255,255,255,0.03);">
-                        <img src="https://aegis-website-gray.vercel.app/assets/logo2.png" alt="AEGIS AI Foundation" style="display: block; max-height: 48px; width: auto; height: auto;" />
+                      <td align="center" style="padding: 40px 40px 30px 40px; text-align: center;">
+                        <img src="https://aegis-website-gray.vercel.app/assets/logo3.png" alt="AEGIS AI Foundation" style="display: block; max-height: 52px; width: auto; height: auto; margin: 0 auto;" />
                       </td>
                     </tr>
 
                     <!-- Body Content -->
                     <tr>
-                      <td style="padding: 30px 40px 40px 40px;">
-                        <h2 style="margin: 0 0 16px 0; color: #ffffff; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; text-align: center;">Secure Node Provisioning</h2>
-                        <p style="margin: 0 0 24px 0; color: #94a3b8; font-size: 13px; line-height: 1.6; font-weight: 300;">
-                          Hello ${userName || "Operator"},<br/><br/>
-                          Your access credentials for the AEGIS Decentralized Compute Hub have been generated. Below are your secure login credentials to connect to the node operator panel.
+                      <td style="padding: 0 40px 40px 40px; text-align: center;">
+                        <p style="margin: 0 0 16px 0; color: #ffffff; font-size: 14px; line-height: 1.6; font-weight: 500; text-align: center;">
+                          This is an automated operational transmission from AEGIS AI Foundation.
+                        </p>
+                        <p style="margin: 0 0 28px 0; color: #94a3b8; font-size: 12px; line-height: 1.6; font-weight: 400; text-align: center;">
+                          Welcome to Aegis AI Foundation.<br/>
+                          Your official email account has been created.<br/>
+                          You can use the credentials below to access your account.
                         </p>
 
                         <!-- Credentials Box -->
-                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #030712; border: 1px solid rgba(125,211,252,0.1); border-radius: 12px; margin-bottom: 24px;">
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #030712; border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; margin-bottom: 24px; text-align: center;">
                           <tr>
-                            <td style="padding: 20px;">
-                              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <td style="padding: 24px;">
+                              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="text-align: center;">
                                 <tr>
-                                  <td style="padding-bottom: 8px; font-family: monospace; font-size: 11px; color: #565f89; text-transform: uppercase; font-weight: bold; letter-spacing: 0.1em;">Secure Endpoint ID</td>
+                                  <td align="center" style="padding-bottom: 4px; font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; text-align: center;">Email Address</td>
                                 </tr>
                                 <tr>
-                                  <td style="padding-bottom: 16px; font-family: monospace; font-size: 14px; color: #38bdf8; font-weight: 600; word-break: break-all;">${email}</td>
+                                  <td align="center" style="padding-bottom: 16px; font-family: monospace; font-size: 15px; color: #ffffff; font-weight: 500; text-align: center;">${emailAddress}</td>
                                 </tr>
                                 <tr>
-                                  <td style="padding-bottom: 8px; font-family: monospace; font-size: 11px; color: #565f89; text-transform: uppercase; font-weight: bold; letter-spacing: 0.1em;">Temporary Access Key</td>
+                                  <td align="center" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; padding-bottom: 4px; font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; text-align: center;">Username</td>
                                 </tr>
                                 <tr>
-                                  <td style="font-family: monospace; font-size: 15px; color: #10b981; font-weight: 600;">${generatedPassword}</td>
+                                  <td align="center" style="padding-bottom: 16px; font-family: monospace; font-size: 18px; color: #ffffff; font-weight: bold; text-align: center;">${userLoginName}</td>
+                                </tr>
+                                <tr>
+                                  <td align="center" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; padding-bottom: 4px; font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; text-align: center;">Password</td>
+                                </tr>
+                                <tr>
+                                  <td align="center" style="font-family: monospace; font-size: 18px; color: #10b981; font-weight: bold; text-align: center;">${userPassword}</td>
                                 </tr>
                               </table>
                             </td>
                           </tr>
                         </table>
 
-                        <p style="margin: 0 0 24px 0; color: #f87171; font-size: 11px; line-height: 1.5; font-weight: 500; text-align: center;">
-                          ⚠️ CRITICAL: Log in to your settings portal and replace this temporary key immediately.
-                        </p>
-
-                        <!-- Action Button -->
-                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <!-- Security Recommendation Card -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #030712; border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; margin-bottom: 28px; text-align: left;">
                           <tr>
-                            <td align="center">
-                              <a href="https://aegis-website-gray.vercel.app/login" target="_blank" style="display: inline-block; padding: 12px 30px; background-color: #4D7CFE; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 700; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(77,124,254,0.3);">Access Secure Panel</a>
+                            <td style="padding: 16px; vertical-align: middle; width: 44px;" align="center">
+                              <table border="0" cellpadding="0" cellspacing="0" style="background-color: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); width: 32px; height: 32px;">
+                                <tr>
+                                  <td align="center" style="vertical-align: middle; color: #38bdf8; font-size: 18px; font-weight: bold; text-align: center;">🛡️</td>
+                                </tr>
+                              </table>
+                            </td>
+                            <td style="padding: 16px 16px 16px 0; vertical-align: middle;">
+                              <span style="display: block; font-size: 11px; font-weight: bold; color: #ffffff; margin-bottom: 3px;">Security Recommendation</span>
+                              <span style="display: block; font-size: 11px; color: #94a3b8; line-height: 1.4;">For your security, we recommend changing your password after your first login.</span>
                             </td>
                           </tr>
                         </table>
-                      </td>
-                    </tr>
 
-                    <!-- Footer -->
-                    <tr>
-                      <td style="padding: 24px 40px; background-color: rgba(255,255,255,0.01); border-top: 1px solid rgba(255,255,255,0.03); text-align: center;">
-                        <p style="margin: 0; font-size: 10px; color: #475569; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase;">
-                          AEGIS AI FOUNDATION • SECURE TRANSMISSION
-                        </p>
+                        <!-- Help Footer -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="text-align: center;">
+                          <tr>
+                            <td align="center" style="padding-bottom: 8px; text-align: center;">
+                              <table border="0" cellpadding="0" cellspacing="0" style="background-color: rgba(255,255,255,0.03); border-radius: 50%; border: 1px solid rgba(255,255,255,0.08); width: 34px; height: 34px; text-align: center; margin: 0 auto;">
+                                <tr>
+                                  <td align="center" style="vertical-align: middle; color: #38bdf8; font-size: 16px; text-align: center;">✉️</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align="center" style="font-size: 11px; color: #64748b; text-align: center;">
+                              Need help? Contact us at<br/>
+                              <a href="mailto:aegis.ai.foundation@gmail.com" style="color: #38bdf8; text-decoration: none; font-weight: 500;">aegis.ai.foundation@gmail.com</a>
+                            </td>
+                          </tr>
+                        </table>
+
                       </td>
                     </tr>
 
